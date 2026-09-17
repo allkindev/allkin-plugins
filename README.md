@@ -53,6 +53,40 @@ Le nom du dossier est l'identifiant du plugin : il ne change jamais.
   applications qui savent servir sous un chemin de base (`--base`, `BASE_URL`…) et écrivent
   leurs liens en absolu. Elles reçoivent ce chemin dans `ALLKIN_PLUGIN_BASE_PATH`.
 
+## Plugins d'interface
+
+Un plugin peut apporter une partie de l'interface d'Allkin elle-même — c'est le cas de
+`file-explorer`, `text-editor` et `markdown-editor`, livrés avec Allkin. Il déclare une section `ui`
+et le droit `interface` :
+
+```jsonc
+{
+  "permissions": [{ "id": "interface", "reason": "…" }],
+  "ui": {
+    "apiVersion": 1,                  // version de window.Allkin visée
+    "provides": ["file-explorer"],    // capacités fournies (affichage)
+    "html": ["view.html"],            // fragments posés dans la page
+    "styles": ["explorer.css"],
+    "scripts": ["explorer.js"]        // exécutés dans l'ordre, après le HTML et les styles
+  }
+}
+```
+
+Chaque fragment HTML contient des `<template data-slot="…">`, posés à l'emplacement nommé :
+`views` (le panneau principal), `chat-menu` (le menu ⋮ de l'en-tête), `body` (fenêtres, modèles).
+
+Les scripts s'adressent à `window.Allkin` :
+
+| Appel | Rôle |
+|-------|------|
+| `registerTabKind(kind, def)` | Déclare une nature d'onglet : `panels`, `icon`, `label(tab)`, `meta`, `tooltip(tab)`, `byPath`, `maxPerAgent`, `scroller()`, `scrollKeySuffix(tab)`, `activate(tab)`, `leave(tab)`, `beforeClose(tab)`, `menu: { title, onShow }` |
+| `provide(name, impl)` / `capability(name)` | Fournit / utilise une capacité (`markdown-editor`, `text-editor`, `file-explorer`) |
+| `hasTabKind(kind)` | Une nature d'onglet est-elle disponible |
+| `core` | Le cœur : `state`, `el`, `api`, `openTab`, `activeTab`, `persistTabs`, `applyScroll`, `copyToClipboard`, `formatSize`, `dataFileUrl`, `agentName`… |
+
+Un script s'enveloppe dans une fonction (`(() => { … })();`) : tous les scripts de la page partagent
+la même portée globale. Activer ou retirer un plugin d'interface demande de recharger la page.
+
 ## Ce que reçoit le service
 
 | Variable                  | Contenu                                            |

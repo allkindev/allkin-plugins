@@ -1,0 +1,127 @@
+/* Plugin « Éditeur markdown vivant ».
+   Les règles communes à l'interface (cartes, en-têtes de page, .md-body…)
+   restent dans web/style.css ; seules vivent ici celles qui ne servent qu'à ce plugin. */
+
+.live-block {
+  /* La source contient de vrais retours à la ligne : ils doivent compter. */
+  white-space: pre-wrap;
+  outline: none;
+  cursor: text;
+}
+.live-block:focus,
+.live-block:focus-visible { outline: none; }
+
+/* Typographie par nature de bloc. Elle est la même que le curseur soit dedans
+   ou non : c'est ce qui fait qu'entrer dans un bloc ne déplace rien. */
+.live-block[data-kind="heading"] { font-weight: 700; line-height: 1.3; margin: 1.4em 0 0.5em; }
+.live-block[data-kind="heading"]:first-child { margin-top: 0; }
+.live-block[data-kind="heading"][data-level="1"] { font-size: var(--text-2xl); }
+.live-block[data-kind="heading"][data-level="2"] { font-size: var(--text-xl); }
+.live-block[data-kind="heading"][data-level="3"] { font-size: var(--text-lg); }
+.live-block[data-kind="heading"][data-level="4"] { font-size: var(--text-md); }
+.live-block[data-kind="heading"][data-level="5"],
+.live-block[data-kind="heading"][data-level="6"] { font-size: var(--text-md); color: var(--text-dim); }
+.live-block[data-kind="paragraph"] { margin: 0.75em 0; }
+.live-block[data-kind="paragraph"]:first-child { margin-top: 0; }
+.live-block[data-kind="list"] { margin: 0.6em 0; }
+.live-block[data-kind="quote"] {
+  margin: 0.8em 0;
+  padding-left: var(--sp-3);
+  border-left: 2px solid var(--accent);
+  color: var(--text-dim);
+}
+/* La chasse fixe alignait les barres verticales de la source d'un tableau.
+   Le tableau étant désormais rendu comme un tableau, elle n'a plus d'objet :
+   ses cellules se lisent comme le reste du document. */
+.live-block[data-kind="code"] {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+.live-block[data-kind="code"] {
+  margin: 0.8em 0;
+  padding: var(--sp-3);
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.live-block[data-kind="hr"] { color: var(--text-faint); }
+/* Sans cadre au repos : quatorze rectangles alignés faisaient une grille de
+   boutons, là où il ne s'agit que d'un menu. Le contour n'apparaît qu'au
+   survol, sur celui qu'on vise. */
+.md-tool {
+  min-width: 1.9rem;
+  min-height: 1.9rem;
+  padding: 0 var(--sp-2);
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  color: var(--text-dim);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.md-tool:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); box-shadow: none; transform: none; }
+.md-tool-bold { font-weight: 800; }
+.md-tool-italic { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+.md-tool-strike { text-decoration: line-through; }
+.md-tool-code { font-family: var(--font-mono); font-weight: 500; }
+/* Sépare les familles d'outils (titres / style / blocs). */
+.md-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px var(--sp-1);
+  background: var(--border-strong);
+}
+
+/* ---- Tableau éditable (éditeur vivant) ----
+   Seul bloc rendu autrement que par sa source : on vient y écrire, pas y lire
+   des barres verticales. Chaque cellule est une zone éditable ; la grille est
+   dessinée en entier (et pas seulement sous les lignes) parce qu'on a besoin
+   de voir où l'on tape. */
+.live-block[data-kind="table"] { white-space: normal; margin: 1em 0; }
+.live-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.live-table { table-layout: auto; }
+.live-table th, .live-table td {
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  /* Une cellule vide doit rester cliquable, et le texte long passer à la ligne
+     plutôt que d'étirer la colonne hors de l'écran. */
+  min-width: 4.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.live-table th:last-child, .live-table td:last-child { border-right: none; }
+.live-cell { outline: none; cursor: text; }
+.live-cell:focus, .live-cell:focus-visible { outline: none; }
+/* Le seul repère de la cellule courante : un liseré intérieur, qui ne déplace
+   rien (contrairement à une bordure, qui décalerait toute la ligne). */
+.live-cell:focus { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+/* L'en-tête garde sa casse d'origine ici : c'est du texte qu'on édite, le
+   mettre en capitales à l'écran ferait mentir ce qu'on a tapé. */
+.live-table th { text-transform: none; font-size: var(--text-sm); color: var(--text); }
+
+/* Barre d'actions : discrète, et seulement quand on est dans le tableau. */
+.live-table-controls {
+  display: flex;
+  gap: var(--sp-1);
+  margin-top: var(--sp-1);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+.live-block[data-kind="table"]:focus-within .live-table-controls,
+.live-block[data-kind="table"]:hover .live-table-controls { opacity: 1; pointer-events: auto; }
+.live-table-btn {
+  padding: 2px var(--sp-2);
+  font-size: var(--text-2xs);
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: none;
+}
+.live-table-btn:hover { border-color: var(--accent); color: var(--accent); transform: none; }
+
+@media (max-width: 720px) {
+  .md-tool { min-height: 36px; min-width: 2.4rem; }
+}

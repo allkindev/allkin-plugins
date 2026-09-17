@@ -15,6 +15,7 @@
       ],
       "service": true,
       "web": true,
+      "ui": false,
       "icon": "icon.svg",
       "files": [
         {
@@ -45,6 +46,148 @@
       ]
     },
     {
+      "id": "file-explorer",
+      "name": "Explorateur de fichiers",
+      "version": "1.0.0",
+      "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "interface",
+          "reason": "Ajoute l'onglet Fichiers des agents et l'explorateur de ~/.allkin à la page d'Allkin."
+        }
+      ],
+      "service": false,
+      "web": false,
+      "ui": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 1451,
+          "sha256": "8b27a7a6e671d8ab31e379208e1f6b16898d40507c5a0f493c5353a0be5805e0"
+        },
+        {
+          "path": "explorer.css",
+          "size": 15266,
+          "sha256": "060c3cd55c3e7096244c974d263b355b2eaff5ccae89f784c5d42f18fd2b0ee5"
+        },
+        {
+          "path": "explorer.js",
+          "size": 60665,
+          "sha256": "355644625d8a333da7fc4d6ebb1d5b49af1acab0aef2a02509464a5bc3657248"
+        },
+        {
+          "path": "icon.svg",
+          "size": 239,
+          "sha256": "7d1ef7c8f58efa3d08ebf4b350f820153ce33dcbfee317f5661c5bc104746ad5"
+        },
+        {
+          "path": "plugin.json",
+          "size": 520,
+          "sha256": "32628e9eb6b7357f47b8b7cfce0d099a6c90480f05874465a3c231b8f42fbb6b"
+        },
+        {
+          "path": "view.html",
+          "size": 19773,
+          "sha256": "d425586c705225ccfe44ad414b769bf785cd68772e51d9248c9a650ab50e04a7"
+        }
+      ]
+    },
+    {
+      "id": "markdown-editor",
+      "name": "Éditeur markdown",
+      "version": "1.0.0",
+      "description": "L'éditeur markdown vivant d'Allkin : bloc-notes, rôle des agents (CLAUDE.md) et fichiers .md.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "interface",
+          "reason": "S'intègre à la page d'Allkin pour éditer le bloc-notes, le rôle des agents et les fichiers markdown."
+        }
+      ],
+      "service": false,
+      "web": false,
+      "ui": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 1273,
+          "sha256": "bf6ea7a75bf147a50803e843539a28a6d7cc5e073f1789badd07c1b83d16a7dc"
+        },
+        {
+          "path": "editor.css",
+          "size": 5385,
+          "sha256": "fe148fd40451bd3e85915c030a813ab926eac9be9bd18bbd41427463cdfda004"
+        },
+        {
+          "path": "editor.js",
+          "size": 59845,
+          "sha256": "a77d9d501b9812136366a58d1e65d9a77f7d7ee9b23e49d328890051a596c63d"
+        },
+        {
+          "path": "icon.svg",
+          "size": 276,
+          "sha256": "66cb29730da698a7c96731350eb59f2a1b739a1c27a000fd2c2e0ef9400cb24c"
+        },
+        {
+          "path": "plugin.json",
+          "size": 494,
+          "sha256": "570dd0f9f2634d6370a918b46daf6dec8a235cf8c43172c21b3774eb82e624bb"
+        }
+      ]
+    },
+    {
+      "id": "text-editor",
+      "name": "Éditeur de texte",
+      "version": "1.0.0",
+      "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "interface",
+          "reason": "Ajoute l'onglet fichier à la page d'Allkin."
+        }
+      ],
+      "service": false,
+      "web": false,
+      "ui": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 957,
+          "sha256": "9e5b5346cca469b6c2e22da3ac57430c60759cc6750e8cf7f7d84da79146874b"
+        },
+        {
+          "path": "editor.css",
+          "size": 6756,
+          "sha256": "59fd1e210b5a109723d6df4d3fc23ceb20c45890a8a502b6bb736089278d8cd6"
+        },
+        {
+          "path": "editor.js",
+          "size": 17923,
+          "sha256": "9b2a3eb6714e92ddc34126a9f587bb5d41214be01089b66aa4adcebdc0c197ac"
+        },
+        {
+          "path": "icon.svg",
+          "size": 235,
+          "sha256": "f54e59c9bb79d3e856b48bcabff6a8d8b77ee3c0426975071615ef677ca54a30"
+        },
+        {
+          "path": "plugin.json",
+          "size": 478,
+          "sha256": "c923f972f577a67314b3e413bf604e507dc1122884667a9782186c01cab7dd09"
+        },
+        {
+          "path": "view.html",
+          "size": 4331,
+          "sha256": "85a8ec8e5475773e84a19970b5805e0401f52e721e5374418084c15a98ca9410"
+        }
+      ]
+    },
+    {
       "id": "wetty",
       "name": "WeTTY",
       "version": "1.0.0",
@@ -67,6 +210,7 @@
       ],
       "service": true,
       "web": true,
+      "ui": false,
       "icon": "icon.svg",
       "files": [
         {

@@ -1,0 +1,16 @@
+{
+  "name": "Explorateur de fichiers",
+  "version": "1.0.0",
+  "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
+  "author": "Allkin",
+  "permissions": [
+    { "id": "interface", "reason": "Ajoute l'onglet Fichiers des agents et l'explorateur de ~/.allkin à la page d'Allkin." }
+  ],
+  "ui": {
+    "apiVersion": 1,
+    "provides": ["file-explorer"],
+    "html": ["view.html"],
+    "styles": ["explorer.css"],
+    "scripts": ["explorer.js"]
+  }
+}

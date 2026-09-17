@@ -1,0 +1,15 @@
+{
+  "name": "Éditeur markdown",
+  "version": "1.0.0",
+  "description": "L'éditeur markdown vivant d'Allkin : bloc-notes, rôle des agents (CLAUDE.md) et fichiers .md.",
+  "author": "Allkin",
+  "permissions": [
+    { "id": "interface", "reason": "S'intègre à la page d'Allkin pour éditer le bloc-notes, le rôle des agents et les fichiers markdown." }
+  ],
+  "ui": {
+    "apiVersion": 1,
+    "provides": ["markdown-editor"],
+    "styles": ["editor.css"],
+    "scripts": ["editor.js"]
+  }
+}

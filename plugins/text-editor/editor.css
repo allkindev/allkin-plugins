@@ -1,0 +1,207 @@
+/* Plugin « Onglet fichier : visionneuse et éditeur ».
+   Les règles communes à l'interface (cartes, en-têtes de page, .md-body…)
+   restent dans web/style.css ; seules vivent ici celles qui ne servent qu'à ce plugin. */
+
+/* ---- Onglet fichier : visionneuse et éditeur ----------------------------
+   Même mécanique de panneau plein que .data-view. L'éditeur et l'aperçu
+   occupent tout l'espace restant sous l'en-tête : éditer un document, c'est
+   le voir en entier, pas dans une boîte. */
+.file-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-5);
+  padding-bottom: var(--sp-4);
+  padding-left: calc(var(--sp-5) + var(--safe-left));
+  padding-right: calc(var(--sp-5) + var(--safe-right));
+  gap: var(--sp-3);
+}
+/* Plein écran : recouvre tout, sidebar comprise — c'est le but, écrire sans
+   rien autour. Un simple changement de position, rien d'autre : l'en-tête et
+   le corps gardent la mise en page qu'ils ont déjà. */
+.file-view.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  padding: calc(var(--sp-4) + var(--safe-top)) calc(var(--sp-5) + var(--safe-right))
+    calc(var(--sp-4) + var(--safe-bottom)) calc(var(--sp-5) + var(--safe-left));
+}
+/* Une seule ligne, aussi basse que possible : le nom du fichier vit dans son
+   onglet, l'en-tête n'a plus à porter que les outils. */
+.file-view-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 2.1rem;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+}
+/* Les boutons flottants de la zone de lecture sont hors du flux : le corps du
+   fichier doit donc être un repère de positionnement. */
+.file-view-body { position: relative; }
+.file-float-actions {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+.file-float-btn {
+  min-width: 1.9rem;
+  min-height: 1.9rem;
+  padding: 0;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.file-float-btn:hover { background: var(--accent-soft); color: var(--accent); box-shadow: none; transform: none; }
+
+.file-mode-btn { min-height: 2.1rem; padding: 0 var(--sp-4); }
+
+/* Chemin complet, affiché uniquement en aperçu (voir applyFileMode) : en
+   édition l'en-tête n'a que le texte à défendre. Comme la barre de balises,
+   il prend l'espace disponible pour pousser l'état d'enregistrement à droite. */
+.file-path {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: var(--sp-1);
+}
+.file-path-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+
+.file-fullscreen-btn { flex-shrink: 0; }
+
+/* L'enregistrement étant automatique, cet indicateur est la seule preuve que
+   le travail est en sécurité : il reste visible en permanence. */
+.file-save-state {
+  flex-shrink: 0;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.file-view-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.file-preview {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: var(--text);
+}
+/* Le premier et le dernier bloc ne doivent pas ajouter de blanc au cadre. */
+.file-preview > :first-child { margin-top: 0; }
+.file-preview > :last-child { margin-bottom: 0; }
+
+/* Dans l'onglet fichier, l'éditeur prend la place restante et défile lui-même. */
+.file-live {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Éditeur de texte brut. La coloration syntaxique est un calque : voir
+   web/highlight.js pour l'invariant qui la rend possible (même texte, même
+   métrique, seules les couleurs diffèrent d'un calque à l'autre). Sans
+   langage reconnu, le calque reste masqué et la zone de saisie garde son
+   apparence pleine — c'est le seul cas où elle est directement lisible. */
+.file-editor-wrap { position: relative; flex: 1; min-height: 0; }
+
+.file-editor-highlight,
+.file-editor {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: 1.7;
+  tab-size: 2;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.file-editor-highlight {
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--code-fg, var(--text));
+  background: var(--code-bg, var(--bg-alt));
+}
+.file-editor-wrap.has-highlight .file-editor-highlight { display: block; }
+.file-editor-wrap.has-highlight:focus-within .file-editor-highlight { border-color: var(--accent); }
+
+.file-editor {
+  resize: none;
+  overflow: auto;
+  color: var(--text);
+  background: var(--bg-alt);
+}
+.file-editor:focus { border-color: var(--accent); outline: none; }
+.file-editor-wrap.has-highlight .file-editor {
+  color: transparent;
+  background: transparent;
+  border-color: transparent;
+  caret-color: var(--text);
+}
+.file-editor-wrap.has-highlight .file-editor:focus { border-color: transparent; }
+
+.file-media {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.file-media-image { max-width: 100%; max-height: 100%; object-fit: contain; }
+.file-media-frame { width: 100%; height: 100%; border: none; background: #fff; }
+/* Sans la barre (fichier sans rendu), les actions restent calées à droite. */
+.file-save-state { margin-left: auto; }
+
+@media (max-width: 720px) {
+  /* L'en-tête tient sur une ligne, ici aussi : la barre de balises défile, et
+     l'état d'enregistrement s'efface plutôt que de voler de la place aux
+     outils — l'information reste dans l'onglet, qui signale les modifications
+     en attente. */
+  .file-view-header { gap: var(--sp-1); }
+  .file-save-state { display: none; }
+  .file-preview { padding: var(--sp-4); font-size: var(--text-md); }
+  /* Corps de police : voir la règle anti-zoom en tête de cette section. Les
+     deux calques doivent garder le même remplissage, sous peine de désaligner
+     le texte tapé de sa coloration. */
+  .file-editor-highlight,
+  .file-editor { padding: var(--sp-3); }
+}

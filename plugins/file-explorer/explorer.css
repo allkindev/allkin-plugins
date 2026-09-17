@@ -1,0 +1,449 @@
+/* Plugin « Explorateur de fichiers : onglet Fichiers d'un agent et explorateur de ~/.allkin ».
+   Les règles communes à l'interface (cartes, en-têtes de page, .md-body…)
+   restent dans web/style.css ; seules vivent ici celles qui ne servent qu'à ce plugin. */
+
+.data-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  font-size: var(--text-sm);
+}
+.data-crumb {
+  background: none;
+  border: none;
+  box-shadow: none;
+  min-height: auto;
+  min-width: auto;
+  padding: var(--sp-1) var(--sp-1);
+  color: var(--text-dim);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+.data-crumb:last-of-type { color: var(--text); font-weight: 600; }
+.data-crumb:hover { background: var(--sidebar-bg); box-shadow: none; transform: none; }
+.data-crumb-sep { color: var(--text-faint); }
+
+/* Sélecteur de dossier de destination (Copier/déplacer) : liste de dossiers
+   cliquables, même hauteur/interligne que les autres listes de l'app. */
+.data-move-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-1);
+}
+.data-move-dir-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0 var(--sp-2);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--text);
+  font-size: var(--text-sm);
+  text-align: left;
+}
+.data-move-dir-row:hover { background: var(--bg-alt); box-shadow: none; transform: none; }
+
+.data-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-md); }
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--sidebar-bg);
+  color: var(--text-faint);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.data-table thead th:hover { color: var(--text); }
+.data-table th[data-sort-key="name"] { width: 38%; }
+.data-table th[data-sort-key="size"] { width: 12%; }
+.data-table th[data-sort-key="createdAt"] { width: 18%; }
+.data-table th[data-sort-key="modifiedAt"] { width: 18%; }
+.data-table th.data-table-actions-col { width: 14%; }
+.data-table thead th.data-table-actions-col { cursor: default; }
+.data-table thead th.data-table-actions-col:hover { color: var(--text-faint); }
+.data-row { cursor: pointer; transition: background-color 0.1s ease; }
+.data-row:hover { background: var(--sidebar-bg); }
+.data-row td { padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-row:last-child td { border-bottom: none; }
+.data-row-name { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.data-row-icon { flex-shrink: 0; }
+.data-row-name-text {
+  min-width: 0;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.data-row-size, .data-row-created, .data-row-modified {
+  color: var(--text-faint);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+}
+.data-row-actions { white-space: nowrap; text-align: right; }
+.data-row-actions button {
+  background: none;
+  box-shadow: none;
+  min-width: 2rem;
+  min-height: 1.8rem;
+  padding: 0 var(--sp-1);
+  color: var(--text-faint);
+}
+.data-row-actions button:hover { background: var(--bg); box-shadow: none; transform: none; }
+.data-row-delete:hover { color: var(--risk-high); background: var(--risk-high-soft) !important; }
+.data-table-empty { text-align: center; color: var(--text-faint); padding: var(--sp-8) var(--sp-4) !important; cursor: default; }
+
+/* Colonne de sélection : masquée hors mode « Sélectionner » (voir le switch
+   du menu ⋮ sur l'explorateur), qui bascule .select-mode sur #data-table. Les
+   actions par ligne (télécharger/supprimer) s'effacent en retour, pour ne pas
+   mélanger action ponctuelle et action groupée pendant la sélection. */
+.data-table-select-col, .data-row-select { width: 2.25rem; display: none; }
+.data-table.select-mode .data-table-select-col,
+.data-table.select-mode .data-row-select { display: table-cell; }
+.data-table.select-mode .data-table-actions-col,
+.data-table.select-mode .data-row-actions { display: none; }
+.data-row-checkbox { width: 1.1rem; height: 1.1rem; cursor: pointer; }
+
+@media (max-width: 720px) {
+
+  /* Un chemin profond doit défiler horizontalement, pas empiler cinq lignes. */
+  .data-breadcrumb {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: var(--sp-1);
+  }
+  .data-crumb { white-space: nowrap; }
+
+  /* Le cadre et le fond passent sur chaque carte, plus sur le conteneur. */
+  .data-table-wrap {
+    border: none;
+    background: transparent;
+    overflow-x: hidden;
+  }
+  .data-table thead { display: none; }
+  .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; }
+  .data-table { font-size: var(--text-md); }
+
+  /* « .data-table tr.data-row » et non « .data-row » : le display: block
+     ci-dessus vise « .data-table tr », plus spécifique qu'une simple classe. */
+  .data-table tr.data-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "name name     actions"
+      "size modified actions";
+    align-items: center;
+    column-gap: var(--sp-2);
+    row-gap: 2px;
+    min-height: 56px;
+    padding: var(--sp-2) var(--sp-3);
+    margin-bottom: var(--sp-2);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+  }
+  .data-row:hover { background: var(--bg-alt); }
+  .data-row td { padding: 0; border-bottom: none; }
+
+  .data-row td.data-row-name { display: flex; grid-area: name; min-width: 0; }
+  /* Un nom long s'enroule au lieu d'être tronqué : sur mobile la fin du nom
+     (l'extension, le numéro de version) porte souvent l'information utile. */
+  .data-row-name-text {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    font-weight: 500;
+  }
+  .data-row td.data-row-size { grid-area: size; justify-self: start; }
+  .data-row td.data-row-modified { grid-area: modified; justify-self: start; }
+  /* Une seule date sur mobile : « modifié le » est plus parlant que « créé le ».
+     La date complète reste accessible en appui long (attribut title). */
+  .data-row td.data-row-created { display: none; }
+  .data-row-modified::before {
+    content: "·";
+    margin-right: 0.45em;
+    color: var(--text-faint);
+  }
+
+  .data-row td.data-row-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  .data-row-actions button { min-width: 44px; min-height: 44px; }
+
+  /* Mode sélection : une colonne de plus dans la grille de la carte, pas
+     seulement dans le tableau desktop. */
+  .data-table.select-mode tr.data-row {
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+      "select name name     actions"
+      "select size modified actions";
+  }
+  .data-table.select-mode .data-row td.data-row-select {
+    grid-area: select;
+    display: flex;
+    align-items: center;
+  }
+  .data-row-checkbox { width: 1.4rem; height: 1.4rem; }
+
+  .data-table-empty { padding: var(--sp-6) var(--sp-4) !important; }
+  .explorer-view {
+    padding: var(--sp-4) var(--sp-3);
+    padding-bottom: var(--sp-4);
+    padding-left: calc(var(--sp-3) + var(--safe-left));
+    padding-right: calc(var(--sp-3) + var(--safe-right));
+  }
+  .explorer-col-date { display: none; }
+}
+
+/* ---- Explorateur de ~/.allkin ----
+   Réutilise la mécanique du navigateur de fichiers d'un agent (fil d'Ariane,
+   tableau) sans ses colonnes d'actions : il n'y en a aucune, tout y est en
+   lecture seule. */
+
+.explorer-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  padding-bottom: var(--sp-5);
+  padding-left: calc(var(--sp-5) + var(--safe-left));
+  padding-right: calc(var(--sp-5) + var(--safe-right));
+  overflow: hidden;
+}
+.explorer-readonly {
+  padding: 2px 8px;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.explorer-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-alt);
+}
+.explorer-table thead th { cursor: default; }
+.explorer-table thead th:hover { color: var(--text-faint); }
+.explorer-col-size { width: 6.5rem; }
+.explorer-col-date { width: 9rem; }
+.explorer-row td.explorer-col-size,
+.explorer-row td.explorer-col-date {
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.explorer-name {
+  display: flex;
+  align-items: center;
+  /* Explicite : la règle générale des boutons centre son contenu, ce qui
+     enverrait chaque nom de fichier au milieu de la colonne. */
+  justify-content: flex-start;
+  gap: var(--sp-2);
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  min-height: auto;
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.explorer-name:hover { background: none; box-shadow: none; transform: none; color: var(--accent); }
+.explorer-icon { display: flex; flex-shrink: 0; }
+.explorer-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---- Dépôt d'un dossier dans l'explorateur ----
+   Le voile couvre la vue, pas l'écran : on dépose dans le dossier AFFICHÉ, et
+   c'est lui que le voile doit désigner. Il ne capte le pointeur que lorsqu'il
+   est visible, sinon il intercepterait les clics du tableau. */
+.data-drop-veil {
+  position: absolute;
+  inset: var(--sp-3);
+  z-index: 4;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  color: var(--accent);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Choix du format d'archive : une liste de radios, pas des rangées de réglage.
+   Le bouton se lit d'abord, le nom ensuite, l'explication en dessous — c'est
+   l'ordre dans lequel on choisit. */
+/* En-tête du menu contextuel : ce n'est pas une commande, et ça doit se voir —
+   pas de survol, pas de curseur de clic. Le nom peut être long ; il se termine
+   par des points plutôt que d'élargir le menu. */
+.data-ctx-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  max-width: 17rem;
+  min-width: 0;
+}
+.data-ctx-head-icon { flex-shrink: 0; display: flex; }
+.data-ctx-head-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.data-ctx-head-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.data-ctx-head-meta { font-size: var(--text-2xs); color: var(--text-faint); white-space: nowrap; }
+
+.archive-format-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.archive-format input {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-top: 2px;
+  /* Le bleu du système jurerait avec le reste : le point suit l'accent. */
+  accent-color: var(--accent);
+}
+.archive-format-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.archive-format-name { font-weight: 600; font-size: var(--text-md); color: var(--text); }
+.archive-format-note {
+  font-size: var(--text-2xs);
+  color: var(--text-faint);
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.archive-format-name { text-transform: none; letter-spacing: -0.005em; }
+
+.upload-modal-target { margin: 0; }
+.upload-modal-current {
+  margin: 0;
+  font-size: var(--text-2xs);
+  /* Un nom de fichier long ne doit pas faire enfler la fenêtre à chaque
+     fichier : la largeur reste stable, le nom se termine par des points. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono, monospace);
+}
+.upload-errors {
+  max-height: 9rem;
+  overflow-y: auto;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-sm);
+  background: var(--risk-high-soft);
+  color: var(--risk-high);
+  font-size: var(--text-2xs);
+}
+.upload-errors p { margin: 0 0 var(--sp-1); }
+
+/* ---- Exécution d'un script depuis l'explorateur --------------------------
+   Deux temps dans la même fenêtre : le script qu'on s'apprête à lancer, puis
+   sa sortie en direct. Les deux zones défilent d'elles-mêmes et sont bornées
+   en hauteur — la fenêtre garde la même taille du début à la fin, sinon elle
+   sauterait sous les yeux à la première ligne de sortie. */
+.script-run-modal { width: min(760px, 94vw); }
+
+.script-run-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+  margin-bottom: var(--sp-3);
+}
+.script-run-icon { display: flex; color: var(--text-dim); flex: none; }
+.script-run-head-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.script-run-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Le chemin, puis la ligne réellement lancée : les deux peuvent être longs, et
+   c'est la FIN qui renseigne (le nom du script, le dossier). D'où la coupe. */
+.script-run-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.script-run-state {
+  flex: none;
+  font-size: var(--text-2xs);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.script-run-source,
+.script-run-console {
+  margin: 0;
+  padding: var(--sp-3);
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  /* Haute assez pour lire un script court en entier sans défiler, bornée pour
+     qu'un script de 400 lignes ne pousse pas les boutons hors de l'écran. */
+  height: min(52vh, 420px);
+}
+.script-run-source code { font: inherit; background: none; padding: 0; }
+.script-run-console { color: var(--text-dim); }
+/* La sortie d'erreur se distingue sans crier : même fond, teinte du risque.
+   Beaucoup de programmes écrivent leur progression sur stderr — en faire du
+   rouge vif ferait passer un `curl` normal pour un échec. */
+.script-run-err { color: var(--risk-high); }
+
+.script-run-warn { margin: var(--sp-2) 0 0; font-size: var(--text-2xs); }
+.script-run-actions { margin-top: var(--sp-3); }

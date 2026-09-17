@@ -26,7 +26,7 @@ const CATALOGUE_PATH = join(ROOT, "catalogue.json");
 const ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 const SEGMENT_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
-const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents"]);
+const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface"]);
 const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
 const MAX_FILES = 500;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -95,6 +95,7 @@ function readPlugin(id) {
     permissions,
     service: Boolean(m.service),
     web: Boolean(m.web),
+    ui: Boolean(m.ui),
     ...(icon ? { icon } : {}),
     files,
   };

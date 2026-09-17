@@ -1,0 +1,55 @@
+<template data-slot="views">
+    <!-- Onglet fichier : un fichier de data/ ouvert plein écran. Le markdown
+         s'affiche formaté par défaut et bascule en édition (barre d'outils +
+         enregistrement au fil de la frappe) ; les autres textes s'ouvrent
+         directement dans l'éditeur brut ; images et PDF en simple visionneuse. -->
+    <div class="file-view hidden" id="file-view">
+      <!-- En-tête réduit à une seule ligne : le nom du fichier est déjà porté
+           par son onglet, le répéter ne ferait que manger de la hauteur. Barre
+           de balises à gauche (construite en JS depuis MD_TOOLS), état
+           d'enregistrement et bascule d'aperçu à droite. -->
+      <div class="file-view-header">
+        <div class="md-toolbar hidden" id="md-toolbar"></div>
+        <!-- Chemin complet du fichier, visible en aperçu seulement : en édition
+             l'attention doit rester sur le texte, pas sur son emplacement. -->
+        <div class="file-path hidden" id="file-path-wrap">
+          <span class="file-path-text" id="file-path-text"></span>
+          <button type="button" class="ghost file-float-btn" id="file-path-copy-btn" title="Copier le chemin" aria-label="Copier le chemin">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+          </button>
+        </div>
+        <span class="file-save-state" id="file-save-state"></span>
+        <button type="button" class="ghost file-float-btn file-fullscreen-btn hidden" id="file-fullscreen-btn" title="Plein écran" aria-label="Plein écran">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
+        </button>
+        <button type="button" class="secondary file-mode-btn hidden" id="file-mode-btn">Éditer</button>
+      </div>
+      <div class="file-view-body" id="file-view-body">
+        <!-- Posés au-dessus de la zone de lecture, donc insensibles à son
+             défilement : ils restent atteignables où qu'on en soit. -->
+        <div class="file-float-actions" id="file-float-actions">
+          <button type="button" class="ghost file-float-btn" id="file-copy-btn" title="Copier le contenu" aria-label="Copier le contenu">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+          </button>
+          <button type="button" class="ghost file-float-btn" id="file-download-btn" title="Télécharger" aria-label="Télécharger">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          </button>
+        </div>
+        <div class="file-preview md-body hidden" id="file-preview"></div>
+        <!-- Édition du markdown : le document reste rendu, bloc par bloc, et
+             seul le bloc sur lequel on travaille montre sa syntaxe. Construit
+             en JS (app.js), à partir du découpage de markdown.js. -->
+        <div class="file-live md-body hidden" id="file-live"></div>
+        <!-- Édition brute : fichiers texte sans rendu (.txt, .json…). Calque de
+             coloration (highlight.js) sous une zone de saisie rendue
+             transparente quand le langage du fichier est reconnu — voir
+             web/highlight.js pour l'invariant qui rend ce calque possible. -->
+        <div class="file-editor-wrap hidden" id="file-editor-wrap">
+          <div class="file-editor-highlight" id="file-editor-highlight" aria-hidden="true"></div>
+          <textarea class="file-editor" id="file-editor" spellcheck="false"></textarea>
+        </div>
+        <div class="file-media hidden" id="file-media"></div>
+      </div>
+      <p id="file-error" class="error hidden"></p>
+    </div>
+</template>

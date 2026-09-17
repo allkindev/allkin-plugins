@@ -1,0 +1,16 @@
+{
+  "name": "Éditeur de texte",
+  "version": "1.0.0",
+  "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
+  "author": "Allkin",
+  "permissions": [
+    { "id": "interface", "reason": "Ajoute l'onglet fichier à la page d'Allkin." }
+  ],
+  "ui": {
+    "apiVersion": 1,
+    "provides": ["text-editor"],
+    "html": ["view.html"],
+    "styles": ["editor.css"],
+    "scripts": ["editor.js"]
+  }
+}

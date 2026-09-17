@@ -1,0 +1,329 @@
+<template data-slot="chat-menu">
+          <!-- Options de l'explorateur de fichiers — voir dataViewState et les
+               fonctions data*/openData*Dialog dans app.js. Les trois dernières
+               (Supprimer/Copier-déplacer/Télécharger) restent désactivées tant
+               qu'aucune ligne n'est cochée. -->
+          <div class="chat-menu-group hidden" data-menu-view="files">
+            <button type="button" class="chat-menu-item" id="file-new-btn" role="menuitem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/></svg>
+              Nouveau fichier
+            </button>
+            <button type="button" class="chat-menu-item" id="folder-new-btn" role="menuitem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v4M10 13h4"/></svg>
+              Nouveau dossier
+            </button>
+            <div class="chat-menu-sep"></div>
+            <label class="auto-approve-toggle" id="data-select-label" title="Afficher des cases à cocher pour agir sur plusieurs éléments">
+              <input type="checkbox" id="data-select-checkbox" />
+              <span class="switch" aria-hidden="true"></span>
+              <span class="auto-approve-text">Sélectionner</span>
+            </label>
+            <button type="button" class="chat-menu-item" id="data-delete-selected-btn" role="menuitem" disabled>
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0v13a1 1 0 001 1h6a1 1 0 001-1V7"/></svg>
+              Supprimer
+            </button>
+            <!-- Visible uniquement dans Trash/ (voir loadDataPath) : ailleurs,
+                 « vider » ne veut rien dire. -->
+            <button type="button" class="chat-menu-item hidden" id="data-empty-trash-btn" role="menuitem">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0v13a1 1 0 001 1h6a1 1 0 001-1V7"/><path d="M10 11v6M14 11v6"/></svg>
+              Vider la corbeille
+            </button>
+            <button type="button" class="chat-menu-item" id="data-move-selected-btn" role="menuitem" disabled>
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#8b8bf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+              Copier/déplacer
+            </button>
+            <button type="button" class="chat-menu-item" id="data-download-selected-btn" role="menuitem" disabled>
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+              Télécharger
+            </button>
+          </div>
+</template>
+
+<template data-slot="views">
+    <div class="data-view hidden" id="data-view">
+      <!-- Voile de dépôt : n'apparaît que pendant le survol d'un glisser.
+           Posé dans la vue plutôt qu'en plein écran — on dépose DANS le dossier
+           affiché, et le voile doit désigner cette zone-là. -->
+      <div class="data-drop-veil" id="data-drop-veil" aria-hidden="true">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+        <span id="data-drop-veil-text">Déposer ici</span>
+      </div>
+      <div class="data-view-header">
+        <div class="data-breadcrumb" id="data-breadcrumb"></div>
+      </div>
+      <!-- Tri pour mobile : l'en-tête du tableau y est masqué, il faut donc un
+           autre point d'entrée. Ces boutons portent le même data-sort-key que
+           les <th>, et sont pilotés par le même code (voir app.js). -->
+      <div class="data-sort-bar" id="data-sort-bar">
+        <span class="data-sort-label">Trier</span>
+        <button type="button" class="data-sort-btn" data-sort-key="name">Nom</button>
+        <button type="button" class="data-sort-btn" data-sort-key="size">Taille</button>
+        <button type="button" class="data-sort-btn" data-sort-key="modifiedAt">Modifié</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" id="data-table">
+          <thead>
+            <tr>
+              <th class="data-table-select-col"></th>
+              <th data-sort-key="name">Nom</th>
+              <th data-sort-key="size">Taille</th>
+              <th data-sort-key="createdAt">Créé le</th>
+              <th data-sort-key="modifiedAt">Modifié le</th>
+              <th class="data-table-actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="data-table-body"></tbody>
+        </table>
+      </div>
+      <p id="data-error" class="error hidden"></p>
+    </div>
+    <!-- Explorateur de ~/.allkin, en lecture seule : un onglet global, ouvert
+         depuis l'accueil. Voir server/allkin-fs.ts pour les garde-fous ; côté
+         interface, il n'y a délibérément aucune action d'écriture. -->
+    <div class="explorer-view hidden" id="explorer-view">
+      <div class="data-view-header">
+        <h2 class="services-view-title">Explorateur</h2>
+        <span class="explorer-readonly">lecture seule</span>
+      </div>
+      <div class="data-breadcrumb" id="explorer-breadcrumb"></div>
+      <p id="explorer-error" class="error hidden"></p>
+      <div class="explorer-table-wrap">
+        <table class="data-table explorer-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th class="explorer-col-size">Taille</th>
+              <th class="explorer-col-date">Modifié</th>
+            </tr>
+          </thead>
+          <tbody id="explorer-body"></tbody>
+        </table>
+      </div>
+    </div>
+</template>
+
+<template data-slot="body">
+<!-- Menu contextuel de l'explorateur (clic droit / appui long) — voir
+     openDataContextMenu() dans app.js. Les mêmes gestes qu'un explorateur de
+     bureau : c'est ce qu'on essaie d'abord, avant de chercher un menu ailleurs.
+     Les entrées se grisent selon ce qui est visé — un dossier ne s'ouvre pas
+     comme un fichier, et « Coller » n'a de sens qu'après un « Copier ». -->
+<div class="tab-context-menu hidden" id="data-context-menu" role="menu">
+  <!-- En-tête : de QUOI parle ce menu. Sur un clic droit, le pointeur a bougé
+       depuis la ligne visée et la sélection n'est pas toujours visible — sans
+       ce rappel, on agit de mémoire. Masqué quand le menu s'ouvre dans le vide,
+       où il n'y a rien à décrire. -->
+  <div class="data-ctx-head hidden" id="data-ctx-head">
+    <span class="data-ctx-head-icon" id="data-ctx-head-icon"></span>
+    <span class="data-ctx-head-text">
+      <span class="data-ctx-head-name" id="data-ctx-head-name"></span>
+      <span class="data-ctx-head-meta" id="data-ctx-head-meta"></span>
+    </span>
+  </div>
+  <div class="chat-menu-sep data-ctx-head-sep hidden" id="data-ctx-head-sep"></div>
+
+  <button type="button" class="chat-menu-item" id="data-ctx-open" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#8b8bf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/></svg>
+    Ouvrir
+  </button>
+  <!-- Cachée, et non grisée : « Exécuter » n'a de sens que sur un script, et un
+       menu ne doit pas exhiber en permanence ce qui ne servira presque jamais.
+       Même traitement que « Désarchiver ». -->
+  <button type="button" class="chat-menu-item hidden" id="data-ctx-run" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l12 8-12 8z"/></svg>
+    Exécuter
+  </button>
+  <button type="button" class="chat-menu-item" id="data-ctx-download" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+    <span id="data-ctx-download-label">Télécharger</span>
+  </button>
+
+  <div class="chat-menu-sep"></div>
+  <button type="button" class="chat-menu-item" id="data-ctx-copy" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+    Copier
+  </button>
+  <button type="button" class="chat-menu-item" id="data-ctx-cut" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88"/><path d="M14.47 14.48L20 20"/><path d="M8.12 8.12L12 12"/></svg>
+    Couper
+  </button>
+  <button type="button" class="chat-menu-item" id="data-ctx-paste" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3H9z"/><path d="M15 4.5h2A2 2 0 0119 6.5V20a2 2 0 01-2 2H7a2 2 0 01-2-2V6.5a2 2 0 012-2h2"/></svg>
+    <span id="data-ctx-paste-label">Coller</span>
+  </button>
+  <button type="button" class="chat-menu-item" id="data-ctx-rename" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M14.5 4.5l5 5L9 20H4v-5z"/></svg>
+    Renommer
+  </button>
+
+  <div class="chat-menu-sep"></div>
+  <button type="button" class="chat-menu-item" id="data-ctx-archive" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/></svg>
+    <span id="data-ctx-archive-label">Archiver</span>
+  </button>
+  <!-- Ne s'affiche que sur une archive : proposer « Désarchiver » sur un
+       fichier texte serait une promesse qu'on ne peut pas tenir. -->
+  <button type="button" class="chat-menu-item hidden" id="data-ctx-extract" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M12 18v-6m0 0l-2.5 2.5M12 12l2.5 2.5"/></svg>
+    Désarchiver
+  </button>
+
+  <div class="chat-menu-sep"></div>
+  <button type="button" class="chat-menu-item" id="data-ctx-new-file" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 11v6M9 14h6"/></svg>
+    Nouveau fichier
+  </button>
+  <button type="button" class="chat-menu-item" id="data-ctx-new-dir" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></svg>
+    Nouveau dossier
+  </button>
+
+  <div class="chat-menu-sep"></div>
+  <button type="button" class="chat-menu-item" id="data-ctx-delete" role="menuitem">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2"/><path d="M6 7l1 13a1 1 0 001 1h8a1 1 0 001-1l1-13"/></svg>
+    <span id="data-ctx-delete-label">Supprimer</span>
+  </button>
+</div>
+<!-- Choix du format d'archive. Deux options seulement : ce que le serveur sait
+     produire à coup sûr, sans dépendre d'un binaire absent (voir
+     ARCHIVE_FORMATS, agent-archive.ts). La liste est remplie par le serveur —
+     l'interface n'a pas à savoir ce qu'il sait faire. -->
+<template id="archive-format-template">
+  <div class="modal-backdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="archive-modal-title">
+      <h2 id="archive-modal-title">Archiver</h2>
+      <p class="dim" id="archive-modal-target"></p>
+      <div class="archive-format-list" id="archive-format-list"></div>
+      <p id="archive-modal-error" class="error hidden"></p>
+      <div class="modal-actions">
+        <button type="button" class="ghost modal-cancel">Annuler</button>
+        <button type="button" id="archive-modal-go">Créer l'archive</button>
+      </div>
+    </div>
+  </div>
+</template>
+<!-- Sélecteur de dossier de destination — Copier/déplacer (voir
+     openDataMoveDialog dans app.js). Navigation propre à la modale : ne
+     touche pas au dossier affiché dans l'explorateur principal. -->
+<template id="data-move-dialog-template">
+  <div class="modal-backdrop">
+    <div class="modal modal-wide">
+      <h2>Copier / déplacer</h2>
+      <p class="dim" id="data-move-source-label"></p>
+      <div class="data-breadcrumb" id="data-move-breadcrumb"></div>
+      <div class="data-move-list" id="data-move-list"></div>
+      <p id="data-move-error" class="error hidden"></p>
+      <div class="modal-actions">
+        <button type="button" class="ghost modal-cancel">Annuler</button>
+        <button type="button" class="secondary" id="data-move-copy-btn">Copier ici</button>
+        <button type="button" id="data-move-move-btn">Déplacer ici</button>
+      </div>
+    </div>
+  </div>
+</template>
+<!-- Nom de fichier/dossier — générique, réutilisée par Nouveau fichier et
+     Nouveau dossier (voir openDataNameDialog dans app.js). -->
+<template id="data-name-dialog-template">
+  <div class="modal-backdrop">
+    <form class="modal">
+      <h2 id="data-name-dialog-title"></h2>
+      <label><span id="data-name-dialog-label"></span><input type="text" id="data-name-dialog-input" autocomplete="off" /></label>
+      <p id="data-name-dialog-error" class="error hidden"></p>
+      <div class="modal-actions">
+        <button type="button" class="ghost modal-cancel">Annuler</button>
+        <button type="submit" id="data-name-dialog-submit"></button>
+      </div>
+    </form>
+  </div>
+</template>
+<template id="data-row-template">
+  <tr class="data-row">
+    <td class="data-row-select">
+      <input type="checkbox" class="data-row-checkbox" aria-label="Sélectionner" />
+    </td>
+    <td class="data-row-name">
+      <span class="data-row-icon"></span>
+      <span class="data-row-name-text"></span>
+    </td>
+    <td class="data-row-size"></td>
+    <td class="data-row-created"></td>
+    <td class="data-row-modified"></td>
+    <td class="data-row-actions">
+      <button type="button" class="ghost data-row-download" title="Télécharger">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      </button>
+      <button type="button" class="ghost data-row-delete" title="Supprimer">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0v13a1 1 0 001 1h6a1 1 0 001-1V7"/></svg>
+      </button>
+    </td>
+  </tr>
+</template>
+<!-- Exécution d'un script, en deux temps.
+
+     D'ABORD LE CONTENU. Une confirmation posée sur un nom de fichier ne vaut
+     rien : on répond oui à « rapport.sh » sans savoir ce qu'il y a dedans, et
+     le fichier n'a pas forcément été écrit par celui qui clique. Le script est
+     donc montré, coloré, et c'est devant lui qu'on décide.
+
+     ENSUITE LE DIRECT. Un script qui déploie ou compile parle pendant des
+     minutes ; tout montrer d'un coup à la fin revient à ne rien montrer. -->
+<template id="script-run-template">
+  <div class="modal-backdrop script-run-backdrop">
+    <div class="modal modal-wide script-run-modal" role="dialog" aria-modal="true" aria-labelledby="script-run-title">
+      <header class="script-run-head">
+        <span class="script-run-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-5-6-5"/><path d="M12 19h8"/></svg>
+        </span>
+        <span class="script-run-head-text">
+          <span class="script-run-name" id="script-run-name"></span>
+          <span class="script-run-meta dim" id="script-run-meta"></span>
+        </span>
+        <span class="script-run-state" id="script-run-state"></span>
+      </header>
+
+      <!-- Temps 1 : ce qu'on s'apprête à lancer. -->
+      <div class="script-run-phase" id="script-run-confirm">
+        <pre class="script-run-source"><code id="script-run-source"></code></pre>
+        <p class="script-run-warn dim" id="script-run-warn"></p>
+      </div>
+
+      <!-- Temps 2 : ce qui se passe. -->
+      <div class="script-run-phase hidden" id="script-run-live">
+        <pre class="script-run-console" id="script-run-console" role="log" aria-live="polite"></pre>
+      </div>
+
+      <div class="modal-actions script-run-actions">
+        <button type="button" class="modal-cancel" id="script-run-cancel">Annuler</button>
+        <button type="button" id="script-run-go">Exécuter</button>
+        <button type="button" class="danger hidden" id="script-run-stop">Arrêter</button>
+      </div>
+    </div>
+  </div>
+</template>
+<!-- Progression d'un dépôt. Sans échappatoire tant que ça tourne : annuler à
+     mi-parcours laisserait une arborescence à moitié copiée, sans dire laquelle.
+     Le bouton n'apparaît qu'à la fin — ou en cas d'échec, où il faut pouvoir
+     lire ce qui n'est pas passé. -->
+<template id="upload-progress-template">
+  <div class="modal-backdrop upload-modal-backdrop">
+    <div class="modal upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+      <h2 id="upload-modal-title">Dépôt en cours</h2>
+      <p class="dim upload-modal-target" id="upload-modal-target"></p>
+
+      <div class="update-progress">
+        <div class="update-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <span class="update-progress-fill" id="upload-progress-fill"></span>
+        </div>
+        <span class="update-progress-count dim" id="upload-progress-count"></span>
+      </div>
+
+      <p class="upload-modal-current dim" id="upload-modal-current"></p>
+      <div class="upload-errors hidden" id="upload-errors"></div>
+
+      <div class="modal-actions hidden" id="upload-modal-actions">
+        <button type="button" class="modal-cancel">Fermer</button>
+      </div>
+    </div>
+  </div>
+</template>
+</template>
