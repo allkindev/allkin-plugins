@@ -1,0 +1,76 @@
+{
+  "name": "WeTTY",
+  "version": "1.0.0",
+  "description": "Terminal dans le navigateur (WeTTY) : une session SSH sur la machine, ouverte dans un onglet d'Allkin.",
+  "author": "butlerx/wetty — intégration Allkin",
+  "homepage": "https://github.com/butlerx/wetty",
+  "permissions": [
+    { "id": "network", "reason": "Télécharge WeTTY depuis npm au premier démarrage, écoute sur un port local et se connecte au serveur SSH." },
+    { "id": "exec", "reason": "Lance npm pour installer WeTTY, puis ssh : le terminal exécute les commandes que tu tapes." },
+    { "id": "filesystem", "reason": "Un terminal donne accès à tous les fichiers du compte avec lequel tu te connectes." }
+  ],
+  "settings": [
+    {
+      "key": "port",
+      "label": "Port local",
+      "type": "number",
+      "default": 9310,
+      "required": true,
+      "help": "Port d'écoute de WeTTY, sur 127.0.0.1 uniquement : la page passe par Allkin."
+    },
+    {
+      "key": "sshHost",
+      "label": "Serveur SSH",
+      "type": "text",
+      "default": "localhost",
+      "required": true,
+      "help": "La machine sur laquelle ouvrir le terminal. « localhost » = la machine d'Allkin."
+    },
+    {
+      "key": "sshPort",
+      "label": "Port SSH",
+      "type": "number",
+      "default": 22,
+      "required": true
+    },
+    {
+      "key": "sshUser",
+      "label": "Utilisateur SSH",
+      "type": "text",
+      "placeholder": "demandé à chaque connexion",
+      "help": "Vide : le terminal demande l'identifiant à l'ouverture."
+    },
+    {
+      "key": "sshAuth",
+      "label": "Authentification",
+      "type": "select",
+      "default": "password",
+      "options": [
+        { "value": "password", "label": "Mot de passe" },
+        { "value": "publickey,password", "label": "Clé, puis mot de passe" }
+      ]
+    },
+    {
+      "key": "sshKey",
+      "label": "Clé privée SSH",
+      "type": "text",
+      "placeholder": "/home/utilisateur/.ssh/id_ed25519",
+      "help": "Facultatif. Avec une clé sans phrase de passe, le terminal s'ouvre sans rien demander : seule la session Allkin le protège alors."
+    },
+    {
+      "key": "title",
+      "label": "Titre",
+      "type": "text",
+      "default": "Terminal"
+    }
+  ],
+  "service": {
+    "command": "node",
+    "args": ["start.mjs"]
+  },
+  "web": {
+    "portSetting": "port",
+    "path": "/",
+    "keepPrefix": true
+  }
+}

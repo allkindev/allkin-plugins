@@ -49,6 +49,9 @@ Le nom du dossier est l'identifiant du plugin : il ne change jamais.
   une commande en `./` est un fichier du plugin (le rendre exécutable dans le dépôt).
 - **web** — suppose un service. `port` fixe ou `portSetting` (un réglage `number`). La page
   s'ouvre dans un onglet d'Allkin, relayée sous `/plugins/<id>/web/`.
+  `keepPrefix: true` transmet le chemin complet au lieu de retirer le préfixe : pour les
+  applications qui savent servir sous un chemin de base (`--base`, `BASE_URL`…) et écrivent
+  leurs liens en absolu. Elles reçoivent ce chemin dans `ALLKIN_PLUGIN_BASE_PATH`.
 
 ## Ce que reçoit le service
 
@@ -84,4 +87,6 @@ plugin dont un fichier ne correspond pas. **Relancer le script après chaque mod
 committer `catalogue.json` avec le reste.
 
 Plugins sans dépendances de préférence : Allkin copie les fichiers tels quels, il ne lance pas de
-`npm install`. Un plugin qui en a besoin embarque ses dépendances déjà construites.
+`npm install`. Un plugin qui en a besoin les installe lui-même au démarrage, dans
+`ALLKIN_PLUGIN_DATA` (voir `plugins/wetty/start.mjs`) — c'est la seule voie pour un module natif,
+compilé pour la machine.

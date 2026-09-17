@@ -43,6 +43,53 @@
           "sha256": "401a553bb2f89753f4c1c78eab0ec13c001972b08a59ece0691378406cc86dae"
         }
       ]
+    },
+    {
+      "id": "wetty",
+      "name": "WeTTY",
+      "version": "1.0.0",
+      "description": "Terminal dans le navigateur (WeTTY) : une session SSH sur la machine, ouverte dans un onglet d'Allkin.",
+      "author": "butlerx/wetty — intégration Allkin",
+      "homepage": "https://github.com/butlerx/wetty",
+      "permissions": [
+        {
+          "id": "network",
+          "reason": "Télécharge WeTTY depuis npm au premier démarrage, écoute sur un port local et se connecte au serveur SSH."
+        },
+        {
+          "id": "exec",
+          "reason": "Lance npm pour installer WeTTY, puis ssh : le terminal exécute les commandes que tu tapes."
+        },
+        {
+          "id": "filesystem",
+          "reason": "Un terminal donne accès à tous les fichiers du compte avec lequel tu te connectes."
+        }
+      ],
+      "service": true,
+      "web": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 2910,
+          "sha256": "9d1db924df52d55d9163a089082cfad1925adf19f68aadebcead5e9b8bf383ec"
+        },
+        {
+          "path": "icon.svg",
+          "size": 253,
+          "sha256": "3d305d4145170c6d97fedbe15189ea9d36d0af0e0ab81744670d7b0bf729fd9b"
+        },
+        {
+          "path": "plugin.json",
+          "size": 2383,
+          "sha256": "8fec53818d63a6a84f82ad71223c84eaf9aec60b0a68e22cf85885df970309a9"
+        },
+        {
+          "path": "start.mjs",
+          "size": 4586,
+          "sha256": "4cc4c78752616515a702610ad4418e26cb68d04930bdde9cd27aaf93987aad5b"
+        }
+      ]
     }
   ]
 }
