@@ -6,6 +6,9 @@ Depuis Allkin, l'icône **Plugins** en bas de la barre latérale lit ce dépôt 
 disponibles ; on installe ceux qu'on veut utiliser. Un plugin installé ne fait rien tout seul : ses
 droits s'accordent un par un sur sa page, et son service ne démarre que si on l'autorise.
 
+Pour en écrire un : **[Créer un plugin](CREER-UN-PLUGIN.md)** — exemple complet, test en local,
+publication et pièges connus.
+
 ---
 
 ## Structure d'un plugin
