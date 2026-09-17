@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "plugins": [
+    {
+      "id": "bonjour",
+      "name": "Bonjour",
+      "version": "1.0.0",
+      "description": "Plugin d'exemple : un petit serveur web qui affiche ses réglages dans un onglet d'Allkin.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "network",
+          "reason": "Écoute sur un port local pour servir sa page dans Allkin."
+        }
+      ],
+      "service": true,
+      "web": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 885,
+          "sha256": "0d96b4920d052b522dcf9c980619b99c8767cac590d24143941be6e5ed918b38"
+        },
+        {
+          "path": "icon.svg",
+          "size": 228,
+          "sha256": "bd2b95f10acf52ee0c6a8425835039a30d1f89692f65a2e7aa7f8f4a0eeb9217"
+        },
+        {
+          "path": "package.json",
+          "size": 38,
+          "sha256": "0ce00e635c7b098ef6a307e609de09d4d8a839c66ec4c06777eb830482f72320"
+        },
+        {
+          "path": "plugin.json",
+          "size": 1084,
+          "sha256": "0a5e9ff5d2a2083b97bd9168e462ef02e11e88ec83dac8c2af920cfa6dde1d2e"
+        },
+        {
+          "path": "server.js",
+          "size": 1822,
+          "sha256": "401a553bb2f89753f4c1c78eab0ec13c001972b08a59ece0691378406cc86dae"
+        }
+      ]
+    }
+  ]
+}
