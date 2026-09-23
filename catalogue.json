@@ -95,6 +95,70 @@
       ]
     },
     {
+      "id": "promptcraft",
+      "name": "PromptCraft",
+      "version": "1.0.0",
+      "description": "L'atelier de fabrication d'agents sur mesure : personnalité, compétences et méthode réglées finement, prompt noté en direct, conversation test, puis téléchargement .allkin ou déploiement.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "interface",
+          "reason": "Ajoute l'onglet PromptCraft à la page d'Allkin. Avec ta session, il crée un agent d'essai sans aucun droit pour la conversation test, et crée l'agent final quand tu cliques sur « Déployer »."
+        }
+      ],
+      "service": false,
+      "web": false,
+      "ui": true,
+      "icon": "icon.svg",
+      "files": [
+        {
+          "path": "README.md",
+          "size": 6880,
+          "sha256": "6ed847c3370cab25099e7382ed4087f5cf6036cab7c49b8066b6e2d3b566e6bb"
+        },
+        {
+          "path": "app.js",
+          "size": 57494,
+          "sha256": "3e1504dc2e528907fbfc9ed2b46a157250e3f2dae3450edbcb86e556b0fff342"
+        },
+        {
+          "path": "compiler.js",
+          "size": 22146,
+          "sha256": "bfb7ed9099f45ce8f7a9e7b545b554b2437c1a567dad5f51ad0825a08dc426ff"
+        },
+        {
+          "path": "icon.svg",
+          "size": 361,
+          "sha256": "c5883aef1b8b2722ce138a6e2906d5d90ff408c85ac1784ce7b235cf234db630"
+        },
+        {
+          "path": "plugin.json",
+          "size": 744,
+          "sha256": "edcee5e2ae1e562aed782f7a9cd4e0cd4aa5bbef7350a77fc67b1b9c9c2f4c13"
+        },
+        {
+          "path": "promptcraft.css",
+          "size": 19857,
+          "sha256": "a9c48241bdd718a8b49d9e98a7b0087fe8e57693fd2318aaa5684d7738425d54"
+        },
+        {
+          "path": "schema.js",
+          "size": 50143,
+          "sha256": "937d2f308142ce685e44ed241aa10068ec06ede2d464d1007e78c63688ded3a4"
+        },
+        {
+          "path": "view.html",
+          "size": 10959,
+          "sha256": "8d5425756a5b8e36c4bf137077f108a1962e5070e81e1fc9bcfb8e7a2de9ac64"
+        },
+        {
+          "path": "zip.js",
+          "size": 5637,
+          "sha256": "77c67a399431c1a7eb40f97bf09fabb2c176d16fc36d65dd6b83ccc7c0125cfd"
+        }
+      ]
+    },
+    {
       "id": "text-editor",
       "name": "Éditeur de texte",
       "version": "1.0.0",

@@ -1,0 +1,16 @@
+{
+  "name": "PromptCraft",
+  "version": "1.0.0",
+  "description": "L'atelier de fabrication d'agents sur mesure : personnalité, compétences et méthode réglées finement, prompt noté en direct, conversation test, puis téléchargement .allkin ou déploiement.",
+  "author": "Allkin",
+  "permissions": [
+    { "id": "interface", "reason": "Ajoute l'onglet PromptCraft à la page d'Allkin. Avec ta session, il crée un agent d'essai sans aucun droit pour la conversation test, et crée l'agent final quand tu cliques sur « Déployer »." }
+  ],
+  "ui": {
+    "apiVersion": 1,
+    "provides": ["promptcraft"],
+    "html": ["view.html"],
+    "styles": ["promptcraft.css"],
+    "scripts": ["zip.js", "schema.js", "compiler.js", "app.js"]
+  }
+}
