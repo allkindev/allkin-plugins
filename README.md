@@ -1,6 +1,6 @@
 # allkin-plugins
 
-Les **plugins** d'[Allkin](https://github.com/ctrlmakeit/allkin).
+Les **plugins** d'[Allkin](https://github.com/allkindev/allkin).
 
 Depuis Allkin, l'icône **Plugins** en bas de la barre latérale lit ce dépôt et affiche les plugins
 disponibles ; on installe ceux qu'on veut utiliser. Un plugin installé ne fait rien tout seul : ses
