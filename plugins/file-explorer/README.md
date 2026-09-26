@@ -7,6 +7,7 @@ Parcourir et gérer les fichiers des agents depuis Allkin.
 Le bouton dossier sur la ligne d'un agent ouvre son espace `data/` :
 
 - navigation par dossiers, tri par nom, taille ou date ;
+- boutons **Nouveau dossier** et **Nouveau fichier** dans l'en-tête, à côté du chemin ;
 - **dépôt** de fichiers et de dossiers entiers par glisser-déposer, avec progression ;
 - **menu contextuel** (clic droit ou appui long) : ouvrir, télécharger, copier, couper, coller,
   renommer, archiver, extraire, nouveau fichier, nouveau dossier, supprimer ;

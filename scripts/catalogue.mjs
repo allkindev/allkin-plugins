@@ -24,7 +24,10 @@ const PLUGINS_DIR = join(ROOT, "plugins");
 const CATALOGUE_PATH = join(ROOT, "catalogue.json");
 
 const ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
-const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+/* Semver (1.0.0), ou la forme 1.XXXX que pose ~/git_commit_plugins.sh — le
+   nombre de commits du dépôt. Allkin ne fait que comparer la version du
+   catalogue à celle installée : toute forme stable convient. */
+const VERSION_PATTERN = /^\d+\.\d+(?:\.\d+)?$/;
 const SEGMENT_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
 const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface", "agent"]);
 const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
@@ -60,7 +63,7 @@ function readPlugin(id) {
     return fail(id, `plugin.json n'est pas un JSON valide (${err.message}).`);
   }
   if (typeof m.name !== "string" || !m.name.trim()) fail(id, "name est obligatoire.");
-  if (!VERSION_PATTERN.test(String(m.version ?? ""))) fail(id, "version doit être un semver (ex. 1.0.0).");
+  if (!VERSION_PATTERN.test(String(m.version ?? ""))) fail(id, "version attendue : 1.0.0 ou 1.0042.");
   if (typeof m.description !== "string" || !m.description.trim()) fail(id, "description est obligatoire.");
   if (m.web && !m.service) fail(id, "web suppose un service.");
   if (m.service && (typeof m.service.command !== "string" || !m.service.command)) fail(id, "service.command est obligatoire.");

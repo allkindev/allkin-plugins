@@ -28,7 +28,7 @@ Le nom du dossier est l'identifiant du plugin : il ne change jamais.
 ```jsonc
 {
   "name": "Mon plugin",
-  "version": "1.0.0",                  // semver, à incrémenter à chaque modification
+  "version": "1.0.0",                  // à changer à chaque modification (voir git_commit_plugins.sh)
   "description": "Une phrase.",
   "author": "Moi",
   "homepage": "https://…",             // facultatif

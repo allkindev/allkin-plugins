@@ -9,6 +9,18 @@
   gap: 1px;
   font-size: var(--text-sm);
 }
+/* En-tête de l'onglet Fichiers : le chemin prend la place, les actions de
+   création se calent à droite. */
+#data-view .data-view-header { flex-wrap: nowrap; }
+#data-view .data-breadcrumb { flex: 1; min-width: 0; }
+.data-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+.data-header-btn { gap: var(--sp-2); padding: 0 var(--sp-3); font-size: var(--text-sm); }
+
 .data-crumb {
   background: none;
   border: none;
@@ -138,6 +150,12 @@
     padding-bottom: var(--sp-1);
   }
   .data-crumb { white-space: nowrap; }
+  /* À côté du chemin, sans le pousser à la ligne : les boutons perdent leur
+     libellé et deviennent carrés (le title reste pour l'infobulle). */
+  #data-view .data-view-header { gap: var(--sp-2); }
+  #data-view .data-breadcrumb { width: auto; }
+  .data-header-btn { padding: 0; min-width: 2.35rem; }
+  .data-header-btn-label { display: none; }
 
   /* Le cadre et le fond passent sur chaque carte, plus sur le conteneur. */
   .data-table-wrap {

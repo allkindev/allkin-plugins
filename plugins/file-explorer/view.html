@@ -1,18 +1,10 @@
 <template data-slot="chat-menu">
           <!-- Options de l'explorateur de fichiers — voir dataViewState et les
-               fonctions data*/openData*Dialog dans app.js. Les trois dernières
+               fonctions data*/openData*Dialog dans app.js. Nouveau fichier et
+               Nouveau dossier vivent dans l'en-tête de la vue. Les trois dernières
                (Supprimer/Copier-déplacer/Télécharger) restent désactivées tant
                qu'aucune ligne n'est cochée. -->
           <div class="chat-menu-group hidden" data-menu-view="files">
-            <button type="button" class="chat-menu-item" id="file-new-btn" role="menuitem">
-              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/></svg>
-              Nouveau fichier
-            </button>
-            <button type="button" class="chat-menu-item" id="folder-new-btn" role="menuitem">
-              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v4M10 13h4"/></svg>
-              Nouveau dossier
-            </button>
-            <div class="chat-menu-sep"></div>
             <label class="auto-approve-toggle" id="data-select-label" title="Afficher des cases à cocher pour agir sur plusieurs éléments">
               <input type="checkbox" id="data-select-checkbox" />
               <span class="switch" aria-hidden="true"></span>
@@ -48,8 +40,21 @@
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
         <span id="data-drop-veil-text">Déposer ici</span>
       </div>
+      <!-- En-tête : où l'on est, et ce qu'on peut y créer. Les deux actions
+           de création restent à portée de main plutôt que cachées dans le
+           menu ⋮ — c'est le geste le plus courant après la navigation. -->
       <div class="data-view-header">
         <div class="data-breadcrumb" id="data-breadcrumb"></div>
+        <div class="data-header-actions">
+          <button type="button" class="secondary data-header-btn" id="folder-new-btn" title="Nouveau dossier">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v4M10 13h4"/></svg>
+            <span class="data-header-btn-label">Nouveau dossier</span>
+          </button>
+          <button type="button" class="secondary data-header-btn" id="file-new-btn" title="Nouveau fichier">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/></svg>
+            <span class="data-header-btn-label">Nouveau fichier</span>
+          </button>
+        </div>
       </div>
       <!-- Tri pour mobile : l'en-tête du tableau y est masqué, il faut donc un
            autre point d'entrée. Ces boutons portent le même data-sort-key que
