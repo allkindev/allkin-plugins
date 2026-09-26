@@ -95,66 +95,73 @@
       ]
     },
     {
-      "id": "promptcraft",
-      "name": "PromptCraft",
+      "id": "promptr",
+      "name": "Promptr",
       "version": "1.0.0",
-      "description": "L'atelier de fabrication d'agents sur mesure : personnalité, compétences et méthode réglées finement, prompt noté en direct, conversation test, puis téléchargement .allkin ou déploiement.",
+      "description": "L'atelier de prompts : dessinez un agent en blocs, ou ouvrez un prompt existant pour le voir en plan. Son agent dédié écrit le prompt depuis le plan, et le plan depuis un prompt.",
       "author": "Allkin",
       "permissions": [
         {
           "id": "interface",
-          "reason": "Ajoute l'onglet PromptCraft à la page d'Allkin. Avec ta session, il crée un agent d'essai sans aucun droit pour la conversation test, et crée l'agent final quand tu cliques sur « Déployer »."
+          "reason": "Ajoute l'app Promptr à la page d'Allkin. Avec ta session, il crée un agent d'essai sans aucun droit pour la conversation test, et crée l'agent final quand tu cliques sur « Déployer »."
+        },
+        {
+          "id": "agent",
+          "reason": "Promptr confie à son agent l'écriture du prompt à partir du plan, et la lecture d'un prompt existant pour en faire un plan."
         }
       ],
       "service": false,
       "web": false,
       "ui": true,
+      "agent": {
+        "name": "Promptr"
+      },
       "icon": "icon.svg",
       "files": [
         {
           "path": "README.md",
-          "size": 6880,
-          "sha256": "6ed847c3370cab25099e7382ed4087f5cf6036cab7c49b8066b6e2d3b566e6bb"
+          "size": 3827,
+          "sha256": "2f5456e98d71cf09cc8a38eaf28250ec7b75d2c05e91d9d8724834f41fc2d89c"
+        },
+        {
+          "path": "agent.md",
+          "size": 3600,
+          "sha256": "1e18db1065c556dff56692f64987d1f3eae6b7719edf766a7aa12ed04a6f0fb5"
         },
         {
           "path": "app.js",
-          "size": 57494,
-          "sha256": "3e1504dc2e528907fbfc9ed2b46a157250e3f2dae3450edbcb86e556b0fff342"
+          "size": 57797,
+          "sha256": "086effbf62690bf5b8af265d3468abdc49826513f0424e6b2dc73f78d0b8ade3"
         },
         {
-          "path": "compiler.js",
-          "size": 22146,
-          "sha256": "bfb7ed9099f45ce8f7a9e7b545b554b2437c1a567dad5f51ad0825a08dc426ff"
+          "path": "blocks.js",
+          "size": 16917,
+          "sha256": "c636eaf09533b6183284fc82561ffd5a8b771b3cbce46f355c79e761caff9ef6"
         },
         {
           "path": "icon.svg",
-          "size": 361,
-          "sha256": "c5883aef1b8b2722ce138a6e2906d5d90ff408c85ac1784ce7b235cf234db630"
+          "size": 350,
+          "sha256": "399bd9b659a13f0e6f8cfb64439949fd9fb77700722524795b20ff01be6906a6"
         },
         {
           "path": "plugin.json",
-          "size": 744,
-          "sha256": "edcee5e2ae1e562aed782f7a9cd4e0cd4aa5bbef7350a77fc67b1b9c9c2f4c13"
+          "size": 1023,
+          "sha256": "c669bb00d1fa7f92d4dbdd3b33886b12698ef1f714e36a9407e0d15e05fe8e5a"
         },
         {
-          "path": "promptcraft.css",
-          "size": 19857,
-          "sha256": "a9c48241bdd718a8b49d9e98a7b0087fe8e57693fd2318aaa5684d7738425d54"
-        },
-        {
-          "path": "schema.js",
-          "size": 50143,
-          "sha256": "937d2f308142ce685e44ed241aa10068ec06ede2d464d1007e78c63688ded3a4"
+          "path": "promptr.css",
+          "size": 26819,
+          "sha256": "144bf1da9bb9edd0981e2ef1dfb5b17b1dea55021ba7feea5e2132e9226b8a40"
         },
         {
           "path": "view.html",
-          "size": 10959,
-          "sha256": "8d5425756a5b8e36c4bf137077f108a1962e5070e81e1fc9bcfb8e7a2de9ac64"
+          "size": 11604,
+          "sha256": "d775d0bc6bc2c3cab22ceef71efbcf77e58118f2200ebe2da32cfc05c5121ed3"
         },
         {
           "path": "zip.js",
-          "size": 5637,
-          "sha256": "77c67a399431c1a7eb40f97bf09fabb2c176d16fc36d65dd6b83ccc7c0125cfd"
+          "size": 5625,
+          "sha256": "5fc17c1493e76c5385fefcb78d9e397440e94a9b4602289a515d763390c6802e"
         }
       ]
     },

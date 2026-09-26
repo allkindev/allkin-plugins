@@ -43,8 +43,8 @@ Le nom du dossier est l'identifiant du plugin : il ne change jamais.
 }
 ```
 
-- **permissions** — `network`, `filesystem`, `exec`, `root`, `agents`, ou un identifiant propre
-  au plugin (affiché à risque élevé). Le service ne démarre pas tant que chacun n'est pas accordé ;
+- **permissions** — `network`, `filesystem`, `exec`, `root`, `agents`, `interface`, `agent`, ou
+  un identifiant propre au plugin (affiché à risque élevé). Le service ne démarre pas tant que chacun n'est pas accordé ;
   un droit ajouté dans une nouvelle version n'est jamais accordé d'office.
 - **settings** — types `text`, `textarea`, `number`, `boolean`, `secret`, `select` (avec
   `options`). Un `secret` n'est jamais renvoyé au navigateur.
@@ -85,10 +85,48 @@ Les scripts s'adressent à `window.Allkin` :
 | `registerTabKind(kind, def)` | Déclare une nature d'onglet : `panels`, `icon`, `label(tab)`, `meta`, `tooltip(tab)`, `byPath`, `maxPerAgent`, `scroller()`, `scrollKeySuffix(tab)`, `activate(tab)`, `leave(tab)`, `beforeClose(tab)`, `menu: { title, onShow }` |
 | `provide(name, impl)` / `capability(name)` | Fournit / utilise une capacité (`markdown-editor`, `text-editor`, `file-explorer`) |
 | `hasTabKind(kind)` | Une nature d'onglet est-elle disponible |
-| `core` | Le cœur : `state`, `el`, `api`, `openTab`, `activeTab`, `persistTabs`, `applyScroll`, `copyToClipboard`, `formatSize`, `dataFileUrl`, `agentName`… |
+| `registerApp({ key, name, meta, icon, open })` | Ajoute une entrée à la liste Plugins du menu Allkin |
+| `core` | Le cœur : `state`, `el`, `api`, `openTab`, `activeTab`, `persistTabs`, `applyScroll`, `copyToClipboard`, `formatSize`, `dataFileUrl`, `agentName`, `toast(message, "ok" \| "ko")`, `runPluginAgent(id, prompt)`… |
 
 Un script s'enveloppe dans une fonction (`(() => { … })();`) : tous les scripts de la page partagent
 la même portée globale. Activer ou retirer un plugin d'interface demande de recharger la page.
+
+## Un plugin, un agent
+
+Un plugin peut disposer de **son propre agent** : Allkin le crée, le tient à jour et le retire
+avec le plugin. Il déclare une section `agent` et le droit `agent` :
+
+```jsonc
+{
+  "permissions": [{ "id": "agent", "reason": "…" }],
+  "agent": {
+    "name": "Promptr",                // son nom, dans la liste des agents
+    "description": "…",              // facultatif, 100 caractères au plus
+    "prompt": "agent.md",            // son rôle (CLAUDE.md), un fichier .md du plugin
+    "model": "…", "effort": "…", "thinking": "…"   // facultatifs
+  }
+}
+```
+
+- L'agent naît dès que **tous les droits** du plugin sont accordés. Son identifiant est
+  `plugin-<id>` ; il porte un badge « Plugin » dans la liste des agents.
+- **Aucun droit** : ni commandes, ni fichiers hors de son dossier, ni web, ni autres agents. Personne
+  ne peut lui en donner, et les autres agents ne peuvent pas le solliciter.
+- Son **rôle appartient au plugin** : `prompt` est rétabli à chaque mise à jour, et ne se modifie pas
+  depuis Allkin. Son modèle et sa description restent réglables sur sa page Agent.
+- Il ne se supprime pas à la main : il part avec le plugin, à la désinstallation.
+
+L'interface du plugin lui confie une tâche et reçoit le texte complet de sa réponse :
+
+```js
+const text = await Allkin.core.runPluginAgent("mon-plugin", "TÂCHE : …");
+```
+
+(ou `POST /api/plugins/<id>/agent/run` avec `{ "prompt": "…" }` → `{ "text": "…" }`). Chaque tâche
+tourne dans une session jetable, invisible et sans notification ; personne n'y valide de commande
+ni ne remplit de formulaire, les deux sont refusés d'office. L'attente peut durer plusieurs
+minutes (5 au plus). Le rôle de l'agent doit donc dire exactement quoi rendre, et sous quelle forme
+— des balises (`<prompt>…</prompt>`) se relisent bien mieux qu'un texte libre. Voir `promptr`.
 
 ## Ce que reçoit le service
 

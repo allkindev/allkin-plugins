@@ -9,7 +9,8 @@ Trois sortes de plugins, combinables :
 |-------|-----------|------------------------|
 | **Service** — un programme qui tourne en continu | `service` | `wetty` |
 | **Page web** — le service sert une page, affichée dans un onglet d'Allkin | `service` + `web` | `wetty` |
-| **Interface** — des morceaux de l'interface d'Allkin elle-même | `ui` | `file-explorer`, `text-editor`, `markdown-editor` |
+| **Interface** — des morceaux de l'interface d'Allkin elle-même | `ui` | `file-explorer`, `text-editor`, `markdown-editor`, `promptr` |
+| **Agent** — un agent dédié, auquel le plugin confie ses tâches | `agent` | `promptr` |
 
 ---
 
@@ -242,3 +243,17 @@ git add -A && git commit && git push
 - **Tester avec et sans chaque plugin dont on dépend**, puis recharger la page : les onglets
   restaurés d'une nature disparue doivent être écartés sans erreur.
 - Changer `ui.apiVersion` n'est à faire que si Allkin a changé la version de son API.
+- **Une app** (une entrée du menu Allkin) se déclare avec `Allkin.registerApp` : ne pas s'insérer
+  soi-même dans la page, dont les éléments changent d'une version à l'autre.
+
+### Agent
+
+- **Écrire le rôle pour un programme, pas pour un humain.** L'agent reçoit des tâches de
+  l'interface du plugin : son `agent.md` dit, tâche par tâche, quoi rendre et entre quelles balises.
+  Côté interface, une réponse sans la balise attendue est une erreur à afficher — c'est souvent le
+  fournisseur IA qui a échoué (clé invalide, quota) et rendu son message comme du texte.
+- **Donner le format dans la tâche** quand l'interface le connaît mieux que le rôle : Promptr
+  génère la description d'un plan depuis `blocks.js` et l'envoie avec chaque analyse, pour que
+  l'interface et l'agent parlent toujours du même format.
+- **Prévoir l'attente** : une tâche prend de quelques secondes à plusieurs minutes. Montrer qu'on
+  travaille, et ne rien bloquer d'autre.

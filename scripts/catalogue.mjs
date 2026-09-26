@@ -26,7 +26,7 @@ const CATALOGUE_PATH = join(ROOT, "catalogue.json");
 const ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 const SEGMENT_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
-const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface"]);
+const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface", "agent"]);
 const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
 const MAX_FILES = 500;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -64,6 +64,13 @@ function readPlugin(id) {
   if (typeof m.description !== "string" || !m.description.trim()) fail(id, "description est obligatoire.");
   if (m.web && !m.service) fail(id, "web suppose un service.");
   if (m.service && (typeof m.service.command !== "string" || !m.service.command)) fail(id, "service.command est obligatoire.");
+  if (m.agent) {
+    if (typeof m.agent.name !== "string" || !m.agent.name.trim()) fail(id, "agent.name est obligatoire.");
+    if (typeof m.agent.prompt !== "string" || !m.agent.prompt.endsWith(".md")) fail(id, "agent.prompt doit désigner un fichier .md du plugin.");
+    else if (!existsSync(join(dir, m.agent.prompt))) fail(id, `agent.prompt : ${m.agent.prompt} est absent.`);
+    const declared = (Array.isArray(m.permissions) ? m.permissions : []).some((p) => (typeof p === "string" ? p : p?.id) === "agent");
+    if (!declared) fail(id, "un plugin qui déclare « agent » doit demander le droit « agent ».");
+  }
 
   const permissions = (Array.isArray(m.permissions) ? m.permissions : []).map((p) => (typeof p === "string" ? { id: p } : p));
   for (const p of permissions) {
@@ -96,6 +103,7 @@ function readPlugin(id) {
     service: Boolean(m.service),
     web: Boolean(m.web),
     ui: Boolean(m.ui),
+    ...(m.agent ? { agent: { name: m.agent.name } } : {}),
     ...(icon ? { icon } : {}),
     files,
   };

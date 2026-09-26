@@ -1,9 +1,9 @@
 "use strict";
 /* ============================================================================
-   PromptCraft — écriture et relecture d'archives .zip, sans dépendance.
+   Promptr — écriture et relecture d'archives .zip, sans dépendance.
    ----------------------------------------------------------------------------
    Un .allkin n'est qu'un zip : agent.json, CLAUDE.md, LISEZMOI.txt et le
-   projet PromptCraft. Quelques kilo-octets de texte — la compression n'y
+   projet Promptr. Quelques kilo-octets de texte — la compression n'y
    gagnerait presque rien, et la méthode « stored » (0) tient en cinquante
    lignes là où deflate demanderait une bibliothèque. adm-zip, côté serveur,
    lit ces archives comme n'importe quelle autre.
@@ -137,5 +137,5 @@ function readZip(buffer) {
   return entries;
 }
 
-window.PromptCraftZip = Object.freeze({ createZip, readZip });
+window.PromptrZip = Object.freeze({ createZip, readZip });
 })();

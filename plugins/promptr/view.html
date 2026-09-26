@@ -1,0 +1,161 @@
+<template data-slot="views">
+    <!-- Promptr : l'atelier de prompts. Un onglet global (agentId null), trois
+         volets — le plan (des blocs), le prompt (le CLAUDE.md que l'agent de
+         Promptr en écrit), l'essai (une conversation avec un agent de test).
+         Les blocs, leurs fenêtres de réglage et les listes sont construits en
+         JS (blocks.js, app.js) : ce fichier ne porte que la charpente. -->
+    <div class="pr-view hidden" id="pr-view">
+      <header class="pr-head">
+        <span class="pr-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="5" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/><path d="M7 8v8"/><path d="M11 12.5h2"/></svg>
+        </span>
+        <div class="pr-head-text">
+          <h2 class="pr-title" id="pr-title">Promptr</h2>
+          <span class="pr-subtitle" id="pr-subtitle">L'atelier de prompts</span>
+        </div>
+        <nav class="pr-tabs" role="tablist" aria-label="Volets de Promptr">
+          <button type="button" class="pr-tab" role="tab" data-pr-tab="plan">Plan</button>
+          <button type="button" class="pr-tab" role="tab" data-pr-tab="prompt">Prompt<span class="pr-tab-dot hidden" id="pr-prompt-dot" title="Le plan a changé depuis la génération"></span></button>
+          <button type="button" class="pr-tab" role="tab" data-pr-tab="test">Essayer</button>
+        </nav>
+        <div class="pr-head-actions">
+          <button type="button" class="pr-btn pr-btn-quiet" id="pr-open-btn" title="Ouvrir un prompt existant ou un plan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            <span>Ouvrir</span>
+          </button>
+          <button type="button" class="pr-btn pr-btn-quiet" id="pr-new-btn" title="Repartir d'un plan vierge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Nouveau</span>
+          </button>
+          <button type="button" class="pr-btn pr-btn-quiet" id="pr-download-btn" title="Télécharger l'agent au format .allkin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            <span>.allkin</span>
+          </button>
+          <button type="button" class="pr-btn pr-btn-primary" id="pr-deploy-btn" title="Créer cet agent dans Allkin">
+            <span>Déployer</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ---- Volet Plan ---- -->
+      <section class="pr-pane" id="pr-pane-plan" role="tabpanel">
+        <!-- Point de départ, tant qu'aucun plan n'est ouvert. -->
+        <div class="pr-start hidden" id="pr-start">
+          <h3 class="pr-start-title">Par quoi commencer ?</h3>
+          <div class="pr-start-choices">
+            <button type="button" class="pr-start-card" id="pr-start-open">
+              <span class="pr-start-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span>
+              <strong>Ouvrir un prompt existant</strong>
+              <span>Collez un prompt, choisissez un fichier ou un agent installé : Promptr le dessine en blocs.</span>
+            </button>
+            <button type="button" class="pr-start-card" id="pr-start-blank">
+              <span class="pr-start-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="5" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/><path d="M7 8v8"/><path d="M11 12.5h2"/></svg></span>
+              <strong>Partir d'un plan vierge</strong>
+              <span>Ajoutez vos blocs un à un, puis laissez Promptr en écrire le prompt.</span>
+            </button>
+          </div>
+        </div>
+        <!-- Le plan : l'identité de l'agent, puis ses blocs, reliés en colonne. -->
+        <div class="pr-canvas hidden" id="pr-canvas">
+          <div class="pr-identity">
+            <input type="text" class="pr-identity-name" id="pr-name" maxlength="60" placeholder="Nom de l'agent" autocomplete="off" />
+            <input type="text" class="pr-identity-desc" id="pr-description" maxlength="100" placeholder="Une phrase qui le décrit (100 caractères au plus)" autocomplete="off" />
+          </div>
+          <ol class="pr-flow" id="pr-flow"></ol>
+          <div class="pr-canvas-foot">
+            <button type="button" class="pr-btn pr-btn-primary pr-generate" id="pr-generate-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
+              <span>Générer le prompt</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- Volet Prompt ---- -->
+      <section class="pr-pane hidden" id="pr-pane-prompt" role="tabpanel">
+        <div class="pr-prompt-bar">
+          <span class="pr-status" id="pr-prompt-status"></span>
+          <span class="pr-grow"></span>
+          <div class="pr-seg" role="group" aria-label="Affichage">
+            <button type="button" class="pr-seg-btn" data-pr-mode="preview">Aperçu</button>
+            <button type="button" class="pr-seg-btn" data-pr-mode="source">Source</button>
+          </div>
+          <button type="button" class="pr-icon-btn" id="pr-copy-btn" title="Copier le prompt" aria-label="Copier le prompt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+          </button>
+        </div>
+        <div class="pr-prompt-empty hidden" id="pr-prompt-empty">
+          <strong>Pas encore de prompt</strong>
+          <span>Dessinez votre plan, puis « Générer le prompt » : l'agent de Promptr l'écrit pour vous.</span>
+        </div>
+        <textarea class="pr-prompt-source hidden" id="pr-prompt-source" spellcheck="false" aria-label="Prompt de l'agent (CLAUDE.md)"></textarea>
+        <div class="pr-prompt-preview md-body hidden" id="pr-prompt-preview"></div>
+        <div class="pr-prompt-actions">
+          <button type="button" class="pr-btn pr-btn-quiet" id="pr-to-plan-btn" title="L'agent de Promptr relit ce prompt et en refait le plan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0115.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+            <span>Refaire le plan depuis ce prompt</span>
+          </button>
+          <span class="pr-grow"></span>
+          <button type="button" class="pr-btn pr-btn-primary" id="pr-regenerate-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
+            <span id="pr-regenerate-label">Générer depuis le plan</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---- Volet Essayer ---- -->
+      <section class="pr-pane pr-pane-test hidden" id="pr-pane-test" role="tabpanel">
+        <div class="pr-test-bar">
+          <span class="pr-test-status">
+            <span class="pr-dot" id="pr-test-dot"></span>
+            <span id="pr-test-status-text">Banc d'essai prêt</span>
+          </span>
+          <span class="pr-test-stale hidden" id="pr-test-stale">Le prompt a changé depuis le début de cette conversation.</span>
+          <span class="pr-grow"></span>
+          <button type="button" class="pr-btn pr-btn-quiet" id="pr-test-restart" title="Nouvelle conversation, avec le prompt actuel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>Nouvelle conversation</span>
+          </button>
+        </div>
+        <div class="pr-test-log" id="pr-test-log" role="log" aria-live="polite"></div>
+        <div class="pr-test-probes" id="pr-test-probes"></div>
+        <form class="pr-test-compose" id="pr-test-compose">
+          <textarea id="pr-test-input" rows="2" placeholder="Écrivez à votre agent…" aria-label="Message de test"></textarea>
+          <button type="submit" class="pr-send" id="pr-test-send" title="Envoyer (Entrée)" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg>
+          </button>
+          <button type="button" class="pr-send pr-stop hidden" id="pr-test-stop" title="Interrompre" aria-label="Interrompre">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+          </button>
+        </form>
+        <p class="pr-test-note">Le banc d'essai est un vrai agent Allkin, <strong>sans aucun droit</strong> : il éprouve la personnalité, le savoir-faire et les consignes, pas les outils.</p>
+      </section>
+
+      <!-- Pendant qu'une tâche est confiée à l'agent de Promptr. -->
+      <div class="pr-busy hidden" id="pr-busy" role="status" aria-live="polite">
+        <div class="pr-busy-card">
+          <span class="pr-spinner" aria-hidden="true"></span>
+          <strong id="pr-busy-title">L'agent de Promptr travaille…</strong>
+          <span class="pr-busy-time" id="pr-busy-time"></span>
+        </div>
+      </div>
+    </div>
+</template>
+
+<template data-slot="body">
+  <!-- La fenêtre de Promptr : réglage d'un bloc, choix d'un bloc à ajouter,
+       ouverture d'un prompt, déploiement. Une seule, remplie par app.js. -->
+  <div class="pr-modal-backdrop hidden" id="pr-modal">
+    <div class="pr-modal" role="dialog" aria-modal="true" aria-labelledby="pr-modal-title">
+      <header class="pr-modal-head">
+        <span class="pr-modal-icon" id="pr-modal-icon" aria-hidden="true"></span>
+        <h2 class="pr-modal-title" id="pr-modal-title"></h2>
+        <button type="button" class="pr-icon-btn" id="pr-modal-close" title="Fermer" aria-label="Fermer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>
+        </button>
+      </header>
+      <div class="pr-modal-body" id="pr-modal-body"></div>
+      <footer class="pr-modal-foot" id="pr-modal-foot"></footer>
+    </div>
+  </div>
+</template>
