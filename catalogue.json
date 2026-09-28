@@ -4,7 +4,7 @@
     {
       "id": "file-explorer",
       "name": "Explorateur de fichiers",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
       "author": "Allkin",
       "permissions": [
@@ -30,8 +30,8 @@
         },
         {
           "path": "explorer.js",
-          "size": 74473,
-          "sha256": "36f19e9a83705ebe15c85926b2eefa6d5201fe857ba4c20f12f48861b3e706d0"
+          "size": 74715,
+          "sha256": "1f7e6791f34368aa617690f623f3d475e78959d264c4cf5f165be66b70faa95d"
         },
         {
           "path": "icon.svg",
@@ -41,7 +41,7 @@
         {
           "path": "plugin.json",
           "size": 520,
-          "sha256": "369b33ee9c0da83ca9882c4f709cd089d9a180ceb9b8ae60fd6c35f364b2422b"
+          "sha256": "a6336edbdda98873bf23eded9fa7c46cb21942e6c858beae2ae55cded851267c"
         },
         {
           "path": "view.html",
@@ -178,8 +178,8 @@
     {
       "id": "text-editor",
       "name": "Éditeur de texte",
-      "version": "1.0.1",
-      "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
+      "version": "1.0.2",
+      "description": "Ouvre les fichiers des agents dans un onglet : éditeur de code (80 langages colorés, numéros de ligne, recherche/remplacement, commentaires, indentation), aperçu markdown, images et PDF.",
       "author": "Allkin",
       "permissions": [
         {
@@ -194,18 +194,23 @@
       "files": [
         {
           "path": "README.md",
-          "size": 1057,
-          "sha256": "e52b852e3c7e26f41ff33166fb05568c6665ee165db1ddea94c8991f83094aa7"
+          "size": 2568,
+          "sha256": "e88423a529f8661123988c33fff4dd528a4dff8934298916bfbb0994c249132a"
         },
         {
           "path": "editor.css",
-          "size": 6756,
-          "sha256": "59fd1e210b5a109723d6df4d3fc23ceb20c45890a8a502b6bb736089278d8cd6"
+          "size": 11480,
+          "sha256": "e3991556ec01b1ac2d49bb5faeb1f1e2458c4d46ce08e0d2a9fba40659793eaa"
         },
         {
           "path": "editor.js",
-          "size": 21634,
-          "sha256": "5efac63c48921999d741f3c9ce67f9038d235833705f535b0633fcec0bb9e127"
+          "size": 43500,
+          "sha256": "e444ffdbec4112b3c5d0bfede5b6dbab93b450744941fd6fa3afb2c97bade984"
+        },
+        {
+          "path": "hljs.js",
+          "size": 271318,
+          "sha256": "05d0e20e5de559b9b443010c483fa2491ef0b1c468a1eeb74c3835f9ef3db2d2"
         },
         {
           "path": "icon.svg",
@@ -214,13 +219,13 @@
         },
         {
           "path": "plugin.json",
-          "size": 478,
-          "sha256": "4dc91442e4e1f5d6cc72ae30ae8c5ca5ce22d88f7513cc136ce417a3aa281a41"
+          "size": 657,
+          "sha256": "b6bb4907c2360e685b164ec8e1b75e83801dd935da91dbe207c831bd280baf1b"
         },
         {
           "path": "view.html",
-          "size": 4331,
-          "sha256": "85a8ec8e5475773e84a19970b5805e0401f52e721e5374418084c15a98ca9410"
+          "size": 9388,
+          "sha256": "2d13505bb5013c6a140c0745e0a4f25aafa4db69f229775ad62af665eaacce92"
         }
       ]
     },

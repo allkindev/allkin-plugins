@@ -1093,8 +1093,11 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
        et c'est sur cette lecture que repose la décision. La langue se déduit du
        NOM — highlight.js est indexé sur « sh », pas sur « bash », et lui passer
        l'extension brute rendrait du texte nu sans que rien ne le signale. */
-    const langue = window.languageForFilename?.(nom);
-    source.innerHTML = langue && window.highlightCode ? window.highlightCode(texte, langue) : "";
+    // Le coloriseur de l'éditeur de texte (80 langages) s'il est là, celui
+    // du cœur sinon.
+    const hl = window.Allkin.capability("code-highlight");
+    const langue = hl ? hl.languageForFilename(nom) : window.languageForFilename?.(nom);
+    source.innerHTML = langue && langue !== "plaintext" ? (hl ? hl.highlight(texte, langue) : window.highlightCode?.(texte, langue) ?? "") : "";
     if (!source.innerHTML) source.textContent = texte;
     bouton.disabled = false;
   } catch (err) {

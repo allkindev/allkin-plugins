@@ -1,21 +1,43 @@
 <template data-slot="views">
     <!-- Onglet fichier : un fichier de data/ ouvert plein écran. Le markdown
-         s'affiche formaté par défaut et bascule en édition (barre d'outils +
-         enregistrement au fil de la frappe) ; les autres textes s'ouvrent
-         directement dans l'éditeur brut ; images et PDF en simple visionneuse. -->
+         s'affiche formaté par défaut et bascule en édition ; les autres textes
+         s'ouvrent directement dans l'éditeur de code ; images et PDF en simple
+         visionneuse. -->
     <div class="file-view hidden" id="file-view">
-      <!-- En-tête réduit à une seule ligne : le nom du fichier est déjà porté
-           par son onglet, le répéter ne ferait que manger de la hauteur. Barre
-           de balises à gauche (construite en JS depuis MD_TOOLS), état
-           d'enregistrement et bascule d'aperçu à droite. -->
+      <!-- En-tête sur une seule ligne : le nom du fichier est déjà dans son
+           onglet. Barre de balises markdown à gauche, ou barre de code ;
+           état d'enregistrement et bascule d'aperçu à droite. -->
       <div class="file-view-header">
         <div class="md-toolbar hidden" id="md-toolbar"></div>
-        <!-- Chemin complet du fichier, visible en aperçu seulement : en édition
-             l'attention doit rester sur le texte, pas sur son emplacement. -->
+        <!-- Chemin complet du fichier, visible en aperçu seulement. -->
         <div class="file-path hidden" id="file-path-wrap">
           <span class="file-path-text" id="file-path-text"></span>
           <button type="button" class="ghost file-float-btn" id="file-path-copy-btn" title="Copier le chemin" aria-label="Copier le chemin">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+          </button>
+        </div>
+        <!-- Barre de l'éditeur de code : le langage (détecté, ou choisi à la
+             main), puis les outils. Chaque outil a son raccourci, dit dans
+             l'infobulle. -->
+        <div class="code-toolbar hidden" id="code-toolbar">
+          <select class="code-lang" id="code-lang" title="Langage de coloration" aria-label="Langage de coloration"></select>
+          <button type="button" class="ghost code-tool" id="code-find-btn" title="Rechercher et remplacer (Ctrl+F)" aria-label="Rechercher et remplacer">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+          </button>
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-goto-btn" title="Aller à la ligne (Ctrl+G)" aria-label="Aller à la ligne">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h6M4 18h10"/><path d="M15 12h5m0 0l-3-3m3 3l-3 3"/></svg>
+          </button>
+          <button type="button" class="ghost code-tool" id="code-comment-btn" title="Commenter / décommenter (Ctrl+/)" aria-label="Commenter ou décommenter">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5"/><path d="M16 7l5 5-5 5"/><path d="M14 4l-4 16"/></svg>
+          </button>
+          <button type="button" class="ghost code-tool" id="code-wrap-btn" title="Retour à la ligne automatique" aria-label="Retour à la ligne automatique" aria-pressed="false">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h12a3 3 0 010 6h-3"/><path d="M4 18h5"/><path d="M15 15l-2 3 2 3"/></svg>
+          </button>
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-minus-btn" title="Réduire la police" aria-label="Réduire la police">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L9.5 5l5.5 13"/><path d="M6 14h7"/><path d="M16 12h5"/></svg>
+          </button>
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-plus-btn" title="Agrandir la police" aria-label="Agrandir la police">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L9.5 5l5.5 13"/><path d="M6 14h7"/><path d="M16 12h5M18.5 9.5v5"/></svg>
           </button>
         </div>
         <span class="file-save-state" id="file-save-state"></span>
@@ -24,9 +46,30 @@
         </button>
         <button type="button" class="secondary file-mode-btn hidden" id="file-mode-btn">Éditer</button>
       </div>
+      <!-- Rechercher / remplacer : une barre sous l'en-tête, pas une fenêtre —
+           on cherche en regardant le texte. -->
+      <div class="code-find hidden" id="code-find" role="search">
+        <label class="code-find-field">
+          <input type="text" id="code-find-input" placeholder="Rechercher" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Rechercher" />
+          <span class="code-find-count" id="code-find-count"></span>
+        </label>
+        <button type="button" class="ghost code-tool" id="code-find-case" title="Respecter la casse" aria-label="Respecter la casse" aria-pressed="false"><span class="code-find-case-label">Aa</span></button>
+        <button type="button" class="ghost code-tool" id="code-find-prev" title="Précédent (Maj+Entrée)" aria-label="Occurrence précédente">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+        </button>
+        <button type="button" class="ghost code-tool" id="code-find-next" title="Suivant (Entrée)" aria-label="Occurrence suivante">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <label class="code-find-field code-find-replace">
+          <input type="text" id="code-replace-input" placeholder="Remplacer par" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Remplacer par" />
+        </label>
+        <button type="button" class="secondary code-find-act" id="code-replace-one">Remplacer</button>
+        <button type="button" class="secondary code-find-act" id="code-replace-all">Tout</button>
+        <button type="button" class="ghost code-tool" id="code-find-close" title="Fermer (Échap)" aria-label="Fermer la recherche">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>
+        </button>
+      </div>
       <div class="file-view-body" id="file-view-body">
-        <!-- Posés au-dessus de la zone de lecture, donc insensibles à son
-             défilement : ils restent atteignables où qu'on en soit. -->
         <div class="file-float-actions" id="file-float-actions">
           <button type="button" class="ghost file-float-btn" id="file-copy-btn" title="Copier le contenu" aria-label="Copier le contenu">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
@@ -36,19 +79,27 @@
           </button>
         </div>
         <div class="file-preview md-body hidden" id="file-preview"></div>
-        <!-- Édition du markdown : le document reste rendu, bloc par bloc, et
-             seul le bloc sur lequel on travaille montre sa syntaxe. Construit
-             en JS (app.js), à partir du découpage de markdown.js. -->
+        <!-- Édition du markdown : l'éditeur vivant du plugin Éditeur markdown. -->
         <div class="file-live md-body hidden" id="file-live"></div>
-        <!-- Édition brute : fichiers texte sans rendu (.txt, .json…). Calque de
-             coloration (highlight.js) sous une zone de saisie rendue
-             transparente quand le langage du fichier est reconnu — voir
-             web/highlight.js pour l'invariant qui rend ce calque possible. -->
+        <!-- Éditeur de code : numéros de ligne, calque de coloration
+             (highlight.js) sous une zone de saisie transparente. Les trois
+             partagent police, taille et interligne — voir editor.css pour
+             l'invariant qui rend ce calque possible. -->
         <div class="file-editor-wrap hidden" id="file-editor-wrap">
-          <div class="file-editor-highlight" id="file-editor-highlight" aria-hidden="true"></div>
-          <textarea class="file-editor" id="file-editor" spellcheck="false"></textarea>
+          <div class="file-editor-gutter" id="file-editor-gutter" aria-hidden="true"></div>
+          <div class="file-editor-area">
+            <div class="file-editor-highlight" id="file-editor-highlight" aria-hidden="true"></div>
+            <textarea class="file-editor" id="file-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+          </div>
         </div>
         <div class="file-media hidden" id="file-media"></div>
+      </div>
+      <!-- Barre d'état de l'éditeur de code : où l'on est, ce qu'on édite. -->
+      <div class="code-status hidden" id="code-status">
+        <span id="code-status-pos">Ln 1, Col 1</span>
+        <span id="code-status-lines"></span>
+        <span id="code-status-indent"></span>
+        <span id="code-status-lang"></span>
       </div>
       <p id="file-error" class="error hidden"></p>
     </div>

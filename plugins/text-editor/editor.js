@@ -2,14 +2,21 @@
 /* ============================================================================
    Plugin « Éditeur de texte » — l'onglet fichier d'Allkin.
    ----------------------------------------------------------------------------
-   Déclare la nature d'onglet « file » (un fichier du data/ d'un agent) et la
-   capacité « text-editor » :
+   Déclare la nature d'onglet « file » (un fichier du data/ d'un agent) et les
+   capacités :
 
      Allkin.capability("text-editor").openFile(agentId, path, name)
      Allkin.capability("text-editor").canOpen(name)
+     Allkin.capability("code-highlight").highlight(text, language) -> HTML
+     Allkin.capability("code-highlight").languageForFilename(name)
 
-   dont se sert l'explorateur de fichiers. Les fichiers .md passent par le
-   plugin « Éditeur markdown » quand il est là, en saisie brute sinon.
+   Le markdown passe par le plugin « Éditeur markdown » quand il est là. Tout
+   le reste du texte s'ouvre dans l'ÉDITEUR DE CODE : numéros de ligne,
+   coloration highlight.js (hljs.js, 80 langages, bundle construit depuis
+   node_modules — voir scripts/hljs-entry.mjs), langage détecté par le nom du
+   fichier ou son contenu, et corrigeable à la main ; recherche/remplacement,
+   aller à la ligne, commentaires, indentation, retour à la ligne, taille de
+   police, enregistrement au fil de la frappe.
    ========================================================================== */
 (() => {
 const {
@@ -24,45 +31,191 @@ const {
   returnToActiveTab,
   state,
 } = window.Allkin.core;
+const core = window.Allkin.core;
+const hljs = window.AllkinHljs ?? null;
+const bulle = (message, kind = "ok") => core.toast?.(message, kind);
 
-// ---- Onglet fichier : lecture et édition ----
-// Un fichier de data/ ouvert plein écran dans son onglet. Le markdown s'affiche
-// formaté par défaut, avec un bouton qui bascule en édition et découvre la
-// barre des balises ; les autres fichiers texte s'ouvrent directement dans
-// l'éditeur brut ; images et PDF en simple visionneuse. Rien à valider : le
-// contenu est enregistré au fil de la frappe.
-
-/* Ce qui s'ouvre autrement que comme du texte. L'ordre compte : un .svg est
-   d'abord une image, même si le coloriseur saurait l'habiller. */
-const FILE_EXT = {
-  markdown: ["md", "markdown", "mdown", "mkd"],
-  image: ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "ico"],
-  pdf: ["pdf"],
-  /* Textes que le coloriseur ne connaît pas — et qu'il n'a aucune raison de
-     connaître : il n'y a rien à colorier dans un .log. Tout le RESTE du texte
-     est déduit de highlight.js (voir fileKind). */
-  text: ["txt", "csv", "tsv", "log", "text", "me", "readme"],
+/* ---- Langages -------------------------------------------------------------
+   Les noms sont ceux de highlight.js ; les libellés, ceux qu'on lit dans le
+   sélecteur. Un langage du bundle sans libellé ici prend celui de hljs. */
+const LANG_LABELS = {
+  javascript: "JavaScript", typescript: "TypeScript", json: "JSON", css: "CSS", scss: "SCSS", less: "Less",
+  xml: "HTML / XML", markdown: "Markdown", yaml: "YAML", bash: "Shell (bash)", shell: "Session shell",
+  python: "Python", php: "PHP", "php-template": "PHP (gabarit)", ini: "INI / TOML", sql: "SQL", pgsql: "PostgreSQL",
+  c: "C", cpp: "C++", csharp: "C#", java: "Java", kotlin: "Kotlin", swift: "Swift", go: "Go", rust: "Rust",
+  ruby: "Ruby", perl: "Perl", lua: "Lua", dart: "Dart", scala: "Scala", haskell: "Haskell", elixir: "Elixir",
+  erlang: "Erlang", r: "R", julia: "Julia", matlab: "MATLAB", powershell: "PowerShell", dockerfile: "Dockerfile",
+  nginx: "Nginx", apache: "Apache", makefile: "Makefile", cmake: "CMake", diff: "Diff / patch", http: "HTTP",
+  protobuf: "Protocol Buffers", latex: "LaTeX", vim: "Vim script", plaintext: "Texte brut", properties: "Properties",
+  objectivec: "Objective-C", groovy: "Groovy", gradle: "Gradle", awk: "AWK", vbscript: "VBScript", x86asm: "Assembleur x86",
+  arduino: "Arduino", django: "Django", handlebars: "Handlebars", twig: "Twig", coffeescript: "CoffeeScript",
+  clojure: "Clojure", lisp: "Lisp", scheme: "Scheme", ocaml: "OCaml", fsharp: "F#", elm: "Elm", crystal: "Crystal",
+  nim: "Nim", d: "D", fortran: "Fortran", basic: "BASIC", vbnet: "VB.NET", delphi: "Delphi / Pascal", prolog: "Prolog",
+  haxe: "Haxe", tcl: "Tcl", smalltalk: "Smalltalk", dns: "Zone DNS", ldif: "LDIF", accesslog: "Journal d'accès",
 };
 
-/**
- * De quelle nature est ce fichier — ce qui décide s'il s'ouvre, et comment.
- *
- * Le texte se reconnaît à DEUX sources : la courte liste ci-dessus, et tout ce
- * que le coloriseur sait habiller. Il y avait avant une seconde liste
- * d'extensions ici, tenue à la main ; elle avait dérivé de celle de
- * highlight.js — vingt-deux extensions étaient colorées mais refusées à
- * l'ouverture, dont `.php`, `.sql`, `.toml` et `.env`. Un fichier PHP
- * répondait « aperçu non disponible » alors que tout était prêt pour l'afficher.
- *
- * Déduire plutôt que redire : ajouter un langage au coloriseur rend désormais
- * ses fichiers ouvrables, sans que personne ait à y penser.
- */
+/* Noms de fichiers sans extension parlante. */
+const NAME_LANGUAGE = {
+  dockerfile: "dockerfile", containerfile: "dockerfile", makefile: "makefile", gnumakefile: "makefile",
+  "cmakelists.txt": "cmake", ".env": "bash", ".bashrc": "bash", ".zshrc": "bash", ".profile": "bash",
+  ".bash_profile": "bash", "nginx.conf": "nginx", ".htaccess": "apache", ".gitignore": "plaintext",
+  ".gitconfig": "ini", ".editorconfig": "ini", ".npmrc": "ini", "gemfile": "ruby", "rakefile": "ruby",
+  "vagrantfile": "ruby", "jenkinsfile": "groovy", "caddyfile": "plaintext", "readme": "markdown", "license": "plaintext",
+};
+
+/** Le nom canonique d'un langage ou d'un alias (« rs » → « rust »), ou null. */
+function canonicalLanguage(alias) {
+  if (!hljs || !alias) return null;
+  const def = hljs.getLanguage(String(alias).toLowerCase());
+  if (!def) return null;
+  return hljs.listLanguages().find((id) => hljs.getLanguage(id) === def) ?? null;
+}
+
+function langLabel(id) {
+  return LANG_LABELS[id] ?? hljs?.getLanguage(id)?.name ?? id;
+}
+
+let languagesCache = null;
+function allLanguages() {
+  if (!hljs) return [];
+  languagesCache ??= hljs
+    .listLanguages()
+    .filter((id) => id !== "plaintext")
+    .map((id) => ({ id, label: langLabel(id) }))
+    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+  return languagesCache;
+}
+
+/** Langage déduit du NOM du fichier, ou null. */
+function languageForFilename(filename) {
+  const name = String(filename ?? "").split("/").pop().toLowerCase();
+  if (NAME_LANGUAGE[name]) return NAME_LANGUAGE[name];
+  const ext = name.includes(".") ? name.split(".").pop() : "";
+  if (!ext) return null;
+  return canonicalLanguage(ext);
+}
+
+/** Langage deviné au CONTENU, quand le nom ne dit rien. Prudent : en dessous
+ *  d'une certaine confiance, mieux vaut du texte brut qu'une coloration fausse. */
+const SHEBANG = [
+  [/python/, "python"], [/\b(?:bash|sh|zsh|ksh|dash)\b/, "bash"], [/\bnode\b|\bdeno\b|\bbun\b/, "javascript"],
+  [/\bruby\b/, "ruby"], [/\bperl\b/, "perl"], [/\bphp\b/, "php"], [/\blua\b/, "lua"], [/\bpwsh|powershell\b/, "powershell"],
+  [/\bRscript\b/, "r"], [/\bjulia\b/, "julia"], [/\bawk\b/, "awk"], [/\btclsh|wish\b/, "tcl"], [/\belixir\b/, "elixir"],
+];
+
+function guessLanguage(text) {
+  if (!hljs || !text.trim()) return null;
+  // Un shebang dit tout : « #!/usr/bin/env python3 » vaut une extension.
+  const first = text.slice(0, 200).split("\n")[0];
+  if (first.startsWith("#!")) {
+    for (const [re, lang] of SHEBANG) if (re.test(first)) return lang;
+  }
+  if (/^<\?xml\b|^<!doctype html\b|^<html\b/i.test(text.trimStart())) return "xml";
+  if (/^\s*[{[]/.test(text) && /[}\]]\s*$/.test(text)) {
+    try {
+      JSON.parse(text);
+      return "json";
+    } catch {
+      // pas du JSON
+    }
+  }
+  try {
+    const r = hljs.highlightAuto(text.slice(0, 20_000));
+    return r.language && r.relevance >= 6 ? r.language : null;
+  } catch {
+    return null;
+  }
+}
+
+function highlightCode(text, language) {
+  if (!hljs || !language || language === "plaintext") return escapeHtml(text);
+  try {
+    return hljs.highlight(text, { language, ignoreIllegals: true }).value;
+  } catch {
+    return escapeHtml(text);
+  }
+}
+
+function escapeHtml(text) {
+  return String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+/* Le préfixe de commentaire de ligne, ou le couple de bloc, par langage. */
+const LINE_COMMENT = {
+  "//": ["javascript", "typescript", "c", "cpp", "csharp", "java", "kotlin", "swift", "go", "rust", "dart", "scala", "php", "groovy", "gradle", "d", "haxe", "objectivec", "arduino", "protobuf"],
+  "#": ["python", "bash", "shell", "yaml", "ruby", "perl", "r", "julia", "makefile", "dockerfile", "nginx", "ini", "properties", "powershell", "elixir", "crystal", "nim", "awk", "tcl", "cmake", "coffeescript", "apache", "plaintext"],
+  "--": ["sql", "pgsql", "lua", "haskell", "elm"],
+  "%": ["latex", "erlang", "matlab", "prolog"],
+  ";": ["lisp", "scheme", "clojure", "x86asm"],
+  '"': ["vim"],
+  "'": ["vbscript", "vbnet", "basic"],
+};
+const BLOCK_COMMENT = { css: ["/* ", " */"], scss: ["/* ", " */"], less: ["/* ", " */"], xml: ["<!-- ", " -->"], markdown: ["<!-- ", " -->"], handlebars: ["<!-- ", " -->"], twig: ["{# ", " #}"], django: ["{# ", " #}"], ocaml: ["(* ", " *)"], fsharp: ["(* ", " *)"], delphi: ["{ ", " }"], smalltalk: ['" ', ' "'] };
+
+function commentSyntax(language) {
+  for (const [prefix, langs] of Object.entries(LINE_COMMENT)) if (langs.includes(language)) return { line: prefix };
+  if (BLOCK_COMMENT[language]) return { block: BLOCK_COMMENT[language] };
+  return null;
+}
+
+/* ---- Réglages retenus sur l'appareil ---------------------------------------
+   Le langage choisi à la main et le retour à la ligne, par fichier ; la
+   taille de police, pour tous. */
+const PREFS_KEY = "allkin.textEditor.v1";
+function readPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "{}");
+    return p && typeof p === "object" ? p : {};
+  } catch {
+    return {};
+  }
+}
+function writePrefs(p) {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+  } catch {
+    // stockage indisponible : les réglages valent pour cette visite
+  }
+}
+const fileKey = (tab) => `${tab.agentId}/${tab.path}`;
+function filePref(tab) {
+  return readPrefs().files?.[fileKey(tab)] ?? {};
+}
+function setFilePref(tab, patch) {
+  const p = readPrefs();
+  p.files ??= {};
+  p.files[fileKey(tab)] = { ...p.files[fileKey(tab)], ...patch };
+  // Bornée : au-delà, les plus anciennes entrées tombent.
+  const keys = Object.keys(p.files);
+  if (keys.length > 300) for (const k of keys.slice(0, keys.length - 300)) delete p.files[k];
+  writePrefs(p);
+}
+function fontSizePref() {
+  const v = Number(readPrefs().fontSize);
+  return Number.isFinite(v) && v >= 10 && v <= 24 ? v : 14;
+}
+
+/* ---- Nature d'un fichier ---------------------------------------------------
+   Ce qui s'ouvre autrement que comme du code : le markdown (éditeur vivant),
+   les images et les PDF (visionneuse). Le reste est du texte, coloré si l'on
+   sait, brut sinon — une extension inconnue n'empêche plus d'ouvrir. Seuls
+   les binaires connus restent fermés. */
+const FILE_EXT = {
+  markdown: ["md", "markdown", "mdown", "mkd"],
+  image: ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "ico", "avif"],
+  pdf: ["pdf"],
+};
+const BINARY_EXT = new Set([
+  "zip", "tar", "gz", "tgz", "bz2", "xz", "7z", "rar", "exe", "dll", "so", "dylib", "bin", "iso", "img", "dmg",
+  "mp3", "wav", "ogg", "flac", "m4a", "mp4", "mov", "webm", "mkv", "avi", "doc", "docx", "xls", "xlsx", "ppt",
+  "pptx", "odt", "ods", "odp", "ttf", "otf", "woff", "woff2", "eot", "sqlite", "db", "pyc", "class", "jar", "wasm",
+  "heic", "psd", "ai",
+]);
+
 function fileKind(filename) {
   const ext = filename.includes(".") ? filename.split(".").pop().toLowerCase() : "";
-  for (const [kind, exts] of Object.entries(FILE_EXT)) {
-    if (exts.includes(ext)) return kind;
-  }
-  return window.languageForFilename?.(filename) ? "text" : "other";
+  for (const [kind, exts] of Object.entries(FILE_EXT)) if (exts.includes(ext)) return kind;
+  return BINARY_EXT.has(ext) ? "other" : "text";
 }
 
 function isEditableKind(kind) {
@@ -73,14 +226,13 @@ function openFileTab(agentId, path, name) {
   openTab(agentId, "file", { path, name });
 }
 
+/* ---- Affichage d'un onglet ----------------------------------------------- */
+
 async function renderFileView(tab) {
   const kind = fileKind(tab.name);
   el("file-error").classList.add("hidden");
   el("file-mode-btn").classList.toggle("hidden", kind !== "markdown");
-  // Copier n'a de sens que pour un contenu texte : une image se télécharge.
   el("file-copy-btn").classList.toggle("hidden", !isEditableKind(kind));
-  // Le markdown s'ouvre formaté ; un fichier texte n'a pas de rendu, autant
-  // l'ouvrir directement dans l'éditeur.
   if (!tab.mode) tab.mode = kind === "markdown" ? "preview" : "edit";
 
   if (!isEditableKind(kind)) {
@@ -96,22 +248,16 @@ async function renderFileView(tab) {
       const res = await fetch(dataFileUrl(tab.agentId, tab.path, false));
       if (!res.ok) throw new Error(`Erreur ${res.status}`);
       const content = await res.text();
-      // L'onglet a pu changer pendant le chargement : ne rien écrire dans une
-      // vue qui affiche désormais un autre fichier.
-      if (activeTab() !== tab) {
-        tab.content = content;
-        tab.loaded = true;
-        return;
-      }
       tab.content = content;
       tab.loaded = true;
+      // L'onglet a pu changer pendant le chargement.
+      if (activeTab() !== tab) return;
     } catch (err) {
       showFileError(`Impossible de charger le fichier : ${err.message}`);
       el("file-preview").textContent = "";
       return;
     }
   }
-
   applyFileMode(tab);
 }
 
@@ -119,11 +265,10 @@ function renderFileMedia(tab, kind) {
   const mediaEl = el("file-media");
   mediaEl.innerHTML = "";
   mediaEl.classList.remove("hidden");
-  el("file-preview").classList.add("hidden");
-  el("file-editor-wrap").classList.add("hidden");
-  el("md-toolbar").classList.add("hidden");
-  el("file-path-wrap").classList.add("hidden");
-  el("file-fullscreen-btn").classList.add("hidden");
+  for (const id of ["file-preview", "file-editor-wrap", "md-toolbar", "file-path-wrap", "file-fullscreen-btn", "code-toolbar", "code-find", "code-status"]) {
+    el(id).classList.add("hidden");
+  }
+  el("file-view").classList.remove("is-code");
   el("file-save-state").textContent = "";
 
   const fileUrl = dataFileUrl(tab.agentId, tab.path, false);
@@ -149,25 +294,20 @@ function renderFileMedia(tab, kind) {
 function applyFileMode(tab) {
   const editing = tab.mode === "edit";
   const kind = fileKind(tab.name);
-  // Le markdown s'édite dans le rendu lui-même (éditeur vivant) ; les autres
-  // textes n'ont pas de rendu à préserver et gardent la zone de saisie brute.
-  // Sans le plugin d'éditeur markdown, un .md s'édite comme n'importe quel texte.
   const live = editing && kind === "markdown" && Boolean(window.Allkin.capability("markdown-editor"));
-  // La saisie brute ne colore que les langages que highlight.js reconnaît :
-  // un fichier .txt ou .log garde son apparence pleine, sans calque transparent.
-  const highlightable = editing && !live && codeLayer.supported(tab.name);
+  const code = editing && !live;
 
   el("file-media").classList.add("hidden");
   el("md-toolbar").classList.toggle("hidden", !live);
   el("file-live").classList.toggle("hidden", !live);
-  el("file-editor-wrap").classList.toggle("hidden", !editing || live);
-  el("file-editor-wrap").classList.toggle("has-highlight", highlightable);
+  el("file-editor-wrap").classList.toggle("hidden", !code);
   el("file-preview").classList.toggle("hidden", editing);
   el("file-mode-btn").textContent = editing ? "Aperçu" : "Éditer";
+  el("code-toolbar").classList.toggle("hidden", !code);
+  el("code-status").classList.toggle("hidden", !code);
+  el("file-view").classList.toggle("is-code", code);
+  if (!code) closeFind();
 
-  // Le chemin complet n'a d'intérêt qu'en aperçu ; le plein écran, qu'en
-  // édition. Quitter l'édition referme un plein écran resté ouvert — sans
-  // quoi le bouton qui permettrait d'en sortir aurait disparu avec lui.
   el("file-path-wrap").classList.toggle("hidden", editing);
   if (!editing) {
     el("file-path-text").textContent = tab.path;
@@ -176,44 +316,27 @@ function applyFileMode(tab) {
   el("file-fullscreen-btn").classList.toggle("hidden", !editing);
   if (!editing) setFileFullscreen(false);
 
-  if (live) {
-    mountFileLiveEditor(tab);
-  } else {
-    unmountFileLiveEditor();
-  }
+  if (live) mountFileLiveEditor(tab);
+  else unmountFileLiveEditor();
 
   if (live) {
-    // rien de plus : mountFileLiveEditor a déjà peint le document
-  } else if (editing) {
-    el("file-editor").value = tab.content;
-    if (highlightable) renderEditorHighlight(tab);
+    // mountFileLiveEditor a déjà peint le document
+  } else if (code) {
+    mountCodeEditor(tab);
   } else {
-    // `agentFiles` : les images du dossier de l'agent s'affichent dans l'aperçu,
-    // comme dans l'éditeur — sans lui, celles qu'on vient d'ajouter resteraient
-    // du texte.
     el("file-preview").innerHTML = window.renderMarkdown ? window.renderMarkdown(tab.content, { agentFiles: tab.agentId }) : "";
   }
   renderFileSaveState(tab);
   applyScroll();
 }
 
-/* ---- L'éditeur vivant, branché sur l'onglet fichier ----
-   Une seule instance à la fois : un seul fichier est affiché. Elle est
-   détruite dès qu'on quitte l'édition markdown, ce qui libère sa pile
-   d'annulation et son écouteur de sélection. */
+/* ---- L'éditeur vivant (markdown) ----------------------------------------- */
 
 let fileLiveEditor = null;
 let fileLiveEditorTabId = null;
 
-/* ---- Images et fichiers ajoutés à un document markdown ----
-   Ils sont rangés à côté du document, sous images/ ou fichiers/. Le chemin
-   écrit dans le markdown part de la racine de data/ : c'est la convention des
-   messages d'agent (mdAgentImageSrc, dans markdown.js), si bien que le même
-   `![…](…)` s'affiche dans l'éditeur, dans l'aperçu et dans une conversation. */
-
 const RASTER = /\.(png|jpe?g|gif|webp|avif|bmp|ico)$/i;
 
-/** Un nom que le rendu des messages acceptera : sans espace ni signe à échapper. */
 function safeUploadName(name) {
   const dot = name.lastIndexOf(".");
   const clean = (part) => part.normalize("NFC").replace(/[^\p{L}\p{N}._-]+/gu, "-").replace(/^[-.]+|[-.]+$/g, "");
@@ -222,14 +345,11 @@ function safeUploadName(name) {
   return ext ? `${base}.${ext}` : base;
 }
 
-/* Un nom encore libre dans le dossier. Le serveur sait lever un doublon, mais
-   en « nom (2).png » — une espace et des parenthèses que le rendu des messages
-   ne lit pas dans une adresse d'image. On choisit donc le nom avant l'envoi. */
 async function freeUploadName(agentId, folder, name) {
   let taken;
   try {
     const res = await fetch(`/api/agents/${encodeURIComponent(agentId)}/data?path=${encodeURIComponent(folder)}`);
-    if (!res.ok) return name; // le dossier n'existe pas encore : rien à éviter
+    if (!res.ok) return name;
     taken = new Set(((await res.json()).entries ?? []).map((entry) => entry.name));
   } catch {
     return name;
@@ -257,10 +377,6 @@ function liveEditorFiles(tab) {
       if (!res.ok || !payload.path) throw new Error(payload.error || `erreur ${res.status}`);
       return { src: payload.path, name: file.name };
     },
-    /* `usage` : "image" pour un <img>, "open" pour un lien qu'on ouvre. Seuls
-       une image matricielle ou un PDF s'ouvrent dans le navigateur ; tout le
-       reste est téléchargé — un .html ou un .svg écrit par un agent ne doit
-       pas s'exécuter sur l'adresse d'Allkin. */
     resolve(src, usage) {
       let path = String(src ?? "").trim();
       try {
@@ -277,8 +393,6 @@ function liveEditorFiles(tab) {
 }
 
 function mountFileLiveEditor(tab) {
-  // Même onglet, éditeur déjà en place : on repeint seulement, sinon changer
-  // de mode ferait perdre l'historique d'annulation en cours.
   if (fileLiveEditor && fileLiveEditorTabId === tab.id) {
     fileLiveEditor.render();
     return;
@@ -287,8 +401,6 @@ function mountFileLiveEditor(tab) {
   fileLiveEditor = window.Allkin.capability("markdown-editor").create({
     host: el("file-live"),
     toolbar: el("md-toolbar"),
-    // Un fichier peut être du code ou une liste de commandes : le correcteur
-    // orthographique y soulignerait tout.
     spellcheck: false,
     files: liveEditorFiles(tab),
     doc: {
@@ -310,20 +422,503 @@ function unmountFileLiveEditor() {
   fileLiveEditorTabId = null;
 }
 
-/* Le calque de coloration de l'onglet fichier. Une seule instance : un seul
-   fichier est affiché à la fois. Sa mécanique — coloration, défilement
-   solidaire, détection du langage — vit dans highlight.js ; ici on ne fait que
-   lui dire quoi montrer. */
-const codeLayer = window.createCodeLayer({
-  textarea: el("file-editor"),
-  layer: el("file-editor-highlight"),
+/* ---- L'éditeur de code --------------------------------------------------- */
+
+const ta = () => el("file-editor");
+const wrapEl = () => el("file-editor-wrap");
+
+/** Le langage effectif d'un onglet : choisi à la main, sinon déduit du nom,
+ *  sinon deviné au contenu, sinon texte brut. */
+function effectiveLanguage(tab) {
+  if (tab.language) return tab.language;
+  if (tab.detectedLanguage === undefined) {
+    tab.detectedLanguage = languageForFilename(tab.name) ?? guessLanguage(tab.content ?? "");
+  }
+  return tab.detectedLanguage ?? "plaintext";
+}
+
+/** Indentation du fichier : tabulation, ou n espaces (2 par défaut). */
+function detectIndent(text) {
+  let tabs = 0;
+  const spaces = new Map();
+  for (const line of text.split("\n").slice(0, 400)) {
+    const m = /^( +|\t+)\S/.exec(line);
+    if (!m) continue;
+    if (m[1][0] === "\t") tabs++;
+    else spaces.set(m[1].length, (spaces.get(m[1].length) ?? 0) + 1);
+  }
+  let best = 0;
+  let bestCount = 0;
+  for (const [n, c] of spaces) if (n <= 8 && c > bestCount) [best, bestCount] = [n, c];
+  if (tabs > bestCount) return "\t";
+  // Deux espaces gagnent souvent par accident (une ligne indentée de 4 en
+  // compte aussi une de 2) : on garde la plus petite unité observée ≥ 2.
+  const units = [...spaces.keys()].filter((n) => n >= 2 && n <= 8).sort((a, b) => a - b);
+  return " ".repeat(units[0] ?? best ?? 2);
+}
+
+function mountCodeEditor(tab) {
+  const textarea = ta();
+  if (textarea.value !== tab.content) textarea.value = tab.content;
+  const pref = filePref(tab);
+  if (tab.language === undefined) tab.language = pref.language ?? null;
+  const language = effectiveLanguage(tab);
+  const kind = fileKind(tab.name);
+  // Texte brut et markdown sans éditeur vivant : le retour à la ligne est
+  // naturel ; le code, lui, garde ses lignes entières.
+  if (tab.wrap === undefined) tab.wrap = pref.wrap ?? (language === "plaintext" || kind === "markdown");
+  tab.indentUnit ??= detectIndent(tab.content ?? "");
+  wrapEl().style.setProperty("--code-size", `${fontSizePref()}px`);
+  wrapEl().classList.toggle("is-wrapping", Boolean(tab.wrap));
+  wrapEl().classList.toggle("no-gutter", Boolean(tab.wrap));
+  el("code-wrap-btn").classList.toggle("active", Boolean(tab.wrap));
+  el("code-wrap-btn").setAttribute("aria-pressed", String(Boolean(tab.wrap)));
+  renderLanguageSelect(tab);
+  renderCodeLayer(tab);
+  renderGutter(tab);
+  renderStatus(tab);
+}
+
+function renderLanguageSelect(tab) {
+  const select = el("code-lang");
+  const detected = tab.detectedLanguage ?? "plaintext";
+  select.replaceChildren();
+  const auto = new Option(`Auto — ${langLabel(detected)}`, "");
+  select.add(auto);
+  select.add(new Option("Texte brut", "plaintext"));
+  for (const { id, label } of allLanguages()) select.add(new Option(label, id));
+  select.value = tab.language ?? "";
+  select.title = tab.language ? `Langage choisi à la main : ${langLabel(tab.language)}` : `Langage détecté : ${langLabel(detected)}`;
+}
+
+let layerTimer = null;
+const HIGHLIGHT_MAX_BYTES = 400_000;
+
+/** Repeint le calque coloré. Différé d'un souffle pendant la frappe : un gros
+ *  fichier recoloré à chaque touche ferait bégayer la saisie. */
+function renderCodeLayer(tab, { immediate = true } = {}) {
+  clearTimeout(layerTimer);
+  const paint = () => {
+    const language = effectiveLanguage(tab);
+    const text = ta().value;
+    const colored = language !== "plaintext" && text.length <= HIGHLIGHT_MAX_BYTES;
+    wrapEl().classList.toggle("has-highlight", colored);
+    // Un « \n » de plus : une dernière ligne vide dans la zone de saisie doit
+    // exister aussi dans le calque, sinon le fond s'arrête une ligne trop tôt.
+    el("file-editor-highlight").innerHTML = colored ? highlightCode(text, language) + "\n" : "";
+    syncScroll();
+  };
+  if (immediate) paint();
+  else layerTimer = setTimeout(paint, 60);
+}
+
+function renderGutter(tab) {
+  const gutter = el("file-editor-gutter");
+  if (tab.wrap) {
+    gutter.textContent = "";
+    return;
+  }
+  const n = countLines(ta().value);
+  if (gutter.dataset.lines === String(n)) return;
+  gutter.dataset.lines = String(n);
+  let s = "";
+  for (let i = 1; i <= n; i++) s += i + "\n";
+  gutter.textContent = s;
+  syncScroll();
+}
+
+function countLines(text) {
+  let n = 1;
+  for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) n++;
+  return n;
+}
+
+function syncScroll() {
+  const textarea = ta();
+  el("file-editor-highlight").scrollTop = textarea.scrollTop;
+  el("file-editor-highlight").scrollLeft = textarea.scrollLeft;
+  el("file-editor-gutter").scrollTop = textarea.scrollTop;
+}
+ta().addEventListener("scroll", syncScroll);
+
+function renderStatus(tab) {
+  const textarea = ta();
+  const pos = textarea.selectionStart;
+  const before = textarea.value.slice(0, pos);
+  const line = countLines(before);
+  const col = pos - before.lastIndexOf("\n");
+  const sel = textarea.selectionEnd - textarea.selectionStart;
+  el("code-status-pos").textContent = `Ln ${line}, Col ${col}${sel ? ` (${sel} sél.)` : ""}`;
+  const total = countLines(textarea.value);
+  el("code-status-lines").textContent = `${total} ligne${total > 1 ? "s" : ""}`;
+  el("code-status-indent").textContent = tab.indentUnit === "\t" ? "Tabulations" : `Espaces : ${tab.indentUnit?.length ?? 2}`;
+  el("code-status-lang").textContent = langLabel(effectiveLanguage(tab));
+}
+
+function currentFileTab() {
+  const tab = activeTab();
+  return tab && tab.kind === "file" && !el("file-editor-wrap").classList.contains("hidden") ? tab : null;
+}
+
+el("code-lang").addEventListener("change", () => {
+  const tab = currentFileTab();
+  if (!tab) return;
+  tab.language = el("code-lang").value || null;
+  setFilePref(tab, { language: tab.language });
+  // Un langage choisi à la main change le sens du retour à la ligne par défaut
+  // seulement si l'utilisateur ne l'a pas réglé lui-même.
+  renderLanguageSelect(tab);
+  renderCodeLayer(tab);
+  renderStatus(tab);
+  bulle(tab.language ? `Coloration : ${langLabel(tab.language)}.` : `Coloration automatique : ${langLabel(effectiveLanguage(tab))}.`);
 });
 
-/** Reconstruit le calque à partir du contenu courant. Appelée au premier rendu
- *  de l'éditeur et à chaque frappe (noteEditorChange). */
-function renderEditorHighlight(tab) {
-  codeLayer.update(tab.content, tab.name);
+el("code-wrap-btn").addEventListener("click", () => {
+  const tab = currentFileTab();
+  if (!tab) return;
+  tab.wrap = !tab.wrap;
+  setFilePref(tab, { wrap: tab.wrap });
+  wrapEl().classList.toggle("is-wrapping", tab.wrap);
+  wrapEl().classList.toggle("no-gutter", tab.wrap);
+  el("code-wrap-btn").classList.toggle("active", tab.wrap);
+  el("code-wrap-btn").setAttribute("aria-pressed", String(tab.wrap));
+  el("file-editor-gutter").dataset.lines = "";
+  renderGutter(tab);
+  syncScroll();
+});
+
+for (const [id, delta] of [["code-font-minus-btn", -1], ["code-font-plus-btn", 1]]) {
+  el(id).addEventListener("click", () => {
+    const next = Math.min(24, Math.max(10, fontSizePref() + delta));
+    writePrefs({ ...readPrefs(), fontSize: next });
+    wrapEl().style.setProperty("--code-size", `${next}px`);
+    syncScroll();
+  });
 }
+
+/* ---- Édition : insertion qui respecte l'annulation native ---------------- */
+
+/** Remplace [start, end[ par `text`, en gardant Ctrl+Z fonctionnel quand le
+ *  navigateur le permet (execCommand), sinon directement. */
+function replaceRange(start, end, text, selectStart = null, selectEnd = null) {
+  const textarea = ta();
+  textarea.focus();
+  textarea.setSelectionRange(start, end);
+  let done = false;
+  try {
+    done = document.execCommand("insertText", false, text);
+  } catch {
+    done = false;
+  }
+  if (!done || textarea.value.slice(start, start + text.length) !== text) {
+    textarea.setRangeText(text, start, end, "end");
+  }
+  if (selectStart !== null) textarea.setSelectionRange(selectStart, selectEnd ?? selectStart);
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+/** Les bornes des lignes entières couvertes par la sélection. */
+function selectedLines() {
+  const textarea = ta();
+  const value = textarea.value;
+  const start = value.lastIndexOf("\n", textarea.selectionStart - 1) + 1;
+  let end = value.indexOf("\n", Math.max(textarea.selectionEnd - (textarea.selectionEnd > textarea.selectionStart && value[textarea.selectionEnd - 1] === "\n" ? 1 : 0), textarea.selectionStart));
+  if (end === -1) end = value.length;
+  return { start, end, text: value.slice(start, end) };
+}
+
+function indentSelection(tab, outdent) {
+  const unit = tab.indentUnit ?? "  ";
+  const textarea = ta();
+  const { start, end, text } = selectedLines();
+  const single = textarea.selectionStart === textarea.selectionEnd;
+  if (single && !outdent) {
+    // Tab sans sélection : insère l'unité (jusqu'à la colonne suivante pour des espaces).
+    const col = textarea.selectionStart - start;
+    const ins = unit === "\t" ? "\t" : " ".repeat(unit.length - (col % unit.length));
+    replaceRange(textarea.selectionStart, textarea.selectionStart, ins);
+    return;
+  }
+  const lines = text.split("\n");
+  const next = lines
+    .map((l) => {
+      if (outdent) {
+        if (l.startsWith(unit)) return l.slice(unit.length);
+        if (l.startsWith("\t")) return l.slice(1);
+        return l.replace(/^ {1,4}/, "");
+      }
+      return l.length || lines.length === 1 ? unit + l : l;
+    })
+    .join("\n");
+  replaceRange(start, end, next, start, start + next.length);
+}
+
+function toggleComment(tab) {
+  const syntax = commentSyntax(effectiveLanguage(tab));
+  if (!syntax) {
+    bulle("Ce langage n'a pas de commentaire connu.", "ko");
+    return;
+  }
+  const { start, end, text } = selectedLines();
+  if (syntax.block) {
+    const [open, close] = syntax.block;
+    const trimmed = text.trim();
+    if (trimmed.startsWith(open.trim()) && trimmed.endsWith(close.trim())) {
+      const inner = text.replace(open.trim(), "").replace(new RegExp(close.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$"), "").replace(/^\s/, "");
+      replaceRange(start, end, inner, start, start + inner.length);
+    } else {
+      const next = open + text + close;
+      replaceRange(start, end, next, start, start + next.length);
+    }
+    return;
+  }
+  const prefix = syntax.line;
+  const lines = text.split("\n");
+  const meaningful = lines.filter((l) => l.trim());
+  const allCommented = meaningful.length > 0 && meaningful.every((l) => l.trimStart().startsWith(prefix));
+  const indent = Math.min(...meaningful.map((l) => l.length - l.trimStart().length), 0) || 0;
+  const next = lines
+    .map((l) => {
+      if (!l.trim()) return l;
+      if (allCommented) return l.replace(new RegExp(`^(\\s*)${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} ?`), "$1");
+      return l.slice(0, indent) + prefix + " " + l.slice(indent);
+    })
+    .join("\n");
+  replaceRange(start, end, next, start, start + next.length);
+}
+
+function newlineWithIndent(tab) {
+  const textarea = ta();
+  const value = textarea.value;
+  const pos = textarea.selectionStart;
+  const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+  const line = value.slice(lineStart, pos);
+  const lead = /^[ \t]*/.exec(line)[0];
+  const unit = tab.indentUnit ?? "  ";
+  // Ouvrir un bloc indente d'un cran ; « : » en Python aussi.
+  const opens = /[{[(]\s*$/.test(line) || (effectiveLanguage(tab) === "python" && /:\s*$/.test(line));
+  let ins = "\n" + lead + (opens ? unit : "");
+  // Entre « { » et « } » : la fermante descend d'une ligne, alignée.
+  const after = value.slice(textarea.selectionEnd);
+  if (/^[{[(]\s*$/.test(line.trimStart().slice(-1)) === false && opens && /^[\]})]/.test(after)) ins += "\n" + lead;
+  const caret = pos + 1 + lead.length + (opens ? unit.length : 0);
+  replaceRange(pos, textarea.selectionEnd, ins, caret, caret);
+}
+
+ta().addEventListener("keydown", (e) => {
+  const tab = currentFileTab();
+  if (!tab) return;
+  const mod = e.ctrlKey || e.metaKey;
+  if (e.key === "Tab") {
+    e.preventDefault();
+    indentSelection(tab, e.shiftKey);
+  } else if (e.key === "Enter" && !mod && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    newlineWithIndent(tab);
+  } else if (mod && e.key === "/") {
+    e.preventDefault();
+    toggleComment(tab);
+  } else if (mod && !e.shiftKey && e.key.toLowerCase() === "s") {
+    e.preventDefault();
+    tab.dirty ? saveFileTab(tab).then(() => bulle("Enregistré.")) : bulle("Déjà enregistré.");
+  } else if (mod && e.key.toLowerCase() === "f") {
+    e.preventDefault();
+    openFind();
+  } else if (mod && e.key.toLowerCase() === "h") {
+    e.preventDefault();
+    openFind({ replace: true });
+  } else if (mod && e.key.toLowerCase() === "g") {
+    e.preventDefault();
+    void gotoLine(tab);
+  } else if (mod && e.key.toLowerCase() === "d" && !e.shiftKey) {
+    e.preventDefault();
+    const { start, end, text } = selectedLines();
+    replaceRange(end, end, "\n" + text, end + 1, end + 1 + text.length);
+  }
+});
+
+for (const evt of ["keyup", "click", "select"]) {
+  ta().addEventListener(evt, () => {
+    const tab = currentFileTab();
+    if (tab) renderStatus(tab);
+  });
+}
+
+async function gotoLine(tab) {
+  const total = countLines(ta().value);
+  const raw = core.prompt
+    ? await core.prompt({ title: "Aller à la ligne", okLabel: "Aller", input: { placeholder: `1 à ${total}`, maxLength: 8 } })
+    : window.prompt(`Ligne (1 à ${total}) :`);
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1) return;
+  goToLineNumber(Math.min(n, total));
+}
+
+function goToLineNumber(n) {
+  const textarea = ta();
+  const value = textarea.value;
+  let pos = 0;
+  for (let i = 1; i < n; i++) {
+    const nl = value.indexOf("\n", pos);
+    if (nl === -1) break;
+    pos = nl + 1;
+  }
+  // Le curseur en tête de ligne, sans la sélectionner : on vient y écrire.
+  selectAndReveal(pos, pos, n);
+}
+
+/** Sélectionne [start, end[ et fait défiler pour le montrer (au tiers). */
+function selectAndReveal(start, end, lineHint = null) {
+  const textarea = ta();
+  textarea.focus();
+  textarea.setSelectionRange(start, end);
+  const line = lineHint ?? countLines(textarea.value.slice(0, start));
+  const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 20;
+  textarea.scrollTop = Math.max(0, (line - 1) * lineHeight - textarea.clientHeight / 3);
+  syncScroll();
+  const tab = currentFileTab();
+  if (tab) renderStatus(tab);
+}
+
+/* ---- Rechercher / remplacer ---------------------------------------------- */
+
+const find = { open: false, caseSensitive: false, matches: [], index: -1 };
+
+function openFind({ replace = false } = {}) {
+  find.open = true;
+  el("code-find").classList.remove("hidden");
+  el("code-find-btn").classList.add("active");
+  const textarea = ta();
+  const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+  if (selected && !selected.includes("\n")) el("code-find-input").value = selected;
+  runFind({ jump: false });
+  (replace ? el("code-replace-input") : el("code-find-input")).focus();
+  el("code-find-input").select();
+}
+
+function closeFind() {
+  if (!find.open) return;
+  find.open = false;
+  el("code-find").classList.add("hidden");
+  el("code-find-btn").classList.remove("active");
+  find.matches = [];
+  find.index = -1;
+}
+
+function runFind({ jump = true, backwards = false } = {}) {
+  const query = el("code-find-input").value;
+  const count = el("code-find-count");
+  find.matches = [];
+  if (!query) {
+    count.textContent = "";
+    count.classList.remove("is-none");
+    return;
+  }
+  const textarea = ta();
+  const hay = find.caseSensitive ? textarea.value : textarea.value.toLowerCase();
+  const needle = find.caseSensitive ? query : query.toLowerCase();
+  let i = 0;
+  while ((i = hay.indexOf(needle, i)) !== -1 && find.matches.length < 5000) {
+    find.matches.push(i);
+    i += needle.length;
+  }
+  if (find.matches.length === 0) {
+    count.textContent = "0";
+    count.classList.add("is-none");
+    find.index = -1;
+    return;
+  }
+  count.classList.remove("is-none");
+  if (jump) {
+    const from = backwards ? textarea.selectionStart - 1 : textarea.selectionEnd;
+    let idx = backwards
+      ? find.matches.map((m, k) => [m, k]).filter(([m]) => m < from).pop()?.[1]
+      : find.matches.findIndex((m) => m >= from);
+    if (idx === undefined || idx === -1) idx = backwards ? find.matches.length - 1 : 0;
+    find.index = idx;
+    selectAndReveal(find.matches[idx], find.matches[idx] + query.length);
+  } else {
+    const cur = find.matches.indexOf(textarea.selectionStart);
+    find.index = cur;
+  }
+  count.textContent = find.index >= 0 ? `${find.index + 1}/${find.matches.length}` : `${find.matches.length}`;
+}
+
+function replaceOne() {
+  const query = el("code-find-input").value;
+  if (!query) return;
+  const textarea = ta();
+  const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+  const same = find.caseSensitive ? selected === query : selected.toLowerCase() === query.toLowerCase();
+  if (same) replaceRange(textarea.selectionStart, textarea.selectionEnd, el("code-replace-input").value);
+  runFind();
+}
+
+function replaceAll() {
+  const query = el("code-find-input").value;
+  if (!query) return;
+  const textarea = ta();
+  const replacement = el("code-replace-input").value;
+  const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), find.caseSensitive ? "g" : "gi");
+  const before = textarea.value;
+  const n = (before.match(re) ?? []).length;
+  if (!n) {
+    bulle("Aucune occurrence.", "ko");
+    return;
+  }
+  replaceRange(0, before.length, before.replace(re, () => replacement), 0, 0);
+  runFind({ jump: false });
+  bulle(`${n} occurrence${n > 1 ? "s" : ""} remplacée${n > 1 ? "s" : ""}.`);
+}
+
+el("code-find-btn").addEventListener("click", () => (find.open ? closeFind() : openFind()));
+el("code-find-close").addEventListener("click", () => {
+  closeFind();
+  ta().focus();
+});
+el("code-find-input").addEventListener("input", () => runFind({ jump: true }));
+el("code-find-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    runFind({ jump: true, backwards: e.shiftKey });
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    e.stopPropagation();
+    closeFind();
+    ta().focus();
+  }
+});
+el("code-replace-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    replaceOne();
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    e.stopPropagation();
+    closeFind();
+    ta().focus();
+  }
+});
+el("code-find-next").addEventListener("click", () => runFind({ jump: true }));
+el("code-find-prev").addEventListener("click", () => runFind({ jump: true, backwards: true }));
+el("code-find-case").addEventListener("click", () => {
+  find.caseSensitive = !find.caseSensitive;
+  el("code-find-case").classList.toggle("active", find.caseSensitive);
+  el("code-find-case").setAttribute("aria-pressed", String(find.caseSensitive));
+  runFind({ jump: true });
+});
+el("code-replace-one").addEventListener("click", replaceOne);
+el("code-replace-all").addEventListener("click", replaceAll);
+el("code-goto-btn").addEventListener("click", () => {
+  const tab = currentFileTab();
+  if (tab) void gotoLine(tab);
+});
+el("code-comment-btn").addEventListener("click", () => {
+  const tab = currentFileTab();
+  if (tab) toggleComment(tab);
+});
+
+/* ---- Boutons de l'en-tête et du flottant --------------------------------- */
 
 function showFileError(message) {
   const errorEl = el("file-error");
@@ -337,10 +932,8 @@ el("file-mode-btn").addEventListener("click", () => {
   tab.mode = tab.mode === "edit" ? "preview" : "edit";
   applyFileMode(tab);
   persistTabs();
-  // Passer en édition doit poser le curseur quelque part : au début du
-  // document, comme n'importe quel traitement de texte.
   if (tab.mode !== "edit") return;
-  if (el("file-live").classList.contains("hidden")) el("file-editor").focus();
+  if (el("file-live").classList.contains("hidden")) ta().focus();
   else fileLiveEditor?.focus("start");
 });
 
@@ -350,31 +943,21 @@ el("file-download-btn").addEventListener("click", () => {
   window.open(dataFileUrl(tab.agentId, tab.path, true), "_blank");
 });
 
-
-
-/**
- * Copie le contenu du fichier tel qu'il est enregistré (`tab.content`), et non
- * ce qui est à l'écran : l'éditeur y ajoute des balises de mise en forme, et le
- * mode aperçu ne montre pas la syntaxe. On copie donc bien du markdown.
- */
 el("file-copy-btn").addEventListener("click", async (event) => {
   const tab = activeTab();
   if (!tab || tab.kind !== "file") return;
   const ok = await copyToClipboard(event.currentTarget, tab.content ?? "");
-  if (!ok) showFileError("Copie impossible : le presse-papiers est refusé par le navigateur.");
+  if (!ok) bulle("Copie impossible : le presse-papiers est refusé par le navigateur.", "ko");
 });
 
 el("file-path-copy-btn").addEventListener("click", async (event) => {
   const tab = activeTab();
   if (!tab || tab.kind !== "file") return;
   const ok = await copyToClipboard(event.currentTarget, tab.path ?? "");
-  if (!ok) showFileError("Copie impossible : le presse-papiers est refusé par le navigateur.");
+  if (!ok) bulle("Copie impossible : le presse-papiers est refusé par le navigateur.", "ko");
 });
 
 // ---- Plein écran ----
-// Recouvre toute la fenêtre (sidebar comprise) : un simple ajout de classe, la
-// mise en page de l'en-tête et du corps ne change pas. Quitter l'édition, ou
-// la touche Échap, referme — inutile de trouver le bouton pour sortir.
 const ICON_FULLSCREEN_ENTER =
   '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>';
 const ICON_FULLSCREEN_EXIT =
@@ -396,16 +979,16 @@ el("file-fullscreen-btn").addEventListener("click", () => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
+  if (find.open && (document.activeElement === ta() || el("code-find").contains(document.activeElement))) {
+    closeFind();
+    ta().focus();
+    return;
+  }
   if (el("file-view").classList.contains("is-fullscreen")) setFileFullscreen(false);
-  // Les deux pages pleine page se referment sur Échap : elles n'ont pas
-  // d'onglet où l'on reviendrait autrement qu'en visant la croix.
   else if (state.view === "settings" || state.view === "config") returnToActiveTab();
 });
 
-// ---- Enregistrement au fil de la frappe ----
-// Le délai évite une requête par touche sans jamais laisser une modification
-// en suspens : tout ce qui reste en attente est écrit avant de quitter
-// l'onglet, de le fermer ou de fermer la page.
+/* ---- Enregistrement au fil de la frappe ---------------------------------- */
 
 const FILE_SAVE_DELAY_MS = 700;
 
@@ -428,9 +1011,6 @@ function renderFileSaveState(tab) {
   }
 }
 
-/** Marque l'onglet modifié et relance le compte à rebours d'enregistrement.
- *  `tab.content` est supposé déjà à jour — l'éditeur vivant l'écrit bloc par
- *  bloc, la zone de saisie brute passe par noteEditorChange ci-dessous. */
 function markFileDirty(tab) {
   tab.dirty = true;
   tab.saveState = "dirty";
@@ -441,8 +1021,11 @@ function markFileDirty(tab) {
 }
 
 function noteEditorChange(tab) {
-  tab.content = el("file-editor").value;
-  if (el("file-editor-wrap").classList.contains("has-highlight")) renderEditorHighlight(tab);
+  tab.content = ta().value;
+  renderCodeLayer(tab, { immediate: tab.content.length < 20_000 });
+  renderGutter(tab);
+  renderStatus(tab);
+  if (find.open) runFind({ jump: false });
   markFileDirty(tab);
 }
 
@@ -458,15 +1041,12 @@ async function saveFileTab(tab, options = {}) {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
-      // Une sauvegarde déclenchée par la fermeture de la page doit survivre à
-      // celle-ci : sans keepalive, le navigateur l'annule.
       keepalive: options.keepalive === true,
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.error || `Erreur ${res.status}`);
     }
-    // Rien de plus n'a été tapé pendant la requête : l'onglet est à jour.
     if (tab.content === content) {
       tab.dirty = false;
       tab.saveState = "saved";
@@ -474,13 +1054,12 @@ async function saveFileTab(tab, options = {}) {
     }
   } catch (err) {
     tab.saveState = "error";
-    if (activeTab() === tab) showFileError(`Enregistrement impossible : ${err.message}`);
+    if (activeTab() === tab) bulle(`Enregistrement impossible : ${err.message}`, "ko");
   }
   if (activeTab() === tab) renderFileSaveState(tab);
   renderTabBar();
 }
 
-// Écrit tout de suite ce qui attendait la fin du délai.
 function flushFileSave(tab, options) {
   if (tab.saveTimer) saveFileTab(tab, options);
 }
@@ -492,11 +1071,12 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-el("file-editor").addEventListener("input", () => {
-  const tab = activeTab();
-  if (tab && tab.kind === "file") noteEditorChange(tab);
+ta().addEventListener("input", () => {
+  const tab = currentFileTab();
+  if (tab) noteEditorChange(tab);
 });
 
+/* ---- Déclarations ------------------------------------------------------- */
 
 window.Allkin.registerTabKind("file", {
   panels: ["file-view"],
@@ -504,25 +1084,18 @@ window.Allkin.registerTabKind("file", {
   label: (tab) => tab.name,
   meta: "Fichier",
   tooltip: (tab) => tab.path,
-  // Plusieurs fichiers ouverts à la fois, distingués par leur chemin ; au-delà
-  // de six par agent, les onglets deviennent illisibles.
   byPath: true,
   maxPerAgent: 6,
-  // Trois zones possibles (aperçu, éditeur vivant, saisie brute) : c'est celle
-  // qui est visible qui défile — et l'aperçu et l'édition ne défilent pas au
-  // même endroit, d'où deux positions distinctes.
   scroller: () =>
     el("file-editor-wrap").classList.contains("hidden")
       ? [el("file-live"), el("file-preview")].find((n) => !n.classList.contains("hidden"))
-      : el("file-editor"),
+      : ta(),
   scrollKeySuffix: (tab) => tab.mode ?? "preview",
   activate: (tab) => renderFileView(tab),
-  // Un onglet fichier quitté enregistre ce qui restait en attente, et sort du
-  // plein écran : sinon il resterait actif sur un onglet qui n'a plus de bouton
-  // pour en sortir.
   leave: (tab) => {
     flushFileSave(tab);
     setFileFullscreen(false);
+    closeFind();
   },
   beforeClose: (tab) => flushFileSave(tab),
 });
@@ -530,6 +1103,16 @@ window.Allkin.registerTabKind("file", {
 window.Allkin.provide("text-editor", {
   openFile: openFileTab,
   canOpen: (name) => fileKind(name) !== "other",
+});
+
+/* La coloration, pour les autres plugins (l'explorateur montre un script
+   avant de l'exécuter). Même contrat que window.highlightCode du cœur, avec
+   bien plus de langages. */
+window.Allkin.provide("code-highlight", {
+  highlight: highlightCode,
+  languageForFilename,
+  languages: () => allLanguages().map((l) => l.id),
+  label: langLabel,
 });
 
 })();

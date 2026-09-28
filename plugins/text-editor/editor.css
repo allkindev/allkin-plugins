@@ -1,11 +1,8 @@
-/* Plugin « Onglet fichier : visionneuse et éditeur ».
+/* Plugin « Éditeur de texte » : visionneuse et éditeur de l'onglet fichier.
    Les règles communes à l'interface (cartes, en-têtes de page, .md-body…)
-   restent dans web/style.css ; seules vivent ici celles qui ne servent qu'à ce plugin. */
+   restent dans web/style.css ; seules vivent ici celles qui ne servent qu'à
+   ce plugin. */
 
-/* ---- Onglet fichier : visionneuse et éditeur ----------------------------
-   Même mécanique de panneau plein que .data-view. L'éditeur et l'aperçu
-   occupent tout l'espace restant sous l'en-tête : éditer un document, c'est
-   le voir en entier, pas dans une boîte. */
 .file-view {
   flex: 1;
   min-height: 0;
@@ -17,9 +14,7 @@
   padding-right: calc(var(--sp-5) + var(--safe-right));
   gap: var(--sp-3);
 }
-/* Plein écran : recouvre tout, sidebar comprise — c'est le but, écrire sans
-   rien autour. Un simple changement de position, rien d'autre : l'en-tête et
-   le corps gardent la mise en page qu'ils ont déjà. */
+/* Plein écran : recouvre tout, sidebar comprise — écrire sans rien autour. */
 .file-view.is-fullscreen {
   position: fixed;
   inset: 0;
@@ -28,8 +23,6 @@
   padding: calc(var(--sp-4) + var(--safe-top)) calc(var(--sp-5) + var(--safe-right))
     calc(var(--sp-4) + var(--safe-bottom)) calc(var(--sp-5) + var(--safe-left));
 }
-/* Une seule ligne, aussi basse que possible : le nom du fichier vit dans son
-   onglet, l'en-tête n'a plus à porter que les outils. */
 .file-view-header {
   display: flex;
   align-items: center;
@@ -38,9 +31,7 @@
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--border);
 }
-/* Les boutons flottants de la zone de lecture sont hors du flux : le corps du
-   fichier doit donc être un repère de positionnement. */
-.file-view-body { position: relative; }
+.file-view-body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .file-float-actions {
   position: absolute;
   top: var(--sp-2);
@@ -54,6 +45,9 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }
+/* Dans l'éditeur de code, les boutons flottants gêneraient la première ligne
+   et la barre de défilement : ils passent en bas à droite. */
+.file-view.is-code .file-float-actions { top: auto; bottom: var(--sp-3); }
 .file-float-btn {
   min-width: 1.9rem;
   min-height: 1.9rem;
@@ -64,34 +58,14 @@
   box-shadow: none;
 }
 .file-float-btn:hover { background: var(--accent-soft); color: var(--accent); box-shadow: none; transform: none; }
-
 .file-mode-btn { min-height: 2.1rem; padding: 0 var(--sp-4); }
 
-/* Chemin complet, affiché uniquement en aperçu (voir applyFileMode) : en
-   édition l'en-tête n'a que le texte à défendre. Comme la barre de balises,
-   il prend l'espace disponible pour pousser l'état d'enregistrement à droite. */
-.file-path {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  gap: var(--sp-1);
-}
-.file-path-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--text-dim);
-}
-
+.file-path { display: flex; align-items: center; flex: 1; min-width: 0; gap: var(--sp-1); }
+.file-path-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-dim); }
 .file-fullscreen-btn { flex-shrink: 0; }
-
-/* L'enregistrement étant automatique, cet indicateur est la seule preuve que
-   le travail est en sécurité : il reste visible en permanence. */
 .file-save-state {
   flex-shrink: 0;
+  margin-left: auto;
   font-size: var(--text-2xs);
   font-weight: 600;
   text-transform: uppercase;
@@ -99,8 +73,6 @@
   color: var(--text-faint);
   white-space: nowrap;
 }
-
-.file-view-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
 .file-preview {
   flex: 1;
@@ -114,24 +86,117 @@
   line-height: 1.65;
   color: var(--text);
 }
-/* Le premier et le dernier bloc ne doivent pas ajouter de blanc au cadre. */
 .file-preview > :first-child { margin-top: 0; }
 .file-preview > :last-child { margin-bottom: 0; }
+.file-live { flex: 1; min-height: 0; overflow: auto; }
 
-/* Dans l'onglet fichier, l'éditeur prend la place restante et défile lui-même. */
-.file-live {
+/* ---- Barre de l'éditeur de code ------------------------------------------- */
+.code-toolbar { display: flex; align-items: center; gap: 2px; flex: 1; min-width: 0; }
+.code-toolbar.hidden { display: none; }
+select.code-lang {
+  max-width: 11rem;
+  min-height: 1.9rem;
+  height: 1.9rem;
+  margin-right: var(--sp-1);
+  padding: 0 1.6rem 0 0.6rem;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+}
+button.code-tool {
+  width: 1.9rem;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  min-height: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-dim);
+  box-shadow: none;
+}
+button.code-tool:hover { background: var(--accent-soft); color: var(--accent); box-shadow: none; transform: none; }
+button.code-tool.active { background: var(--accent-soft); color: var(--accent); }
+button.code-tool .icon { width: 1rem; height: 1rem; }
+
+/* ---- Rechercher / remplacer ----------------------------------------------- */
+.code-find {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: var(--sp-2);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text) 5%, var(--bg-alt));
+  border: 1px solid var(--border);
+}
+.code-find.hidden { display: none; }
+.code-find-field {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: 1 1 10rem;
+  min-width: 8rem;
+  height: 1.9rem;
+  padding: 0 0.6rem;
+  border-radius: 7px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+}
+.code-find-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.code-find-field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+.code-find-field input:focus { outline: none; box-shadow: none; }
+.code-find-count { flex-shrink: 0; font-size: var(--text-2xs); color: var(--text-faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.code-find-count.is-none { color: var(--risk-high); }
+.code-find-case-label { font-size: var(--text-xs); font-weight: 700; letter-spacing: -0.02em; }
+button.code-find-act { height: 1.9rem; min-height: 0; padding: 0 var(--sp-3); font-size: var(--text-sm); }
+
+/* ---- L'éditeur de code ---------------------------------------------------- */
+/* Une seule échelle pour la gouttière, le calque et la zone de saisie : la
+   police, sa taille (--code-size, réglable) et l'interligne. Le moindre écart
+   entre les trois désaligne le texte tapé de sa coloration. */
+.file-editor-wrap {
+  --code-size: var(--text-md);
+  --code-line: 1.6;
+  position: relative;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-bg, var(--bg-alt));
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-line);
+  tab-size: 4;
 }
-
-/* Éditeur de texte brut. La coloration syntaxique est un calque : voir
-   web/highlight.js pour l'invariant qui la rend possible (même texte, même
-   métrique, seules les couleurs diffèrent d'un calque à l'autre). Sans
-   langage reconnu, le calque reste masqué et la zone de saisie garde son
-   apparence pleine — c'est le seul cas où elle est directement lisible. */
-.file-editor-wrap { position: relative; flex: 1; min-height: 0; }
-
+.file-editor-wrap:focus-within { border-color: var(--accent); }
+.file-editor-gutter {
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: var(--sp-3) var(--sp-2) var(--sp-3) var(--sp-3);
+  text-align: right;
+  color: var(--text-faint);
+  background: color-mix(in srgb, var(--text) 3%, var(--code-bg, var(--bg-alt)));
+  border-right: 1px solid var(--border);
+  white-space: pre;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.file-editor-wrap.no-gutter .file-editor-gutter { display: none; }
+.file-editor-area { position: relative; flex: 1; min-width: 0; }
 .file-editor-highlight,
 .file-editor {
   position: absolute;
@@ -139,41 +204,102 @@
   margin: 0;
   width: 100%;
   height: 100%;
-  padding: var(--sp-4) var(--sp-5);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-mono);
-  font-size: var(--text-md);
-  line-height: 1.7;
-  tab-size: 2;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  line-height: inherit;
+  tab-size: inherit;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
 }
-
+/* Retour à la ligne automatique : les deux couches s'enroulent de la même
+   façon ; la gouttière, elle, ne saurait plus où sont les lignes — masquée. */
+.file-editor-wrap.is-wrapping .file-editor-highlight,
+.file-editor-wrap.is-wrapping .file-editor { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
 .file-editor-highlight {
   display: none;
   overflow: hidden;
   pointer-events: none;
   color: var(--code-fg, var(--text));
-  background: var(--code-bg, var(--bg-alt));
+  background: transparent;
 }
 .file-editor-wrap.has-highlight .file-editor-highlight { display: block; }
-.file-editor-wrap.has-highlight:focus-within .file-editor-highlight { border-color: var(--accent); }
-
 .file-editor {
   resize: none;
   overflow: auto;
   color: var(--text);
-  background: var(--bg-alt);
-}
-.file-editor:focus { border-color: var(--accent); outline: none; }
-.file-editor-wrap.has-highlight .file-editor {
-  color: transparent;
   background: transparent;
-  border-color: transparent;
-  caret-color: var(--text);
+  box-shadow: none;
 }
-.file-editor-wrap.has-highlight .file-editor:focus { border-color: transparent; }
+.file-editor:focus { outline: none; box-shadow: none; border: 0; }
+.file-editor-wrap.has-highlight .file-editor { color: transparent; caret-color: var(--text); }
+.file-editor::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* Couleurs des jetons highlight.js, calées sur la palette --tok-* du cœur.
+   COULEURS SEULEMENT : aucune graisse, aucun italique, aucune taille — le
+   calque doit avoir la métrique exacte de la zone de saisie. */
+.file-editor-highlight .hljs-comment,
+.file-editor-highlight .hljs-quote { color: var(--tok-comment); }
+.file-editor-highlight .hljs-string,
+.file-editor-highlight .hljs-regexp,
+.file-editor-highlight .hljs-template-tag,
+.file-editor-highlight .hljs-addition,
+.file-editor-highlight .hljs-char.escape_ { color: var(--tok-string); }
+.file-editor-highlight .hljs-number,
+.file-editor-highlight .hljs-symbol,
+.file-editor-highlight .hljs-bullet,
+.file-editor-highlight .hljs-link { color: var(--tok-number); }
+.file-editor-highlight .hljs-keyword,
+.file-editor-highlight .hljs-selector-tag,
+.file-editor-highlight .hljs-doctag,
+.file-editor-highlight .hljs-section,
+.file-editor-highlight .hljs-formula { color: var(--tok-keyword); }
+.file-editor-highlight .hljs-literal,
+.file-editor-highlight .hljs-built_in,
+.file-editor-highlight .hljs-meta,
+.file-editor-highlight .hljs-meta-keyword { color: var(--tok-literal); }
+.file-editor-highlight .hljs-title,
+.file-editor-highlight .hljs-function,
+.file-editor-highlight .hljs-title.function_ { color: var(--tok-function); }
+.file-editor-highlight .hljs-type,
+.file-editor-highlight .hljs-class,
+.file-editor-highlight .hljs-title.class_,
+.file-editor-highlight .hljs-selector-class,
+.file-editor-highlight .hljs-selector-id,
+.file-editor-highlight .hljs-selector-pseudo { color: var(--tok-type); }
+.file-editor-highlight .hljs-attr,
+.file-editor-highlight .hljs-attribute,
+.file-editor-highlight .hljs-property,
+.file-editor-highlight .hljs-selector-attr { color: var(--tok-property); }
+.file-editor-highlight .hljs-tag,
+.file-editor-highlight .hljs-name { color: var(--tok-tag); }
+.file-editor-highlight .hljs-variable,
+.file-editor-highlight .hljs-template-variable,
+.file-editor-highlight .hljs-params,
+.file-editor-highlight .hljs-subst { color: var(--tok-variable); }
+.file-editor-highlight .hljs-operator,
+.file-editor-highlight .hljs-punctuation { color: var(--tok-operator); }
+.file-editor-highlight .hljs-deletion { color: var(--risk-high); }
+.file-editor-highlight .hljs-emphasis,
+.file-editor-highlight .hljs-strong,
+.file-editor-highlight .hljs-code { color: var(--tok-attr); }
+
+/* ---- Barre d'état --------------------------------------------------------- */
+.code-status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 2px var(--sp-2) 0;
+  font-size: var(--text-2xs);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.code-status.hidden { display: none; }
+.code-status span:last-child { margin-left: auto; }
 
 .file-media {
   flex: 1;
@@ -188,20 +314,17 @@
 }
 .file-media-image { max-width: 100%; max-height: 100%; object-fit: contain; }
 .file-media-frame { width: 100%; height: 100%; border: none; background: #fff; }
-/* Sans la barre (fichier sans rendu), les actions restent calées à droite. */
-.file-save-state { margin-left: auto; }
 
 @media (max-width: 720px) {
-  /* L'en-tête tient sur une ligne, ici aussi : la barre de balises défile, et
-     l'état d'enregistrement s'efface plutôt que de voler de la place aux
-     outils — l'information reste dans l'onglet, qui signale les modifications
-     en attente. */
   .file-view-header { gap: var(--sp-1); }
   .file-save-state { display: none; }
   .file-preview { padding: var(--sp-4); font-size: var(--text-md); }
-  /* Corps de police : voir la règle anti-zoom en tête de cette section. Les
-     deux calques doivent garder le même remplissage, sous peine de désaligner
-     le texte tapé de sa coloration. */
+  select.code-lang { max-width: 8rem; }
+  .code-tool-wide { display: none; }
   .file-editor-highlight,
-  .file-editor { padding: var(--sp-3); }
+  .file-editor { padding: var(--sp-3) var(--sp-3); }
+  .file-editor-gutter { padding-left: var(--sp-2); padding-right: 6px; }
+  .code-find-replace { flex-basis: 100%; }
+  .code-status { gap: var(--sp-3); }
+  .code-status #code-status-indent { display: none; }
 }

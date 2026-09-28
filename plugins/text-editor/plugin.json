@@ -1,16 +1,29 @@
 {
   "name": "Éditeur de texte",
-  "version": "1.0.1",
-  "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
+  "version": "1.0.2",
+  "description": "Ouvre les fichiers des agents dans un onglet : éditeur de code (80 langages colorés, numéros de ligne, recherche/remplacement, commentaires, indentation), aperçu markdown, images et PDF.",
   "author": "Allkin",
   "permissions": [
-    { "id": "interface", "reason": "Ajoute l'onglet fichier à la page d'Allkin." }
+    {
+      "id": "interface",
+      "reason": "Ajoute l'onglet fichier à la page d'Allkin."
+    }
   ],
   "ui": {
     "apiVersion": 1,
-    "provides": ["text-editor"],
-    "html": ["view.html"],
-    "styles": ["editor.css"],
-    "scripts": ["editor.js"]
+    "provides": [
+      "text-editor",
+      "code-highlight"
+    ],
+    "html": [
+      "view.html"
+    ],
+    "styles": [
+      "editor.css"
+    ],
+    "scripts": [
+      "hljs.js",
+      "editor.js"
+    ]
   }
 }
