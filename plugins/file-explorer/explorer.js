@@ -42,6 +42,78 @@ const {
 } = window.Allkin.core;
 const ICON_FILE = window.Allkin.core.icons.file;
 const ICON_FOLDER = window.Allkin.core.icons.folder;
+const core = window.Allkin.core;
+
+/* Les fenêtres de l'application (confirmation, saisie) plutôt que celles du
+   navigateur, qui bloquent l'onglet et jurent avec le reste ; repli sur les
+   natives avec un cœur plus ancien. Tout résultat d'action passe en bulle. */
+const confirmer = (options) => (core.confirm ? core.confirm(options) : Promise.resolve(window.confirm(options.text || options.title)));
+const demander = (options) => (core.prompt ? core.prompt(options) : Promise.resolve(window.prompt(options.title, options.input?.value ?? "")));
+const bulle = (message, kind = "ok") => core.toast?.(message, kind);
+const erreur = (message) => bulle(message, "ko");
+
+/* ---- Icônes par type de fichier -------------------------------------------
+   Une tuile colorée par famille : un dossier, une image, une archive, un
+   script se reconnaissent avant même de lire le nom. Le reste tombe sur le
+   document générique. */
+const FX = {
+  folder: ["#f59e0b", '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>'],
+  trash: ["#94a3b8", '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12"/><path d="M9 7V4h6v3"/>'],
+  inbox: ["#38bdf8", '<path d="M4 13l2-8h12l2 8v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>'],
+  parent: ["#94a3b8", '<path d="M15 6l-6 6 6 6"/>'],
+  image: ["#ec4899", '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/>'],
+  video: ["#a855f7", '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>'],
+  audio: ["#a855f7", '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'],
+  pdf: ["#ef4444", '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 17v-5h1.5a1.5 1.5 0 010 3H9"/>'],
+  archive: ["#c084fc", '<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/>'],
+  script: ["#22c55e", '<path d="M4 17l6-5-6-5"/><path d="M12 19h8"/>'],
+  code: ["#0ea5e9", '<path d="M8 7l-5 5 5 5"/><path d="M16 7l5 5-5 5"/><path d="M14 4l-4 16"/>'],
+  data: ["#14b8a6", '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'],
+  text: ["#6366f1", '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>'],
+  doc: ["#3b82f6", '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/>'],
+};
+const FX_BY_EXT = {
+  png: "image", jpg: "image", jpeg: "image", gif: "image", webp: "image", svg: "image", bmp: "image", heic: "image", avif: "image",
+  mp4: "video", mov: "video", webm: "video", mkv: "video", avi: "video",
+  mp3: "audio", wav: "audio", ogg: "audio", flac: "audio", m4a: "audio",
+  pdf: "pdf",
+  zip: "archive", tar: "archive", gz: "archive", tgz: "archive", bz2: "archive", xz: "archive", "7z": "archive", rar: "archive",
+  sh: "script", bash: "script", zsh: "script", py: "script", rb: "script", pl: "script",
+  js: "code", mjs: "code", cjs: "code", ts: "code", tsx: "code", jsx: "code", html: "code", css: "code", scss: "code", php: "code", go: "code", rs: "code", c: "code", h: "code", cpp: "code", java: "code", kt: "code", swift: "code", sql: "code",
+  json: "data", yaml: "data", yml: "data", toml: "data", csv: "data", tsv: "data", xml: "data", ini: "data", env: "data",
+  md: "text", markdown: "text", txt: "text", log: "text", rtf: "text",
+  doc: "doc", docx: "doc", odt: "doc", xls: "doc", xlsx: "doc", ods: "doc", ppt: "doc", pptx: "doc", odp: "doc",
+};
+
+/** Famille d'un élément : dossier (corbeille et Upload à part), ou par extension. */
+function familleDe(entry, chemin = "") {
+  if (entry.type === "parent") return "parent";
+  if (entry.type === "dir") {
+    if (!chemin.includes("/") && entry.name === TRASH_DIR_NAME) return "trash";
+    if (!chemin.includes("/") && entry.name === "Upload") return "inbox";
+    return "folder";
+  }
+  const ext = entry.name.includes(".") ? entry.name.split(".").pop().toLowerCase() : "";
+  return FX_BY_EXT[ext] ?? "doc";
+}
+
+/** Pose l'icône (et sa couleur) sur une tuile .data-row-icon / .data-ctx-head-icon. */
+function poserIcone(tuile, entry, chemin = "") {
+  const [couleur, chemins] = FX[familleDe(entry, chemin)] ?? FX.doc;
+  tuile.style.setProperty("--fx-color", couleur);
+  tuile.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${chemins}</svg>`;
+}
+
+/** « il y a 2 j » plutôt qu'une date, tant que c'est récent. */
+function quand(iso) {
+  if (!iso) return "";
+  const age = Date.now() - new Date(iso).getTime();
+  return age < 7 * 86_400_000 ? formatRelativeTime(iso) : formatDateTime(iso);
+}
+
+function normaliser(texte) {
+  return (texte || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
 
 /** Ouvre un fichier : dans l'éditeur de texte s'il est installé, en
  *  téléchargement sinon. */
@@ -68,6 +140,8 @@ const dataViewState = {
   // autre dossier deviendraient déroutantes.
   selectMode: false,
   selected: new Set(),
+  /** Filtre par nom (barre d'outils), propre au dossier affiché. */
+  filter: "",
 };
 
 // Nom du dossier corbeille — celui du serveur (agent-data.ts) : supprimer y
@@ -127,6 +201,8 @@ for (const control of document.querySelectorAll("#data-view [data-sort-key]")) {
   });
 }
 
+const SORT_LABELS = { name: "Nom", size: "Taille", createdAt: "Créé", modifiedAt: "Modifié" };
+
 function updateSortIndicators() {
   for (const control of document.querySelectorAll("#data-view [data-sort-key]")) {
     control.classList.remove("sorted-asc", "sorted-desc");
@@ -134,6 +210,59 @@ function updateSortIndicators() {
       control.classList.add(dataViewState.sortDir > 0 ? "sorted-asc" : "sorted-desc");
     }
   }
+  const label = el("data-sort-label");
+  if (label) label.textContent = SORT_LABELS[dataViewState.sortKey] ?? "Nom";
+}
+
+/* Le menu de tri (téléphone) : s'ouvre sous son bouton, se referme au choix,
+   au clic ailleurs et à Échap. */
+function setDataSortMenuOpen(open) {
+  el("data-sort-menu")?.classList.toggle("hidden", !open);
+  el("data-sort-btn")?.setAttribute("aria-expanded", String(open));
+}
+el("data-sort-btn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setDataSortMenuOpen(el("data-sort-menu").classList.contains("hidden"));
+});
+el("data-sort-menu")?.addEventListener("click", () => setDataSortMenuOpen(false));
+document.addEventListener("click", (e) => {
+  if (!e.target.closest?.("#data-sort")) setDataSortMenuOpen(false);
+});
+
+/* Le filtre : par nom, sans tenir compte des accents ni de la casse. */
+function brancherFiltre(inputId, clearId, onChange) {
+  const input = el(inputId);
+  const clear = el(clearId);
+  if (!input) return;
+  input.addEventListener("input", () => {
+    clear?.classList.toggle("hidden", !input.value);
+    onChange(input.value);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && input.value) {
+      e.stopPropagation();
+      input.value = "";
+      clear?.classList.add("hidden");
+      onChange("");
+    }
+  });
+  clear?.addEventListener("click", () => {
+    input.value = "";
+    clear.classList.add("hidden");
+    onChange("");
+    input.focus();
+  });
+}
+brancherFiltre("data-filter-input", "data-filter-clear", (v) => {
+  dataViewState.filter = v;
+  renderDataTable();
+});
+
+/** Les éléments à afficher : triés, puis filtrés. */
+function entreesVisibles() {
+  const q = normaliser(dataViewState.filter.trim());
+  const entries = sortedEntries(dataViewState);
+  return q ? entries.filter((e) => normaliser(e.name).includes(q)) : entries;
 }
 
 function renderDataTable() {
@@ -142,26 +271,55 @@ function renderDataTable() {
   const bodyEl = el("data-table-body");
   bodyEl.innerHTML = "";
   const agent = dataViewState.agent;
-  const entries = sortedEntries(dataViewState);
+  const entries = entreesVisibles();
+  const template = el("data-row-template");
+
+  // Remonter d'un cran, à la place même des dossiers : un geste, pas un
+  // bouton à chercher. Sur téléphone, c'est souvent plus près que le chemin.
+  if (dataViewState.path) {
+    const parent = dataViewState.path.includes("/") ? dataViewState.path.slice(0, dataViewState.path.lastIndexOf("/")) : "";
+    const node = template.content.cloneNode(true);
+    const row = node.querySelector(".data-row");
+    row.classList.add("is-parent");
+    poserIcone(row.querySelector(".data-row-icon"), { type: "parent", name: ".." });
+    row.querySelector(".data-row-name-text").textContent = "Dossier parent";
+    row.querySelector(".data-row-meta").textContent = parent ? parent : `${agent.name} (racine)`;
+    row.querySelector(".data-row-size").textContent = "";
+    row.querySelector(".data-row-select").innerHTML = "";
+    row.querySelector(".data-row-actions").innerHTML = "";
+    row.addEventListener("click", () => loadDataPath(parent));
+    bodyEl.appendChild(node);
+  }
 
   if (entries.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 6;
     cell.className = "data-table-empty";
-    cell.textContent = "Dossier vide.";
+    const filtre = dataViewState.filter.trim();
+    cell.innerHTML = filtre
+      ? `<div class="data-empty"><strong>Rien ne correspond à « ${filtre.replace(/</g, "&lt;")} »</strong></div>`
+      : `<div class="data-empty">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+           <strong>Dossier vide</strong>
+           <span>Crée un fichier ou un dossier, ou dépose des fichiers ici.</span>
+         </div>`;
     row.appendChild(cell);
     bodyEl.appendChild(row);
     return;
   }
 
-  const template = el("data-row-template");
   for (const entry of entries) {
     const node = template.content.cloneNode(true);
     const row = node.querySelector(".data-row");
-    row.querySelector(".data-row-icon").innerHTML = entry.type === "dir" ? ICON_FOLDER : ICON_FILE;
+    const entryPath = joinDataPath(dataViewState.path, entry.name);
+    poserIcone(row.querySelector(".data-row-icon"), entry, entryPath);
     row.querySelector(".data-row-name-text").textContent = entry.name;
-    row.querySelector(".data-row-size").textContent = entry.type === "dir" ? "—" : formatSize(entry.size);
+    row.querySelector(".data-row-name-text").title = entry.name;
+    const taille = entry.type === "dir" ? "" : formatSize(entry.size);
+    row.querySelector(".data-row-size").textContent = entry.type === "dir" ? "—" : taille;
+    // La ligne de détail du téléphone : taille et dernière modification.
+    row.querySelector(".data-row-meta").textContent = [entry.type === "dir" ? "Dossier" : taille, quand(entry.modifiedAt)].filter(Boolean).join(" · ");
     const createdCell = row.querySelector(".data-row-created");
     const modifiedCell = row.querySelector(".data-row-modified");
     createdCell.textContent = formatDateTime(entry.createdAt);
@@ -169,14 +327,14 @@ function renderDataTable() {
     modifiedCell.textContent = formatDateTime(entry.modifiedAt);
     modifiedCell.title = new Date(entry.modifiedAt).toLocaleString();
 
-    const entryPath = joinDataPath(dataViewState.path, entry.name);
-
     const checkbox = row.querySelector(".data-row-checkbox");
     checkbox.checked = dataViewState.selected.has(entryPath);
+    row.classList.toggle("is-selected", checkbox.checked);
     checkbox.addEventListener("click", (e) => e.stopPropagation());
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) dataViewState.selected.add(entryPath);
       else dataViewState.selected.delete(entryPath);
+      row.classList.toggle("is-selected", checkbox.checked);
       updateDataMenuActionsState();
     });
 
@@ -210,27 +368,51 @@ function renderDataTable() {
     }
 
     // Le clic droit est traité par délégation sur `document` (voir plus bas) :
-    // la ligne n'a qu'à dire QUI elle est. L'appui long, lui, reste posé ici —
-    // le tactile n'a pas de clic droit.
+    // la ligne n'a qu'à dire QUI elle est. L'appui long et le bouton ⋯, eux,
+    // restent posés ici — le tactile n'a pas de clic droit.
     row.dataset.path = entryPath;
     bindLongPress(row, (touch) => openDataContextMenu(entry, entryPath, touch.clientX, touch.clientY));
+    row.querySelector(".data-row-more").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const r = e.currentTarget.getBoundingClientRect();
+      openDataContextMenu(entry, entryPath, r.right, r.bottom + 4, { alignRight: true });
+    });
 
     row.querySelector(".data-row-delete").addEventListener("click", async (e) => {
       e.stopPropagation();
-      const message = isInTrash(entryPath)
-        ? `Effacer définitivement « ${entry.name} » ? Cet élément est déjà dans la corbeille : il ne sera plus récupérable.`
-        : `Mettre « ${entry.name} » à la corbeille (${TRASH_DIR_NAME}/) ?`;
-      if (!confirm(message)) return;
-      try {
-        await api(`/api/agents/${agent.id}/data/file?path=${encodeURIComponent(entryPath)}`, { method: "DELETE" });
-        loadDataPath(dataViewState.path);
-      } catch (err) {
-        el("data-error").textContent = err.message;
-        el("data-error").classList.remove("hidden");
-      }
+      await supprimerElements([entryPath], entry.name);
     });
 
     bodyEl.appendChild(node);
+  }
+}
+
+/** Corbeille ou effacement définitif, après confirmation dans la fenêtre de
+ *  l'application. `nom` : pour un élément seul, ce qu'on affiche. */
+async function supprimerElements(chemins, nom = null) {
+  if (chemins.length === 0) return;
+  const definitif = chemins.every((c) => isInTrash(c));
+  const quoi = nom && chemins.length === 1 ? `« ${nom} »` : `${chemins.length} élément${chemins.length > 1 ? "s" : ""}`;
+  const ok = await confirmer({
+    title: "Confirmation",
+    text: definitif
+      ? `Effacer définitivement ${quoi} ? Déjà dans la corbeille : ce sera irréversible.`
+      : `Mettre ${quoi} à la corbeille (${TRASH_DIR_NAME}/) ?`,
+    okLabel: definitif ? "Effacer" : "Mettre à la corbeille",
+    danger: true,
+  });
+  if (!ok) return;
+  try {
+    const { errors } = await api(`/api/agents/${dataViewState.agent.id}/data/delete-many`, {
+      method: "POST",
+      body: JSON.stringify({ paths: chemins }),
+    });
+    await loadDataPath(dataViewState.path);
+    const rates = Object.keys(errors ?? {});
+    if (rates.length) erreur(`Non supprimé : ${rates.join(", ")}.`);
+    else bulle(definitif ? `${quoi} effacé${chemins.length > 1 ? "s" : ""}.` : `${quoi} mis${chemins.length > 1 ? "" : ""} à la corbeille.`);
+  } catch (err) {
+    erreur(err.message);
   }
 }
 
@@ -390,13 +572,11 @@ let profondeurGlisser = 0;
     try {
       depot = await fichiersDeposes(e.dataTransfer);
     } catch (err) {
-      el("data-error").textContent = `Lecture du dossier impossible : ${err.message}`;
-      el("data-error").classList.remove("hidden");
+      erreur(`Lecture du dossier impossible : ${err.message}`);
       return;
     }
     if (depot.fichiers.length === 0 && depot.dossiers.length === 0) {
-      el("data-error").textContent = "Rien à déposer.";
-      el("data-error").classList.remove("hidden");
+      erreur("Rien à déposer.");
       return;
     }
     await deposerFichiers(agent.id, dataViewState.path, depot.fichiers, depot.dossiers);
@@ -475,7 +655,7 @@ function renderDataContextHead(entry, chemin) {
   if (!visible) return;
 
   const dossier = entry.type === "dir";
-  el("data-ctx-head-icon").innerHTML = dossier ? ICON_FOLDER : ICON_FILE;
+  poserIcone(el("data-ctx-head-icon"), entry, chemin);
   el("data-ctx-head-name").textContent = entry.name;
   el("data-ctx-head-name").title = entry.name;
   const meta = el("data-ctx-head-meta");
@@ -499,7 +679,7 @@ function renderDataContextHead(entry, chemin) {
     });
 }
 
-function openDataContextMenu(entry, chemin, x, y) {
+function openDataContextMenu(entry, chemin, x, y, { alignRight = false } = {}) {
   window.getSelection?.()?.removeAllRanges?.();
   closeTabContextMenu?.();
   dataContextTarget = { entry, chemin };
@@ -514,6 +694,8 @@ function openDataContextMenu(entry, chemin, x, y) {
   // collage. Les griser plutôt que les cacher garde le menu stable d'un clic à
   // l'autre — un menu dont les entrées se déplacent se manipule mal.
   el("data-ctx-open").disabled = !surUnElement || plusieurs;
+  el("data-ctx-select").disabled = !surUnElement;
+  el("data-ctx-select").classList.toggle("hidden", dataViewState.selectMode && plusieurs);
   el("data-ctx-download").disabled = !surUnElement;
   el("data-ctx-copy").disabled = !surUnElement;
   el("data-ctx-cut").disabled = !surUnElement || dansCorbeille;
@@ -554,6 +736,7 @@ function openDataContextMenu(entry, chemin, x, y) {
   menu.classList.remove("hidden");
   const rect = menu.getBoundingClientRect();
   const safe = safeAreaInsets();
+  if (alignRight) x -= rect.width;
   const left = Math.min(x, window.innerWidth - rect.width - 8 - safe.right);
   const top = Math.min(y, window.innerHeight - rect.height - 8 - safe.bottom);
   menu.style.left = `${Math.max(8 + safe.left, left)}px`;
@@ -614,6 +797,27 @@ el("data-ctx-open").addEventListener("click", () => {
   else openFileTab(dataViewState.agent.id, cible.chemin, cible.entry.name);
 });
 
+/* « Sélectionner » : entre en mode sélection avec cet élément coché. Sur
+   téléphone, c'est le chemin le plus court vers une action groupée. */
+el("data-ctx-select").addEventListener("click", () => {
+  const cible = dataContextTarget;
+  closeDataContextMenu();
+  if (!cible?.chemin) return;
+  if (!dataViewState.selectMode) {
+    dataViewState.selectMode = true;
+    el("data-select-checkbox").checked = true;
+  }
+  if (dataViewState.selected.has(cible.chemin)) dataViewState.selected.delete(cible.chemin);
+  else dataViewState.selected.add(cible.chemin);
+  renderDataTable();
+  updateDataMenuActionsState();
+});
+
+el("data-ctx-upload").addEventListener("click", () => {
+  closeDataContextMenu();
+  el("data-upload-input").click();
+});
+
 el("data-ctx-download").addEventListener("click", () => {
   const cibles = ciblesDuMenu();
   const entry = dataContextTarget?.entry;
@@ -635,9 +839,7 @@ for (const [id, mode] of [["data-ctx-copy", "copy"], ["data-ctx-cut", "move"]]) 
     if (cibles.length === 0) return;
     dataClipboard.mode = mode;
     dataClipboard.paths = cibles;
-    appendDataNote(
-      `${cibles.length} élément${cibles.length > 1 ? "s" : ""} ${mode === "copy" ? "copié" : "coupé"}${cibles.length > 1 ? "s" : ""}. Colle-les où tu veux.`
-    );
+    bulle(`${cibles.length} élément${cibles.length > 1 ? "s" : ""} ${mode === "copy" ? "copié" : "coupé"}${cibles.length > 1 ? "s" : ""} — colle où tu veux (menu ⋯ ou clic droit).`);
   });
 }
 
@@ -670,11 +872,10 @@ el("data-ctx-paste").addEventListener("click", async () => {
     }
   }
   // Un « couper » ne se colle qu'une fois : les sources n'existent plus.
+  const colles = dataClipboard.paths.length - erreurs.length;
   if (dataClipboard.mode === "move") dataClipboard.paths = [];
-  if (erreurs.length) {
-    el("data-error").textContent = erreurs.join(" · ");
-    el("data-error").classList.remove("hidden");
-  }
+  if (erreurs.length) erreur(erreurs.join(" · "));
+  else bulle(`${colles} élément${colles > 1 ? "s" : ""} collé${colles > 1 ? "s" : ""}.`);
   await loadDataPath(dataViewState.path);
 });
 
@@ -682,8 +883,16 @@ el("data-ctx-rename").addEventListener("click", async () => {
   const cible = dataContextTarget;
   closeDataContextMenu();
   if (!cible?.entry) return;
-  const nom = prompt("Nouveau nom :", cible.entry.name);
+  const nom = (await demander({
+    title: "Renommer",
+    okLabel: "Renommer",
+    input: { value: cible.entry.name, placeholder: "Nouveau nom", maxLength: 255 },
+  }))?.trim();
   if (!nom || nom === cible.entry.name) return;
+  if (nom.includes("/")) {
+    erreur("Un nom ne contient pas de « / ».");
+    return;
+  }
   const parent = cible.chemin.includes("/") ? cible.chemin.slice(0, cible.chemin.lastIndexOf("/")) : "";
   try {
     await api(`/api/agents/${dataViewState.agent.id}/data/move`, {
@@ -691,9 +900,9 @@ el("data-ctx-rename").addEventListener("click", async () => {
       body: JSON.stringify({ from: cible.chemin, to: parent ? `${parent}/${nom}` : nom }),
     });
     await loadDataPath(dataViewState.path);
+    bulle(`Renommé en « ${nom} ».`);
   } catch (err) {
-    el("data-error").textContent = err.message;
-    el("data-error").classList.remove("hidden");
+    erreur(err.message);
   }
 });
 
@@ -760,7 +969,7 @@ el("data-ctx-archive").addEventListener("click", async () => {
       });
       fermer();
       await loadDataPath(dataViewState.path);
-      appendDataNote(`Archive créée : ${path}`);
+      bulle(`Archive créée : ${path}`);
     } catch (err) {
       const zone = modal.querySelector("#archive-modal-error");
       zone.textContent = err.message;
@@ -775,17 +984,16 @@ el("data-ctx-extract").addEventListener("click", async () => {
   const cible = dataContextTarget;
   closeDataContextMenu();
   if (!cible?.chemin) return;
-  appendDataNote(`Extraction de ${cible.entry?.name ?? cible.chemin}…`);
+  bulle(`Extraction de ${cible.entry?.name ?? cible.chemin}…`);
   try {
     const r = await api(`/api/agents/${dataViewState.agent.id}/data/extract`, {
       method: "POST",
       body: JSON.stringify({ path: cible.chemin }),
     });
     await loadDataPath(dataViewState.path);
-    appendDataNote(`${r.files} fichier${r.files > 1 ? "s" : ""} extrait${r.files > 1 ? "s" : ""} dans ${r.path}/`);
+    bulle(`${r.files} fichier${r.files > 1 ? "s" : ""} extrait${r.files > 1 ? "s" : ""} dans ${r.path}/`);
   } catch (err) {
-    el("data-error").textContent = err.message;
-    el("data-error").classList.remove("hidden");
+    erreur(err.message);
   }
 });
 
@@ -977,35 +1185,10 @@ el("data-ctx-new-dir").addEventListener("click", () => {
 
 el("data-ctx-delete").addEventListener("click", async () => {
   const cibles = ciblesDuMenu();
+  const entry = dataContextTarget?.entry;
   closeDataContextMenu();
-  if (cibles.length === 0) return;
-  const definitif = cibles.every((c) => isInTrash(c));
-  const message = definitif
-    ? `Effacer définitivement ${cibles.length} élément${cibles.length > 1 ? "s" : ""} ? Ils sont déjà dans la corbeille : ce sera irréversible.`
-    : `Mettre ${cibles.length} élément${cibles.length > 1 ? "s" : ""} à la corbeille (${TRASH_DIR_NAME}/) ?`;
-  if (!confirm(message)) return;
-  try {
-    await api(`/api/agents/${dataViewState.agent.id}/data/delete-many`, {
-      method: "POST",
-      body: JSON.stringify({ paths: cibles }),
-    });
-    await loadDataPath(dataViewState.path);
-  } catch (err) {
-    el("data-error").textContent = err.message;
-    el("data-error").classList.remove("hidden");
-  }
+  await supprimerElements(cibles, cibles.length === 1 ? entry?.name : null);
 });
-
-/** Message passager sous l'en-tête de l'explorateur. Le champ d'erreur sert
- *  aussi de champ d'information : une seule place à regarder. */
-function appendDataNote(texte) {
-  const zone = el("data-error");
-  zone.textContent = texte;
-  zone.classList.remove("hidden");
-  setTimeout(() => {
-    if (zone.textContent === texte) zone.classList.add("hidden");
-  }, 4000);
-}
 
 async function loadDataPath(path) {
   const agent = dataViewState.agent;
@@ -1013,6 +1196,13 @@ async function loadDataPath(path) {
   el("data-error").classList.add("hidden");
   try {
     const { entries } = await api(`/api/agents/${agent.id}/data?path=${encodeURIComponent(path)}`);
+    // Un filtre vaut pour le dossier où on l'a tapé.
+    if (path !== dataViewState.path) {
+      dataViewState.filter = "";
+      const input = el("data-filter-input");
+      if (input) input.value = "";
+      el("data-filter-clear")?.classList.add("hidden");
+    }
     dataViewState.path = path;
     dataViewState.entries = entries;
     // Bornée au dossier affiché — voir le commentaire sur dataViewState.selected.
@@ -1038,32 +1228,67 @@ async function loadDataPath(path) {
 // Recalcule l'état (activé/désactivé) des trois actions groupées, à chaque
 // changement de sélection et à chaque ouverture du menu sur cette vue.
 function updateDataMenuActionsState() {
-  const hasSelection = dataViewState.selected.size > 0;
+  const n = dataViewState.selected.size;
+  const hasSelection = n > 0;
   el("data-delete-selected-btn").disabled = !hasSelection;
   el("data-move-selected-btn").disabled = !hasSelection;
   el("data-download-selected-btn").disabled = !hasSelection;
-  // « Vider la corbeille » n'a de sens que dans la corbeille : ailleurs, le
-  // bouton disparaît plutôt que de rester grisé sans qu'on sache pourquoi.
+  el("data-select-bar").classList.toggle("hidden", !dataViewState.selectMode);
+  el("data-select-count").textContent = n === 0 ? "Aucune sélection" : `${n} sélectionné${n > 1 ? "s" : ""}`;
+  const visibles = entreesVisibles().length;
+  el("data-select-all-btn").textContent = n >= visibles && visibles > 0 ? "Aucun" : "Tout";
+  // « Vider la corbeille » n'a de sens que dans la corbeille.
   el("data-empty-trash-btn").classList.toggle("hidden", !isInTrash(dataViewState.path));
 }
 
+function setSelectMode(on) {
+  dataViewState.selectMode = on;
+  el("data-select-checkbox").checked = on;
+  if (!on) dataViewState.selected.clear();
+  renderDataTable();
+  updateDataMenuActionsState();
+}
+
+el("data-select-checkbox").addEventListener("change", (e) => setSelectMode(e.target.checked));
+el("data-select-done-btn").addEventListener("click", () => setSelectMode(false));
+el("data-select-all-btn").addEventListener("click", () => {
+  const visibles = entreesVisibles().map((e) => joinDataPath(dataViewState.path, e.name));
+  const tous = visibles.length > 0 && visibles.every((p) => dataViewState.selected.has(p));
+  if (tous) dataViewState.selected.clear();
+  else for (const p of visibles) dataViewState.selected.add(p);
+  renderDataTable();
+  updateDataMenuActionsState();
+});
+
 el("data-empty-trash-btn").addEventListener("click", async () => {
   closeChatMenu();
-  if (!confirm("Vider la corbeille ?\n\nTout ce qu'elle contient sera effacé définitivement.")) return;
+  const ok = await confirmer({
+    title: "Vider la corbeille",
+    text: "Tout ce qu'elle contient sera effacé définitivement.",
+    okLabel: "Vider",
+    danger: true,
+  });
+  if (!ok) return;
   try {
     await api(`/api/agents/${dataViewState.agent.id}/data/trash/empty`, { method: "POST" });
     await loadDataPath(dataViewState.path);
+    bulle("Corbeille vidée.");
   } catch (err) {
-    el("data-error").textContent = err.message;
-    el("data-error").classList.remove("hidden");
+    erreur(err.message);
   }
 });
 
-el("data-select-checkbox").addEventListener("change", (e) => {
-  dataViewState.selectMode = e.target.checked;
-  if (!dataViewState.selectMode) dataViewState.selected.clear();
-  renderDataTable();
-  updateDataMenuActionsState();
+/* Déposer des fichiers sans glisser : le sélecteur du système, depuis le
+   menu ⋮ ou le menu contextuel. Sur téléphone, c'est la seule façon. */
+el("data-upload-btn").addEventListener("click", () => {
+  closeChatMenu();
+  el("data-upload-input").click();
+});
+el("data-upload-input").addEventListener("change", async (e) => {
+  const fichiers = [...e.target.files].map((fichier) => ({ chemin: fichier.name, fichier }));
+  e.target.value = "";
+  if (!fichiers.length || !dataViewState.agent) return;
+  await deposerFichiers(dataViewState.agent.id, dataViewState.path, fichiers);
 });
 
 el("file-new-btn").addEventListener("click", () => {
@@ -1081,6 +1306,8 @@ el("file-new-btn").addEventListener("click", () => {
         body: JSON.stringify({ content: "" }),
       });
       await loadDataPath(dataViewState.path);
+      bulle(`« ${fileName} » créé.`);
+      openFileTab(dataViewState.agent.id, path, fileName);
     },
   });
 });
@@ -1099,6 +1326,7 @@ el("folder-new-btn").addEventListener("click", () => {
         body: JSON.stringify({ path }),
       });
       await loadDataPath(dataViewState.path);
+      bulle(`Dossier « ${name} » créé.`);
     },
   });
 });
@@ -1123,7 +1351,21 @@ function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }
   modalEl.querySelector("#data-name-dialog-label").textContent = label;
   input.placeholder = placeholder;
   modalEl.querySelector("#data-name-dialog-submit").textContent = submitLabel;
-  modalEl.querySelector(".modal-cancel").addEventListener("click", () => modalEl.remove());
+  const fermer = () => {
+    document.removeEventListener("keydown", surEchap);
+    modalEl.remove();
+  };
+  const surEchap = (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      fermer();
+    }
+  };
+  document.addEventListener("keydown", surEchap);
+  modalEl.querySelector(".modal-cancel").addEventListener("click", fermer);
+  modalEl.addEventListener("mousedown", (e) => {
+    if (e.target === modalEl) fermer();
+  });
   setTimeout(() => input.focus(), 0);
 
   form.addEventListener("submit", async (e) => {
@@ -1131,9 +1373,14 @@ function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }
     const name = input.value.trim();
     errorEl.classList.add("hidden");
     if (!name) return;
+    if (name.includes("/")) {
+      errorEl.textContent = "Un nom ne contient pas de « / ».";
+      errorEl.classList.remove("hidden");
+      return;
+    }
     try {
       await onSubmit(name);
-      modalEl.remove();
+      fermer();
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.classList.remove("hidden");
@@ -1143,28 +1390,7 @@ function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }
 
 el("data-delete-selected-btn").addEventListener("click", async () => {
   closeChatMenu();
-  const paths = [...dataViewState.selected];
-  if (paths.length === 0) return;
-  const count = `${paths.length} élément${paths.length > 1 ? "s" : ""}`;
-  const message = isInTrash(dataViewState.path)
-    ? `Effacer définitivement ${count} ? Ces éléments sont déjà dans la corbeille : ils ne seront plus récupérables.`
-    : `Mettre ${count} à la corbeille (${TRASH_DIR_NAME}/) ?`;
-  if (!confirm(message)) return;
-  try {
-    const { errors } = await api(`/api/agents/${dataViewState.agent.id}/data/delete-many`, {
-      method: "POST",
-      body: JSON.stringify({ paths }),
-    });
-    await loadDataPath(dataViewState.path);
-    const failed = Object.keys(errors ?? {});
-    if (failed.length > 0) {
-      el("data-error").textContent = `Non supprimé(s) : ${failed.join(", ")}.`;
-      el("data-error").classList.remove("hidden");
-    }
-  } catch (err) {
-    el("data-error").textContent = err.message;
-    el("data-error").classList.remove("hidden");
-  }
+  await supprimerElements([...dataViewState.selected]);
 });
 
 el("data-download-selected-btn").addEventListener("click", async () => {
@@ -1308,7 +1534,10 @@ function openDataMoveDialog() {
         const row = document.createElement("button");
         row.type = "button";
         row.className = "data-move-dir-row";
-        row.innerHTML = `${ICON_FOLDER}<span>${dir.name}</span>`;
+        row.innerHTML = ICON_FOLDER;
+        const libelle = document.createElement("span");
+        libelle.textContent = dir.name;
+        row.appendChild(libelle);
         row.addEventListener("click", () => {
           pickerPath = joinDataPath(pickerPath, dir.name);
           renderPicker();
@@ -1335,6 +1564,7 @@ function openDataMoveDialog() {
       modalEl.remove();
       dataViewState.selected.clear();
       await loadDataPath(dataViewState.path);
+      bulle(`${sourcePaths.length} élément${sourcePaths.length > 1 ? "s" : ""} ${apiPath === "copy" ? "copié" : "déplacé"}${sourcePaths.length > 1 ? "s" : ""}.`);
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.classList.remove("hidden");
@@ -1368,6 +1598,8 @@ function explorerTab() {
   return tab?.kind === "explorer" ? tab : null;
 }
 
+let explorerEntries = { path: "", entries: [], filter: "" };
+
 async function loadExplorerPath(path) {
   const tab = explorerTab();
   if (tab) tab.path = path;
@@ -1376,7 +1608,14 @@ async function loadExplorerPath(path) {
   renderExplorerBreadcrumb(path);
   try {
     const { entries } = await api(`/api/allkin/fs?path=${encodeURIComponent(path)}`);
-    renderExplorerEntries(path, entries);
+    if (path !== explorerEntries.path) {
+      explorerEntries.filter = "";
+      const input = el("explorer-filter-input");
+      if (input) input.value = "";
+      el("explorer-filter-clear")?.classList.add("hidden");
+    }
+    explorerEntries = { ...explorerEntries, path, entries };
+    renderExplorerEntries();
     persistTabs();
     applyScroll();
   } catch (err) {
@@ -1385,6 +1624,11 @@ async function loadExplorerPath(path) {
     errorEl.classList.remove("hidden");
   }
 }
+
+brancherFiltre("explorer-filter-input", "explorer-filter-clear", (v) => {
+  explorerEntries.filter = v;
+  renderExplorerEntries();
+});
 
 function renderExplorerBreadcrumb(path) {
   const bar = el("explorer-breadcrumb");
@@ -1409,23 +1653,24 @@ function renderExplorerBreadcrumb(path) {
   }
 }
 
-function renderExplorerEntries(path, entries) {
+function renderExplorerEntries() {
+  const { path } = explorerEntries;
   const body = el("explorer-body");
   body.innerHTML = "";
 
-  // Remonter d'un cran : une ligne plutôt qu'un bouton à part, pour que le
-  // geste soit au même endroit que les dossiers eux-mêmes.
   if (path) {
     const parent = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
-    body.appendChild(explorerRow({ name: "..", type: "dir" }, () => loadExplorerPath(parent)));
+    body.appendChild(explorerRow({ name: "Dossier parent", type: "parent", meta: parent || "~/.allkin" }, () => loadExplorerPath(parent)));
   }
 
-  if (entries.length === 0 && !path) {
+  const q = normaliser(explorerEntries.filter.trim());
+  const entries = q ? explorerEntries.entries.filter((e) => normaliser(e.name).includes(q)) : explorerEntries.entries;
+  if (entries.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     cell.colSpan = 3;
     cell.className = "data-table-empty dim";
-    cell.textContent = "Dossier vide.";
+    cell.textContent = q ? `Rien ne correspond à « ${explorerEntries.filter.trim()} ».` : "Dossier vide.";
     row.appendChild(cell);
     body.appendChild(row);
     return;
@@ -1445,32 +1690,33 @@ function renderExplorerEntries(path, entries) {
   }
 }
 
-const EXPLORER_ICONS = {
-  dir: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
-  file: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/></svg>',
-};
-
+/** Même dessin que les lignes de l'onglet Fichiers : tuile, nom, détail. */
 function explorerRow(entry, onOpen) {
   const row = document.createElement("tr");
   row.className = "data-row explorer-row";
+  if (entry.type === "parent") row.classList.add("is-parent");
 
   const nameCell = document.createElement("td");
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "explorer-name";
+  nameCell.className = "data-row-name";
   const icon = document.createElement("span");
-  icon.className = "explorer-icon";
-  icon.innerHTML = EXPLORER_ICONS[entry.type];
+  icon.className = "data-row-icon";
+  poserIcone(icon, entry, "x/x");
+  const text = document.createElement("span");
+  text.className = "data-row-text";
   const label = document.createElement("span");
-  label.className = "explorer-label";
+  label.className = "data-row-name-text";
   label.textContent = entry.name;
-  button.append(icon, label);
-  button.addEventListener("click", onOpen);
-  nameCell.appendChild(button);
+  label.title = entry.name;
+  const meta = document.createElement("span");
+  meta.className = "data-row-meta";
+  meta.textContent =
+    entry.type === "parent" ? entry.meta : [entry.type === "dir" ? "Dossier" : formatSize(entry.size), quand(entry.modifiedAt)].filter(Boolean).join(" · ");
+  text.append(label, meta);
+  nameCell.append(icon, text);
 
   const sizeCell = document.createElement("td");
   sizeCell.className = "explorer-col-size";
-  sizeCell.textContent = entry.type === "dir" ? "—" : formatSize(entry.size);
+  sizeCell.textContent = entry.type === "dir" || entry.type === "parent" ? (entry.type === "dir" ? "—" : "") : formatSize(entry.size);
 
   const dateCell = document.createElement("td");
   dateCell.className = "explorer-col-date";
@@ -1480,9 +1726,13 @@ function explorerRow(entry, onOpen) {
   }
 
   row.append(nameCell, sizeCell, dateCell);
+  row.addEventListener("click", onOpen);
+  row.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") onOpen();
+  });
+  row.tabIndex = 0;
   return row;
 }
-
 
 window.Allkin.registerTabKind("files", {
   panels: ["data-view"],
