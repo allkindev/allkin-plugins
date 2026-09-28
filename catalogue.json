@@ -4,7 +4,7 @@
     {
       "id": "file-explorer",
       "name": "Explorateur de fichiers",
-      "version": "1.0008",
+      "version": "1.0.1",
       "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
       "author": "Allkin",
       "permissions": [
@@ -30,8 +30,8 @@
         },
         {
           "path": "explorer.js",
-          "size": 60665,
-          "sha256": "355644625d8a333da7fc4d6ebb1d5b49af1acab0aef2a02509464a5bc3657248"
+          "size": 61199,
+          "sha256": "1cc0af6da010bd7aef7ede4823bc5d289be000c946c919e2ccc87a04b44de569"
         },
         {
           "path": "icon.svg",
@@ -40,26 +40,26 @@
         },
         {
           "path": "plugin.json",
-          "size": 521,
-          "sha256": "98c60d2a29dfbf534aaf55363c6b3b2c36c78e01ebc20a3a1e3c53134aecf8fd"
+          "size": 520,
+          "sha256": "3b9b2df64069ee934feda684dd686d2c1bd76f09a7c261701e750049eac7db52"
         },
         {
           "path": "view.html",
-          "size": 20217,
-          "sha256": "856b7d696501212638e0524718917eaf1e7104bad24842a7f314d257b819ce71"
+          "size": 22486,
+          "sha256": "040af310b4aec89156ae580135eab8ac88bba708b011d98d79fa20a73a89cf51"
         }
       ]
     },
     {
       "id": "markdown-editor",
       "name": "Éditeur markdown",
-      "version": "1.0.0",
-      "description": "L'éditeur markdown vivant d'Allkin : bloc-notes, rôle des agents (CLAUDE.md) et fichiers .md.",
+      "version": "1.0.1",
+      "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
       "author": "Allkin",
       "permissions": [
         {
           "id": "interface",
-          "reason": "S'intègre à la page d'Allkin pour éditer le bloc-notes, le rôle des agents et les fichiers markdown."
+          "reason": "S'intègre à la page d'Allkin pour éditer les missions, le rôle des agents et les fichiers markdown."
         }
       ],
       "service": false,
@@ -69,18 +69,18 @@
       "files": [
         {
           "path": "README.md",
-          "size": 1273,
-          "sha256": "bf6ea7a75bf147a50803e843539a28a6d7cc5e073f1789badd07c1b83d16a7dc"
+          "size": 5150,
+          "sha256": "94ce47d7a23b6fb57e5f6b5ab360dbf6609484357191862de358f8a244803d27"
         },
         {
           "path": "editor.css",
-          "size": 5385,
-          "sha256": "fe148fd40451bd3e85915c030a813ab926eac9be9bd18bbd41427463cdfda004"
+          "size": 18654,
+          "sha256": "bec997b36d0d8d7e73116303f017502116b0a38608437a2e0084e53dbf8c28e6"
         },
         {
           "path": "editor.js",
-          "size": 59845,
-          "sha256": "a77d9d501b9812136366a58d1e65d9a77f7d7ee9b23e49d328890051a596c63d"
+          "size": 117901,
+          "sha256": "39f0caa3164262855ad6a7b4c96e3529e1115f633e41ad5f73c3ae7a56b49c70"
         },
         {
           "path": "icon.svg",
@@ -88,9 +88,19 @@
           "sha256": "66cb29730da698a7c96731350eb59f2a1b739a1c27a000fd2c2e0ef9400cb24c"
         },
         {
+          "path": "model.js",
+          "size": 30754,
+          "sha256": "c885c068725ca9c536415b0d491fd682e31d7dd778609588acd6d01789c50f35"
+        },
+        {
           "path": "plugin.json",
-          "size": 494,
-          "sha256": "570dd0f9f2634d6370a918b46daf6dec8a235cf8c43172c21b3774eb82e624bb"
+          "size": 575,
+          "sha256": "57ffbabe8e02f0269ec78b5104f82a65fdb21c264a0811b09a09a2235c106007"
+        },
+        {
+          "path": "ui.js",
+          "size": 26450,
+          "sha256": "8489fc4450a6cff96badc0bed87e6a76198c790ad035e301c4d322c2ebec2e1b"
         }
       ]
     },
@@ -168,7 +178,7 @@
     {
       "id": "text-editor",
       "name": "Éditeur de texte",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
       "author": "Allkin",
       "permissions": [
@@ -184,8 +194,8 @@
       "files": [
         {
           "path": "README.md",
-          "size": 957,
-          "sha256": "9e5b5346cca469b6c2e22da3ac57430c60759cc6750e8cf7f7d84da79146874b"
+          "size": 1057,
+          "sha256": "e52b852e3c7e26f41ff33166fb05568c6665ee165db1ddea94c8991f83094aa7"
         },
         {
           "path": "editor.css",
@@ -194,8 +204,8 @@
         },
         {
           "path": "editor.js",
-          "size": 17923,
-          "sha256": "9b2a3eb6714e92ddc34126a9f587bb5d41214be01089b66aa4adcebdc0c197ac"
+          "size": 21634,
+          "sha256": "5efac63c48921999d741f3c9ce67f9038d235833705f535b0633fcec0bb9e127"
         },
         {
           "path": "icon.svg",
@@ -205,7 +215,7 @@
         {
           "path": "plugin.json",
           "size": 478,
-          "sha256": "c923f972f577a67314b3e413bf604e507dc1122884667a9782186c01cab7dd09"
+          "sha256": "4dc91442e4e1f5d6cc72ae30ae8c5ca5ce22d88f7513cc136ce417a3aa281a41"
         },
         {
           "path": "view.html",

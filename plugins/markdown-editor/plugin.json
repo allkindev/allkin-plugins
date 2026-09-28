@@ -1,15 +1,15 @@
 {
   "name": "Éditeur markdown",
-  "version": "1.0.0",
-  "description": "L'éditeur markdown vivant d'Allkin : bloc-notes, rôle des agents (CLAUDE.md) et fichiers .md.",
+  "version": "1.0.1",
+  "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
   "author": "Allkin",
   "permissions": [
-    { "id": "interface", "reason": "S'intègre à la page d'Allkin pour éditer le bloc-notes, le rôle des agents et les fichiers markdown." }
+    { "id": "interface", "reason": "S'intègre à la page d'Allkin pour éditer les missions, le rôle des agents et les fichiers markdown." }
   ],
   "ui": {
     "apiVersion": 1,
     "provides": ["markdown-editor"],
     "styles": ["editor.css"],
-    "scripts": ["editor.js"]
+    "scripts": ["model.js", "ui.js", "editor.js"]
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "Éditeur de texte",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ouvre les fichiers des agents dans un onglet : édition avec coloration syntaxique, aperçu markdown, images et PDF.",
   "author": "Allkin",
   "permissions": [

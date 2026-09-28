@@ -188,7 +188,10 @@ function applyFileMode(tab) {
     el("file-editor").value = tab.content;
     if (highlightable) renderEditorHighlight(tab);
   } else {
-    el("file-preview").innerHTML = window.renderMarkdown ? window.renderMarkdown(tab.content) : "";
+    // `agentFiles` : les images du dossier de l'agent s'affichent dans l'aperçu,
+    // comme dans l'éditeur — sans lui, celles qu'on vient d'ajouter resteraient
+    // du texte.
+    el("file-preview").innerHTML = window.renderMarkdown ? window.renderMarkdown(tab.content, { agentFiles: tab.agentId }) : "";
   }
   renderFileSaveState(tab);
   applyScroll();
@@ -201,6 +204,77 @@ function applyFileMode(tab) {
 
 let fileLiveEditor = null;
 let fileLiveEditorTabId = null;
+
+/* ---- Images et fichiers ajoutés à un document markdown ----
+   Ils sont rangés à côté du document, sous images/ ou fichiers/. Le chemin
+   écrit dans le markdown part de la racine de data/ : c'est la convention des
+   messages d'agent (mdAgentImageSrc, dans markdown.js), si bien que le même
+   `![…](…)` s'affiche dans l'éditeur, dans l'aperçu et dans une conversation. */
+
+const RASTER = /\.(png|jpe?g|gif|webp|avif|bmp|ico)$/i;
+
+/** Un nom que le rendu des messages acceptera : sans espace ni signe à échapper. */
+function safeUploadName(name) {
+  const dot = name.lastIndexOf(".");
+  const clean = (part) => part.normalize("NFC").replace(/[^\p{L}\p{N}._-]+/gu, "-").replace(/^[-.]+|[-.]+$/g, "");
+  const base = clean(dot > 0 ? name.slice(0, dot) : name) || "fichier";
+  const ext = dot > 0 ? clean(name.slice(dot + 1)).toLowerCase() : "";
+  return ext ? `${base}.${ext}` : base;
+}
+
+/* Un nom encore libre dans le dossier. Le serveur sait lever un doublon, mais
+   en « nom (2).png » — une espace et des parenthèses que le rendu des messages
+   ne lit pas dans une adresse d'image. On choisit donc le nom avant l'envoi. */
+async function freeUploadName(agentId, folder, name) {
+  let taken;
+  try {
+    const res = await fetch(`/api/agents/${encodeURIComponent(agentId)}/data?path=${encodeURIComponent(folder)}`);
+    if (!res.ok) return name; // le dossier n'existe pas encore : rien à éviter
+    taken = new Set(((await res.json()).entries ?? []).map((entry) => entry.name));
+  } catch {
+    return name;
+  }
+  if (!taken.has(name)) return name;
+  const dot = name.lastIndexOf(".");
+  const base = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : "";
+  let n = 2;
+  while (taken.has(`${base}-${n}${ext}`)) n++;
+  return `${base}-${n}${ext}`;
+}
+
+function liveEditorFiles(tab) {
+  const folder = tab.path.includes("/") ? tab.path.slice(0, tab.path.lastIndexOf("/")) : "";
+  return {
+    async upload(file) {
+      const target = [folder, /^image\//.test(file.type) ? "images" : "fichiers"].filter(Boolean).join("/");
+      const name = await freeUploadName(tab.agentId, target, safeUploadName(file.name));
+      const form = new FormData();
+      form.append("path", `${target}/${name}`);
+      form.append("file", file, name);
+      const res = await fetch(`/api/agents/${encodeURIComponent(tab.agentId)}/data/upload`, { method: "POST", body: form });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok || !payload.path) throw new Error(payload.error || `erreur ${res.status}`);
+      return { src: payload.path, name: file.name };
+    },
+    /* `usage` : "image" pour un <img>, "open" pour un lien qu'on ouvre. Seuls
+       une image matricielle ou un PDF s'ouvrent dans le navigateur ; tout le
+       reste est téléchargé — un .html ou un .svg écrit par un agent ne doit
+       pas s'exécuter sur l'adresse d'Allkin. */
+    resolve(src, usage) {
+      let path = String(src ?? "").trim();
+      try {
+        path = decodeURIComponent(path);
+      } catch {
+        // adresse mal encodée : prise telle quelle
+      }
+      path = path.replace(/^\.\//, "").replace(/^data\//, "");
+      if (!path || path.startsWith("/") || path.split("/").some((part) => part === ".." || part === "." || part === "")) return null;
+      const inline = usage === "image" || RASTER.test(path) || /\.pdf$/i.test(path);
+      return dataFileUrl(tab.agentId, path, !inline);
+    },
+  };
+}
 
 function mountFileLiveEditor(tab) {
   // Même onglet, éditeur déjà en place : on repeint seulement, sinon changer
@@ -216,6 +290,7 @@ function mountFileLiveEditor(tab) {
     // Un fichier peut être du code ou une liste de commandes : le correcteur
     // orthographique y soulignerait tout.
     spellcheck: false,
+    files: liveEditorFiles(tab),
     doc: {
       getContent: () => tab.content,
       setContent: (next) => {

@@ -4,8 +4,9 @@ Ouvre un fichier du dossier d'un agent dans son propre onglet.
 
 - **Texte et code** — édition directe, coloration syntaxique pour les langages reconnus,
   enregistrement au fil de la frappe (aucun bouton « Enregistrer »), plein écran.
-- **Markdown** — s'ouvre mis en forme ; « Éditer » passe dans l'éditeur markdown vivant si le plugin
-  *Éditeur markdown* est installé, en saisie brute sinon.
+- **Markdown** — s'ouvre mis en forme ; « Éditer » passe dans l'éditeur markdown si le plugin
+  *Éditeur markdown* est installé, en saisie brute sinon. Les images et fichiers qu'on y ajoute
+  sont rangés à côté du document, dans `images/` et `fichiers/`.
 - **Images et PDF** — simple visionneuse.
 - Copier le contenu ou le chemin, télécharger le fichier.
 

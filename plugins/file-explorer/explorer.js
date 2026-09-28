@@ -263,8 +263,10 @@ function renderDataTable() {
  */
 async function deposerFichiers(agentId, destination, fichiers, dossiersVides = []) {
   const node = el("upload-progress-template").content.cloneNode(true);
+  // La fenêtre qu'on ouvre, prise dans le fragment avant insertion : chercher
+  // dans la page renverrait la première fenêtre venue, pas forcément celle-ci.
+  const modal = node.firstElementChild;
   document.body.appendChild(node);
-  const modal = document.body.querySelector(".upload-modal-backdrop");
   const total = fichiers.reduce((n, f) => n + f.fichier.size, 0);
   modal.querySelector("#upload-modal-target").textContent =
     `${fichiers.length} fichier${fichiers.length > 1 ? "s" : ""} · ${formaterOctets(total)}` +
@@ -701,8 +703,10 @@ el("data-ctx-archive").addEventListener("click", async () => {
   if (cibles.length === 0) return;
 
   const node = el("archive-format-template").content.cloneNode(true);
+  // La fenêtre qu'on ouvre, prise dans le fragment avant insertion : chercher
+  // dans la page renverrait la première fenêtre venue, pas forcément celle-ci.
+  const modal = node.firstElementChild;
   document.body.appendChild(node);
-  const modal = document.body.querySelector(".modal-backdrop:last-of-type");
   const fermer = () => modal.remove();
   modal.querySelector(".modal-cancel").addEventListener("click", fermer);
   modal.addEventListener("mousedown", (e) => {
@@ -809,8 +813,8 @@ el("data-ctx-run").addEventListener("click", () => {
 
 async function ouvrirExecutionScript(agentId, chemin, nom) {
   const node = el("script-run-template").content.cloneNode(true);
+  const modal = node.firstElementChild; // voir openDataNameDialog
   document.body.appendChild(node);
-  const modal = document.body.querySelector(".script-run-backdrop");
   const q = (id) => modal.querySelector(`#${id}`);
 
   q("script-run-name").textContent = nom;
@@ -1107,8 +1111,10 @@ el("folder-new-btn").addEventListener("click", () => {
 function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }) {
   const template = el("data-name-dialog-template");
   const node = template.content.cloneNode(true);
+  // La fenêtre qu'on ouvre, prise dans le fragment avant insertion : chercher
+  // dans la page renverrait la première fenêtre venue, pas forcément celle-ci.
+  const modalEl = node.firstElementChild;
   document.body.appendChild(node);
-  const modalEl = document.body.querySelector(".modal-backdrop");
   const form = modalEl.querySelector("form");
   const input = modalEl.querySelector("#data-name-dialog-input");
   const errorEl = modalEl.querySelector("#data-name-dialog-error");
@@ -1245,8 +1251,10 @@ function openDataMoveDialog() {
 
   const template = el("data-move-dialog-template");
   const node = template.content.cloneNode(true);
+  // La fenêtre qu'on ouvre, prise dans le fragment avant insertion : chercher
+  // dans la page renverrait la première fenêtre venue, pas forcément celle-ci.
+  const modalEl = node.firstElementChild;
   document.body.appendChild(node);
-  const modalEl = document.body.querySelector(".modal-backdrop");
   const breadcrumbEl = modalEl.querySelector("#data-move-breadcrumb");
   const listEl = modalEl.querySelector("#data-move-list");
   const errorEl = modalEl.querySelector("#data-move-error");

@@ -187,7 +187,10 @@ git add -A && git commit && git push
 ```
 
 - **Incrémenter `version`** dans `plugin.json` à chaque changement : c'est ce qui fait apparaître
-  « Mettre à jour » chez ceux qui l'ont installé.
+  « Mettre à jour » chez ceux qui l'ont installé. **Règle stricte** : la version a toujours la forme
+  `1.0.N` et seul `N` augmente, de 1, à chaque modification (`1.0.7` → `1.0.8`). Jamais `1.1.0`,
+  jamais `1.0008` (Allkin le lirait comme `1.8`). Un plugin aussi livré avec Allkin porte le même
+  numéro des deux côtés pour le même contenu.
 - GitHub met jusqu'à **5 minutes** à servir la nouvelle version des fichiers bruts, et Allkin garde
   le catalogue **une heure** en cache : le bouton ↻ de la page Plugins force la relecture.
 - Le dépôt doit rester **public** : Allkin lit les fichiers sans authentification.
