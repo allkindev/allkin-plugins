@@ -4,7 +4,7 @@
     {
       "id": "file-explorer",
       "name": "Explorateur de fichiers",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
       "author": "Allkin",
       "permissions": [
@@ -20,18 +20,18 @@
       "files": [
         {
           "path": "README.md",
-          "size": 2325,
-          "sha256": "4470500ca69c53ef232b050d621a36a0b9a62934a2f7e37ec31d45fe164c254e"
+          "size": 2564,
+          "sha256": "c1a7b2e302600489fd4c869bfe915cb972a7143a51352d0fd026960f2f7f2a22"
         },
         {
           "path": "explorer.css",
-          "size": 20611,
-          "sha256": "9d5a3a4f529961c4fc9e40addbf65e7c4f0175188a3b6c287bb15fca28ae2f5f"
+          "size": 20778,
+          "sha256": "be70ddfbf3c696ab6f4ab0fa79880a622f241f697d137ee185044d5d84a63a88"
         },
         {
           "path": "explorer.js",
-          "size": 73548,
-          "sha256": "fe452e8cecd944eec3655a678d102b325b5e6e9ea32f66a14a37f629a82cf927"
+          "size": 74473,
+          "sha256": "36f19e9a83705ebe15c85926b2eefa6d5201fe857ba4c20f12f48861b3e706d0"
         },
         {
           "path": "icon.svg",
@@ -41,12 +41,12 @@
         {
           "path": "plugin.json",
           "size": 520,
-          "sha256": "fc3253ccb7feab34d07aedd93345c6d25a9e6cecfff01e8575bef9a023281152"
+          "sha256": "369b33ee9c0da83ca9882c4f709cd089d9a180ceb9b8ae60fd6c35f364b2422b"
         },
         {
           "path": "view.html",
-          "size": 22486,
-          "sha256": "040af310b4aec89156ae580135eab8ac88bba708b011d98d79fa20a73a89cf51"
+          "size": 23108,
+          "sha256": "9e16ae00e34481a1fc3a726fc91aa9348541deac6bc1c55b559a2d6cd7562d40"
         }
       ]
     },

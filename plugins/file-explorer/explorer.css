@@ -20,8 +20,21 @@
 #explorer-view .data-view-header { flex-wrap: nowrap; gap: var(--sp-3); }
 #data-view .data-breadcrumb,
 #explorer-view .data-breadcrumb { flex: 1; min-width: 0; }
-.data-header-actions { display: flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; }
-.data-header-btn { gap: var(--sp-2); padding: 0 var(--sp-3); font-size: var(--text-sm); }
+.data-header-actions { display: flex; align-items: center; gap: var(--sp-1); flex-shrink: 0; }
+/* Des boutons icône, carrés : le libellé est dans l'infobulle. */
+button.data-header-btn {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-radius: 9px;
+}
+button.data-header-btn .icon { width: 1.1rem; height: 1.1rem; }
+button.data-header-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+button.data-header-btn.active .icon { stroke: var(--accent); }
 
 .data-crumb {
   background: none;
@@ -44,10 +57,10 @@
 
 /* ---- Barre d'outils : filtre et tri ---------------------------------------- */
 .data-toolbar { display: flex; align-items: center; gap: var(--sp-2); }
+.data-toolbar.hidden { display: none; }
 .data-filter {
   flex: 1;
   min-width: 0;
-  max-width: 22rem;
   display: flex;
   align-items: center;
   gap: var(--sp-2);
@@ -93,18 +106,7 @@ button.data-filter-clear:hover { background: color-mix(in srgb, var(--text) 10%,
 button.data-filter-clear.hidden { display: none; }
 /* Le tri par menu ne sert que sur téléphone : ailleurs, les en-têtes trient. */
 .data-sort { position: relative; display: none; }
-button.data-sort-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 2.2rem;
-  min-height: 0;
-  padding: 0 0.8rem 0 0.65rem;
-  border-radius: 999px;
-  font-size: var(--text-sm);
-}
-button.data-sort-btn svg { width: 1rem; height: 1rem; }
-.data-sort-menu { left: auto; right: 0; transform: none; min-width: 9rem; }
+.data-sort-menu { left: auto; right: 0; top: calc(100% + 4px); transform: none; min-width: 9rem; }
 .data-sort-menu.tl-menu { animation: none; }
 .data-sort-menu .tl-menu-item.sorted-asc::after,
 .data-sort-menu .tl-menu-item.sorted-desc::after { margin-left: auto; padding-left: var(--sp-3); font-size: 0.7em; color: var(--accent); }
@@ -394,10 +396,10 @@ button.data-select-act.data-select-done:hover { background: var(--accent); filte
   .data-breadcrumb::-webkit-scrollbar { display: none; }
   .data-crumb { white-space: nowrap; max-width: 10rem; }
   #data-view .data-view-header, #explorer-view .data-view-header { gap: var(--sp-2); }
-  .data-header-btn { padding: 0; width: 2.35rem; min-width: 2.35rem; }
-  .data-header-btn-label { display: none; }
-  .data-filter { max-width: none; }
+  .data-header-actions { gap: 2px; }
+  button.data-header-btn { width: 2.15rem; height: 2.15rem; }
   .data-sort { display: block; }
+  .explorer-readonly { display: none; }
 
   /* La barre de sélection se pose au pied, sous le pouce. */
   .data-select-bar {

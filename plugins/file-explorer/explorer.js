@@ -258,6 +258,31 @@ brancherFiltre("data-filter-input", "data-filter-clear", (v) => {
   renderDataTable();
 });
 
+/* La loupe déplie le champ ; le refermer efface le filtre. */
+function brancherLoupe(btnId, barId, inputId, clearId, onChange) {
+  const btn = el(btnId);
+  const bar = el(barId);
+  if (!btn || !bar) return;
+  btn.addEventListener("click", () => {
+    const open = bar.classList.contains("hidden");
+    bar.classList.toggle("hidden", !open);
+    btn.classList.toggle("active", open);
+    btn.setAttribute("aria-expanded", String(open));
+    const input = el(inputId);
+    if (open) {
+      input.focus();
+    } else if (input.value) {
+      input.value = "";
+      el(clearId)?.classList.add("hidden");
+      onChange("");
+    }
+  });
+}
+brancherLoupe("data-filter-btn", "data-toolbar", "data-filter-input", "data-filter-clear", (v) => {
+  dataViewState.filter = v;
+  renderDataTable();
+});
+
 /** Les éléments à afficher : triés, puis filtrés. */
 function entreesVisibles() {
   const q = normaliser(dataViewState.filter.trim());
@@ -725,6 +750,8 @@ function openDataContextMenu(entry, chemin, x, y, { alignRight = false } = {}) {
     : plusieurs
       ? `Mettre à la corbeille (${cibles.length})`
       : "Mettre à la corbeille";
+  // « Vider la corbeille » n'a de sens que dans la corbeille.
+  el("data-ctx-empty-trash").classList.toggle("hidden", !isInTrash(dataViewState.path));
   el("data-ctx-paste-label").textContent = dataClipboard.paths.length
     ? `Coller (${dataClipboard.paths.length})`
     : "Coller";
@@ -805,7 +832,8 @@ el("data-ctx-select").addEventListener("click", () => {
   if (!cible?.chemin) return;
   if (!dataViewState.selectMode) {
     dataViewState.selectMode = true;
-    el("data-select-checkbox").checked = true;
+    el("data-select-btn").classList.add("active");
+    el("data-select-btn").setAttribute("aria-pressed", "true");
   }
   if (dataViewState.selected.has(cible.chemin)) dataViewState.selected.delete(cible.chemin);
   else dataViewState.selected.add(cible.chemin);
@@ -1237,19 +1265,18 @@ function updateDataMenuActionsState() {
   el("data-select-count").textContent = n === 0 ? "Aucune sélection" : `${n} sélectionné${n > 1 ? "s" : ""}`;
   const visibles = entreesVisibles().length;
   el("data-select-all-btn").textContent = n >= visibles && visibles > 0 ? "Aucun" : "Tout";
-  // « Vider la corbeille » n'a de sens que dans la corbeille.
-  el("data-empty-trash-btn").classList.toggle("hidden", !isInTrash(dataViewState.path));
 }
 
 function setSelectMode(on) {
   dataViewState.selectMode = on;
-  el("data-select-checkbox").checked = on;
+  el("data-select-btn").classList.toggle("active", on);
+  el("data-select-btn").setAttribute("aria-pressed", String(on));
   if (!on) dataViewState.selected.clear();
   renderDataTable();
   updateDataMenuActionsState();
 }
 
-el("data-select-checkbox").addEventListener("change", (e) => setSelectMode(e.target.checked));
+el("data-select-btn").addEventListener("click", () => setSelectMode(!dataViewState.selectMode));
 el("data-select-done-btn").addEventListener("click", () => setSelectMode(false));
 el("data-select-all-btn").addEventListener("click", () => {
   const visibles = entreesVisibles().map((e) => joinDataPath(dataViewState.path, e.name));
@@ -1260,8 +1287,8 @@ el("data-select-all-btn").addEventListener("click", () => {
   updateDataMenuActionsState();
 });
 
-el("data-empty-trash-btn").addEventListener("click", async () => {
-  closeChatMenu();
+el("data-ctx-empty-trash").addEventListener("click", async () => {
+  closeDataContextMenu();
   const ok = await confirmer({
     title: "Vider la corbeille",
     text: "Tout ce qu'elle contient sera effacé définitivement.",
@@ -1280,10 +1307,7 @@ el("data-empty-trash-btn").addEventListener("click", async () => {
 
 /* Déposer des fichiers sans glisser : le sélecteur du système, depuis le
    menu ⋮ ou le menu contextuel. Sur téléphone, c'est la seule façon. */
-el("data-upload-btn").addEventListener("click", () => {
-  closeChatMenu();
-  el("data-upload-input").click();
-});
+el("data-upload-btn").addEventListener("click", () => el("data-upload-input").click());
 el("data-upload-input").addEventListener("change", async (e) => {
   const fichiers = [...e.target.files].map((fichier) => ({ chemin: fichier.name, fichier }));
   e.target.value = "";
@@ -1292,7 +1316,6 @@ el("data-upload-input").addEventListener("change", async (e) => {
 });
 
 el("file-new-btn").addEventListener("click", () => {
-  closeChatMenu();
   openDataNameDialog({
     title: "Nouveau fichier",
     label: "Nom du fichier",
@@ -1313,7 +1336,6 @@ el("file-new-btn").addEventListener("click", () => {
 });
 
 el("folder-new-btn").addEventListener("click", () => {
-  closeChatMenu();
   openDataNameDialog({
     title: "Nouveau dossier",
     label: "Nom du dossier",
@@ -1389,12 +1411,10 @@ function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }
 }
 
 el("data-delete-selected-btn").addEventListener("click", async () => {
-  closeChatMenu();
   await supprimerElements([...dataViewState.selected]);
 });
 
 el("data-download-selected-btn").addEventListener("click", async () => {
-  closeChatMenu();
   const agent = dataViewState.agent;
   const paths = [...dataViewState.selected];
   if (paths.length === 0) return;
@@ -1461,7 +1481,6 @@ function telechargerZip(agentId, paths) {
 }
 
 el("data-move-selected-btn").addEventListener("click", () => {
-  closeChatMenu();
   if (dataViewState.selected.size > 0) openDataMoveDialog();
 });
 
@@ -1629,6 +1648,10 @@ brancherFiltre("explorer-filter-input", "explorer-filter-clear", (v) => {
   explorerEntries.filter = v;
   renderExplorerEntries();
 });
+brancherLoupe("explorer-filter-btn", "explorer-toolbar", "explorer-filter-input", "explorer-filter-clear", (v) => {
+  explorerEntries.filter = v;
+  renderExplorerEntries();
+});
 
 function renderExplorerBreadcrumb(path) {
   const bar = el("explorer-breadcrumb");
@@ -1744,7 +1767,6 @@ window.Allkin.registerTabKind("files", {
   tooltip: (tab, label) => `Fichiers — ${label}`,
   scroller: () => document.querySelector("#data-view .data-table-wrap"),
   activate: (tab) => openFilesTabView(tab),
-  menu: { title: "Options des fichiers", onShow: updateDataMenuActionsState },
 });
 
 window.Allkin.registerTabKind("explorer", {
