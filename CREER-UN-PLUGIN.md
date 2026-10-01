@@ -22,11 +22,18 @@ onglet d'Allkin. Il a longtemps été publié ici sous le nom `bonjour`.
 ```
 plugins/bonjour/
 ├── plugin.json
+├── validation.json
 ├── README.md
 ├── icon.svg
 ├── package.json
 └── server.js
 ```
+
+`validation.json` dit si le propriétaire d'Allkin a vérifié le plugin : `{ "status": "pending" }`
+au départ — tout le monde peut l'installer, sans garantie de fonctionnement, et l'interface
+l'affiche « En cours de validation » — puis `{ "status": "validated", "date": "2026-10-01",
+"by": "Tony" }` une fois vérifié. Fichier absent = en attente. Seul le propriétaire le passe à
+`validated`.
 
 ### `plugin.json`
 
@@ -214,6 +221,11 @@ git add -A && git commit && git push
   la page en HTTPS). Le reste de la politique du plugin est conservé.
 
 ### Service
+
+Un service qui a le droit `agents` reçoit aussi `ALLKIN_SOCKET` (la socket Unix d'Allkin, même
+protocole que la ligne de commande : `list_agents`, `attach`, `message`, `approval_response`,
+`form_response`) et `ALLKIN_DIR`. C'est ainsi qu'un plugin fait parler un agent depuis un autre
+canal — voir `plugins/telegram-bridge/bridge.mjs`, le modèle à copier.
 
 - **Pas de shell.** `command` et `args` partent tels quels. `node` désigne le Node d'Allkin (le
   PATH d'une unité systemd ne contient pas forcément celui de nvm) ; `./script` est cherché dans le

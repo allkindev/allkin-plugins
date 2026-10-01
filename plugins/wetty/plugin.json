@@ -1,6 +1,6 @@
 {
   "name": "WeTTY",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Terminal dans le navigateur (WeTTY) : une session SSH sur la machine, ouverte dans un onglet d'Allkin.",
   "author": "butlerx/wetty — intégration Allkin",
   "homepage": "https://github.com/butlerx/wetty",
@@ -72,5 +72,130 @@
     "portSetting": "port",
     "path": "/",
     "keepPrefix": true
+  },
+  "locales": {
+    "en": {
+      "name": "WeTTY",
+      "description": "Terminal in the browser (WeTTY): an SSH session on the machine, opened in an Allkin tab.",
+      "permissions": {
+        "network": "Downloads WeTTY from npm on first start, listens on a local port and connects to the SSH server.",
+        "exec": "Runs npm to install WeTTY, then ssh: the terminal executes the commands you type.",
+        "filesystem": "A terminal gives access to every file of the account you log in with."
+      },
+      "settings": {
+        "port": {
+          "label": "Local port",
+          "help": "Port WeTTY listens on, on 127.0.0.1 only: the page goes through Allkin."
+        },
+        "sshHost": {
+          "label": "SSH server",
+          "help": "The machine on which to open the terminal. “localhost” = the machine Allkin runs on."
+        },
+        "sshPort": {
+          "label": "SSH port"
+        },
+        "sshUser": {
+          "label": "SSH user",
+          "help": "Empty: the terminal asks for the user name when it opens.",
+          "placeholder": "asked at every connection"
+        },
+        "sshAuth": {
+          "label": "Authentication",
+          "options": {
+            "password": "Password",
+            "publickey,password": "Key, then password"
+          }
+        },
+        "sshKey": {
+          "label": "SSH private key",
+          "help": "Optional. With a key that has no passphrase, the terminal opens without asking anything: only the Allkin session protects it then."
+        },
+        "title": {
+          "label": "Title"
+        }
+      }
+    },
+    "es": {
+      "name": "WeTTY",
+      "description": "Terminal en el navegador (WeTTY): una sesión SSH en la máquina, abierta en una pestaña de Allkin.",
+      "permissions": {
+        "network": "Descarga WeTTY desde npm en el primer inicio, escucha en un puerto local y se conecta al servidor SSH.",
+        "exec": "Ejecuta npm para instalar WeTTY y luego ssh: el terminal ejecuta los comandos que escribes.",
+        "filesystem": "Un terminal da acceso a todos los archivos de la cuenta con la que te conectas."
+      },
+      "settings": {
+        "port": {
+          "label": "Puerto local",
+          "help": "Puerto de escucha de WeTTY, solo en 127.0.0.1: la página pasa por Allkin."
+        },
+        "sshHost": {
+          "label": "Servidor SSH",
+          "help": "La máquina en la que abrir el terminal. «localhost» = la máquina de Allkin."
+        },
+        "sshPort": {
+          "label": "Puerto SSH"
+        },
+        "sshUser": {
+          "label": "Usuario SSH",
+          "help": "Vacío: el terminal pide el nombre de usuario al abrirse.",
+          "placeholder": "se pide en cada conexión"
+        },
+        "sshAuth": {
+          "label": "Autenticación",
+          "options": {
+            "password": "Contraseña",
+            "publickey,password": "Clave y luego contraseña"
+          }
+        },
+        "sshKey": {
+          "label": "Clave privada SSH",
+          "help": "Opcional. Con una clave sin frase de contraseña, el terminal se abre sin pedir nada: en ese caso solo lo protege la sesión de Allkin."
+        },
+        "title": {
+          "label": "Título"
+        }
+      }
+    },
+    "de": {
+      "name": "WeTTY",
+      "description": "Terminal im Browser (WeTTY): eine SSH-Sitzung auf der Maschine, geöffnet in einem Tab von Allkin.",
+      "permissions": {
+        "network": "Lädt WeTTY beim ersten Start von npm herunter, lauscht auf einem lokalen Port und verbindet sich mit dem SSH-Server.",
+        "exec": "Startet npm, um WeTTY zu installieren, dann ssh: Das Terminal führt die Befehle aus, die du eingibst.",
+        "filesystem": "Ein Terminal gibt Zugriff auf alle Dateien des Kontos, mit dem du dich anmeldest."
+      },
+      "settings": {
+        "port": {
+          "label": "Lokaler Port",
+          "help": "Port, auf dem WeTTY lauscht, nur auf 127.0.0.1: Die Seite läuft über Allkin."
+        },
+        "sshHost": {
+          "label": "SSH-Server",
+          "help": "Die Maschine, auf der das Terminal geöffnet wird. „localhost“ = die Maschine von Allkin."
+        },
+        "sshPort": {
+          "label": "SSH-Port"
+        },
+        "sshUser": {
+          "label": "SSH-Benutzer",
+          "help": "Leer: Das Terminal fragt beim Öffnen nach dem Benutzernamen.",
+          "placeholder": "wird bei jeder Verbindung abgefragt"
+        },
+        "sshAuth": {
+          "label": "Authentifizierung",
+          "options": {
+            "password": "Passwort",
+            "publickey,password": "Schlüssel, dann Passwort"
+          }
+        },
+        "sshKey": {
+          "label": "Privater SSH-Schlüssel",
+          "help": "Optional. Mit einem Schlüssel ohne Passphrase öffnet sich das Terminal, ohne etwas abzufragen: Dann schützt es nur noch die Allkin-Sitzung."
+        },
+        "title": {
+          "label": "Titel"
+        }
+      }
+    }
   }
 }

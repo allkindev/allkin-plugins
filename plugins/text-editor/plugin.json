@@ -1,6 +1,6 @@
 {
   "name": "Éditeur de texte",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Ouvre les fichiers des agents dans un onglet : éditeur de code (80 langages colorés, numéros de ligne, recherche/remplacement, commentaires, indentation), aperçu markdown, images et PDF.",
   "author": "Allkin",
   "permissions": [
@@ -9,6 +9,29 @@
       "reason": "Ajoute l'onglet fichier à la page d'Allkin."
     }
   ],
+  "locales": {
+    "en": {
+      "name": "Text editor",
+      "description": "Opens the files of the agents in a tab: code editor (80 highlighted languages, line numbers, find and replace, comments, indentation), Markdown preview, images and PDF.",
+      "permissions": {
+        "interface": "Adds the file tab to the page of Allkin."
+      }
+    },
+    "es": {
+      "name": "Editor de texto",
+      "description": "Abre los archivos de los agentes en una pestaña: editor de código (80 lenguajes resaltados, números de línea, buscar y sustituir, comentarios, sangría), vista previa de Markdown, imágenes y PDF.",
+      "permissions": {
+        "interface": "Añade la pestaña de archivo a la página de Allkin."
+      }
+    },
+    "de": {
+      "name": "Texteditor",
+      "description": "Öffnet die Dateien der Agenten in einem Tab: Code-Editor (80 Sprachen mit Hervorhebung, Zeilennummern, Suchen und Ersetzen, Kommentare, Einrückung), Markdown-Vorschau, Bilder und PDF.",
+      "permissions": {
+        "interface": "Fügt der Seite von Allkin den Datei-Tab hinzu."
+      }
+    }
+  },
   "ui": {
     "apiVersion": 1,
     "provides": [
@@ -22,6 +45,7 @@
       "editor.css"
     ],
     "scripts": [
+      "locales.js",
       "hljs.js",
       "editor.js"
     ]

@@ -50,6 +50,17 @@ function listFiles(dir, base = dir) {
   return out;
 }
 
+/** The owner's check of the plugin (validation.json): absent or unreadable = pending. */
+function readValidation(dir) {
+  try {
+    const raw = JSON.parse(readFileSync(join(dir, "validation.json"), "utf-8"));
+    if (raw?.status !== "validated") return { status: "pending" };
+    return { status: "validated", ...(typeof raw.date === "string" ? { date: raw.date } : {}), ...(typeof raw.by === "string" ? { by: raw.by } : {}) };
+  } catch {
+    return { status: "pending" };
+  }
+}
+
 function readPlugin(id) {
   const dir = join(PLUGINS_DIR, id);
   if (!ID_PATTERN.test(id)) return fail(id, "nom de dossier : minuscules, chiffres et tirets.");
@@ -108,8 +119,27 @@ function readPlugin(id) {
     ui: Boolean(m.ui),
     ...(m.agent ? { agent: { name: m.agent.name } } : {}),
     ...(icon ? { icon } : {}),
+    // validation.json of the folder: "validated" with its date, or pending.
+    validation: readValidation(dir),
+    // Translations of the texts above (name, description, permission reasons):
+    // the gallery shows them before the plugin is installed.
+    ...(m.locales && typeof m.locales === "object" ? { locales: catalogueLocales(m.locales) } : {}),
     files,
   };
+}
+
+/** Only what the catalogue shows: name, description, permission reasons. */
+function catalogueLocales(locales) {
+  const out = {};
+  for (const [language, l] of Object.entries(locales)) {
+    if (!/^[a-z]{2}$/.test(language) || !l || typeof l !== "object") continue;
+    out[language] = {
+      ...(typeof l.name === "string" ? { name: l.name } : {}),
+      ...(typeof l.description === "string" ? { description: l.description } : {}),
+      ...(l.permissions && typeof l.permissions === "object" ? { permissions: l.permissions } : {}),
+    };
+  }
+  return out;
 }
 
 const plugins = existsSync(PLUGINS_DIR)

@@ -32,7 +32,7 @@ function run(command, args) {
   return new Promise((resolve) => {
     const child = spawn(command, args, { cwd: runtimeDir, env, stdio: "inherit" });
     child.on("error", (error) => {
-      console.error(`impossible de lancer ${command} : ${error.message}`);
+      console.error(`cannot start ${command}: ${error.message}`);
       resolve(1);
     });
     child.on("exit", (code) => resolve(code ?? 1));
@@ -40,14 +40,14 @@ function run(command, args) {
 }
 
 if (installedVersion() !== WETTY_VERSION) {
-  console.log(`Installation de WeTTY ${WETTY_VERSION} dans ${runtimeDir} (une minute au plus)…`);
+  console.log(`Installing WeTTY ${WETTY_VERSION} into ${runtimeDir} (one minute at most)…`);
   mkdirSync(runtimeDir, { recursive: true });
   if (!existsSync(join(runtimeDir, "package.json"))) {
     writeFileSync(join(runtimeDir, "package.json"), '{ "private": true }\n');
   }
   const code = await run("npm", ["install", "--omit=dev", "--no-audit", "--no-fund", `wetty@${WETTY_VERSION}`]);
   if (code !== 0 || installedVersion() !== WETTY_VERSION) {
-    console.error("L'installation de WeTTY a échoué (voir ci-dessus).");
+    console.error("WeTTY installation failed (see above).");
     process.exit(1);
   }
 }
@@ -66,10 +66,10 @@ function patchEnvVersion() {
     const source = readFileSync(file, "utf-8");
     if (source.includes(broken)) {
       writeFileSync(file, source.replace(broken, fixed));
-      console.log("Correctif appliqué : détection de la version de env (uutils coreutils).");
+      console.log("Patch applied: detection of the env version (uutils coreutils).");
     }
   } catch (error) {
-    console.error(`Correctif non appliqué : ${error.message}`);
+    console.error(`Patch not applied: ${error.message}`);
   }
 }
 patchEnvVersion();
@@ -92,7 +92,7 @@ const args = [
 if (settings.sshUser) args.push("--ssh-user", String(settings.sshUser));
 if (settings.sshKey) args.push("--ssh-key", String(settings.sshKey));
 
-console.log(`Démarrage de WeTTY sur 127.0.0.1:${args[4]}, base ${base}`);
+console.log(`Starting WeTTY on 127.0.0.1:${args[4]}, base ${base}`);
 const wetty = spawn(process.execPath, args, { cwd: runtimeDir, env, stdio: "inherit" });
 for (const signal of ["SIGTERM", "SIGINT"]) process.on(signal, () => wetty.kill(signal));
 wetty.on("exit", (code, signal) => process.exit(code ?? (signal ? 0 : 1)));

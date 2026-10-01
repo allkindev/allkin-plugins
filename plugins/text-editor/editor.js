@@ -34,24 +34,28 @@ const {
 const core = window.Allkin.core;
 const hljs = window.AllkinHljs ?? null;
 const bulle = (message, kind = "ok") => core.toast?.(message, kind);
+// Translation: the dictionaries are in locales.js, loaded before this script.
+const t = window.Allkin.t;
+const tn = window.Allkin.tn;
 
-/* ---- Langages -------------------------------------------------------------
-   Les noms sont ceux de highlight.js ; les libellés, ceux qu'on lit dans le
-   sélecteur. Un langage du bundle sans libellé ici prend celui de hljs. */
+/* ---- Languages ------------------------------------------------------------
+   Names are those of highlight.js; labels are what the selector shows. A
+   language of the bundle without a label here takes the one of hljs. Names of
+   languages are proper names; only descriptive labels are translated. */
 const LANG_LABELS = {
   javascript: "JavaScript", typescript: "TypeScript", json: "JSON", css: "CSS", scss: "SCSS", less: "Less",
-  xml: "HTML / XML", markdown: "Markdown", yaml: "YAML", bash: "Shell (bash)", shell: "Session shell",
-  python: "Python", php: "PHP", "php-template": "PHP (gabarit)", ini: "INI / TOML", sql: "SQL", pgsql: "PostgreSQL",
+  xml: "HTML / XML", markdown: "Markdown", yaml: "YAML", bash: "Shell (bash)", shell: t("plugin.text-editor.lang.shell"),
+  python: "Python", php: "PHP", "php-template": t("plugin.text-editor.lang.phpTemplate"), ini: "INI / TOML", sql: "SQL", pgsql: "PostgreSQL",
   c: "C", cpp: "C++", csharp: "C#", java: "Java", kotlin: "Kotlin", swift: "Swift", go: "Go", rust: "Rust",
   ruby: "Ruby", perl: "Perl", lua: "Lua", dart: "Dart", scala: "Scala", haskell: "Haskell", elixir: "Elixir",
   erlang: "Erlang", r: "R", julia: "Julia", matlab: "MATLAB", powershell: "PowerShell", dockerfile: "Dockerfile",
   nginx: "Nginx", apache: "Apache", makefile: "Makefile", cmake: "CMake", diff: "Diff / patch", http: "HTTP",
-  protobuf: "Protocol Buffers", latex: "LaTeX", vim: "Vim script", plaintext: "Texte brut", properties: "Properties",
-  objectivec: "Objective-C", groovy: "Groovy", gradle: "Gradle", awk: "AWK", vbscript: "VBScript", x86asm: "Assembleur x86",
+  protobuf: "Protocol Buffers", latex: "LaTeX", vim: "Vim script", plaintext: t("plugin.text-editor.lang.plaintext"), properties: "Properties",
+  objectivec: "Objective-C", groovy: "Groovy", gradle: "Gradle", awk: "AWK", vbscript: "VBScript", x86asm: t("plugin.text-editor.lang.x86asm"),
   arduino: "Arduino", django: "Django", handlebars: "Handlebars", twig: "Twig", coffeescript: "CoffeeScript",
   clojure: "Clojure", lisp: "Lisp", scheme: "Scheme", ocaml: "OCaml", fsharp: "F#", elm: "Elm", crystal: "Crystal",
   nim: "Nim", d: "D", fortran: "Fortran", basic: "BASIC", vbnet: "VB.NET", delphi: "Delphi / Pascal", prolog: "Prolog",
-  haxe: "Haxe", tcl: "Tcl", smalltalk: "Smalltalk", dns: "Zone DNS", ldif: "LDIF", accesslog: "Journal d'accès",
+  haxe: "Haxe", tcl: "Tcl", smalltalk: "Smalltalk", dns: t("plugin.text-editor.lang.dns"), ldif: "LDIF", accesslog: t("plugin.text-editor.lang.accesslog"),
 };
 
 /* Noms de fichiers sans extension parlante. */
@@ -82,7 +86,7 @@ function allLanguages() {
     .listLanguages()
     .filter((id) => id !== "plaintext")
     .map((id) => ({ id, label: langLabel(id) }))
-    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+    .sort((a, b) => a.label.localeCompare(b.label, window.Allkin.i18n.locale));
   return languagesCache;
 }
 
@@ -243,17 +247,17 @@ async function renderFileView(tab) {
   if (!tab.loaded) {
     el("file-editor-wrap").classList.add("hidden");
     el("file-preview").classList.remove("hidden");
-    el("file-preview").textContent = "Chargement…";
+    el("file-preview").textContent = t("common.loading");
     try {
       const res = await fetch(dataFileUrl(tab.agentId, tab.path, false));
-      if (!res.ok) throw new Error(`Erreur ${res.status}`);
+      if (!res.ok) throw new Error(t("common.errorStatus", { status: res.status }));
       const content = await res.text();
       tab.content = content;
       tab.loaded = true;
       // L'onglet a pu changer pendant le chargement.
       if (activeTab() !== tab) return;
     } catch (err) {
-      showFileError(`Impossible de charger le fichier : ${err.message}`);
+      showFileError(t("plugin.text-editor.load.failed", { message: err.message }));
       el("file-preview").textContent = "";
       return;
     }
@@ -286,7 +290,7 @@ function renderFileMedia(tab, kind) {
   } else {
     const note = document.createElement("p");
     note.className = "dim";
-    note.textContent = "Aperçu non disponible pour ce type de fichier — utilise le téléchargement.";
+    note.textContent = t("plugin.text-editor.media.noPreview");
     mediaEl.appendChild(note);
   }
 }
@@ -302,7 +306,7 @@ function applyFileMode(tab) {
   el("file-live").classList.toggle("hidden", !live);
   el("file-editor-wrap").classList.toggle("hidden", !code);
   el("file-preview").classList.toggle("hidden", editing);
-  el("file-mode-btn").textContent = editing ? "Aperçu" : "Éditer";
+  el("file-mode-btn").textContent = editing ? t("plugin.text-editor.mode.preview") : t("plugin.text-editor.mode.edit");
   el("code-toolbar").classList.toggle("hidden", !code);
   el("code-status").classList.toggle("hidden", !code);
   el("file-view").classList.toggle("is-code", code);
@@ -374,7 +378,7 @@ function liveEditorFiles(tab) {
       form.append("file", file, name);
       const res = await fetch(`/api/agents/${encodeURIComponent(tab.agentId)}/data/upload`, { method: "POST", body: form });
       const payload = await res.json().catch(() => ({}));
-      if (!res.ok || !payload.path) throw new Error(payload.error || `erreur ${res.status}`);
+      if (!res.ok || !payload.path) throw new Error(payload.error || t("plugin.text-editor.upload.errorStatus", { status: res.status }));
       return { src: payload.path, name: file.name };
     },
     resolve(src, usage) {
@@ -483,12 +487,12 @@ function renderLanguageSelect(tab) {
   const select = el("code-lang");
   const detected = tab.detectedLanguage ?? "plaintext";
   select.replaceChildren();
-  const auto = new Option(`Auto — ${langLabel(detected)}`, "");
+  const auto = new Option(t("plugin.text-editor.language.auto", { language: langLabel(detected) }), "");
   select.add(auto);
-  select.add(new Option("Texte brut", "plaintext"));
+  select.add(new Option(t("plugin.text-editor.lang.plaintext"), "plaintext"));
   for (const { id, label } of allLanguages()) select.add(new Option(label, id));
   select.value = tab.language ?? "";
-  select.title = tab.language ? `Langage choisi à la main : ${langLabel(tab.language)}` : `Langage détecté : ${langLabel(detected)}`;
+  select.title = tab.language ? t("plugin.text-editor.language.chosen", { language: langLabel(tab.language) }) : t("plugin.text-editor.language.detected", { language: langLabel(detected) });
 }
 
 let layerTimer = null;
@@ -548,10 +552,12 @@ function renderStatus(tab) {
   const line = countLines(before);
   const col = pos - before.lastIndexOf("\n");
   const sel = textarea.selectionEnd - textarea.selectionStart;
-  el("code-status-pos").textContent = `Ln ${line}, Col ${col}${sel ? ` (${sel} sél.)` : ""}`;
+  el("code-status-pos").textContent = sel
+    ? t("plugin.text-editor.status.positionSelection", { line, column: col, selected: sel })
+    : t("plugin.text-editor.status.position", { line, column: col });
   const total = countLines(textarea.value);
-  el("code-status-lines").textContent = `${total} ligne${total > 1 ? "s" : ""}`;
-  el("code-status-indent").textContent = tab.indentUnit === "\t" ? "Tabulations" : `Espaces : ${tab.indentUnit?.length ?? 2}`;
+  el("code-status-lines").textContent = tn("plugin.text-editor.status.lines", total);
+  el("code-status-indent").textContent = tab.indentUnit === "\t" ? t("plugin.text-editor.status.tabs") : t("plugin.text-editor.status.spaces", { size: tab.indentUnit?.length ?? 2 });
   el("code-status-lang").textContent = langLabel(effectiveLanguage(tab));
 }
 
@@ -570,7 +576,7 @@ el("code-lang").addEventListener("change", () => {
   renderLanguageSelect(tab);
   renderCodeLayer(tab);
   renderStatus(tab);
-  bulle(tab.language ? `Coloration : ${langLabel(tab.language)}.` : `Coloration automatique : ${langLabel(effectiveLanguage(tab))}.`);
+  bulle(tab.language ? t("plugin.text-editor.language.toastChosen", { language: langLabel(tab.language) }) : t("plugin.text-editor.language.toastAuto", { language: langLabel(effectiveLanguage(tab)) }));
 });
 
 el("code-wrap-btn").addEventListener("click", () => {
@@ -656,7 +662,7 @@ function indentSelection(tab, outdent) {
 function toggleComment(tab) {
   const syntax = commentSyntax(effectiveLanguage(tab));
   if (!syntax) {
-    bulle("Ce langage n'a pas de commentaire connu.", "ko");
+    bulle(t("plugin.text-editor.comment.unknown"), "ko");
     return;
   }
   const { start, end, text } = selectedLines();
@@ -720,7 +726,7 @@ ta().addEventListener("keydown", (e) => {
     toggleComment(tab);
   } else if (mod && !e.shiftKey && e.key.toLowerCase() === "s") {
     e.preventDefault();
-    tab.dirty ? saveFileTab(tab).then(() => bulle("Enregistré.")) : bulle("Déjà enregistré.");
+    tab.dirty ? saveFileTab(tab).then(() => bulle(t("common.saved"))) : bulle(t("plugin.text-editor.save.already"));
   } else if (mod && e.key.toLowerCase() === "f") {
     e.preventDefault();
     openFind();
@@ -747,8 +753,8 @@ for (const evt of ["keyup", "click", "select"]) {
 async function gotoLine(tab) {
   const total = countLines(ta().value);
   const raw = core.prompt
-    ? await core.prompt({ title: "Aller à la ligne", okLabel: "Aller", input: { placeholder: `1 à ${total}`, maxLength: 8 } })
-    : window.prompt(`Ligne (1 à ${total}) :`);
+    ? await core.prompt({ title: t("plugin.text-editor.goto.title"), okLabel: t("plugin.text-editor.goto.ok"), input: { placeholder: t("plugin.text-editor.goto.range", { total }), maxLength: 8 } })
+    : window.prompt(t("plugin.text-editor.goto.promptFallback", { total }));
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 1) return;
   goToLineNumber(Math.min(n, total));
@@ -863,12 +869,12 @@ function replaceAll() {
   const before = textarea.value;
   const n = (before.match(re) ?? []).length;
   if (!n) {
-    bulle("Aucune occurrence.", "ko");
+    bulle(t("plugin.text-editor.find.none"), "ko");
     return;
   }
   replaceRange(0, before.length, before.replace(re, () => replacement), 0, 0);
   runFind({ jump: false });
-  bulle(`${n} occurrence${n > 1 ? "s" : ""} remplacée${n > 1 ? "s" : ""}.`);
+  bulle(tn("plugin.text-editor.find.replaced", n));
 }
 
 el("code-find-btn").addEventListener("click", () => (find.open ? closeFind() : openFind()));
@@ -947,14 +953,14 @@ el("file-copy-btn").addEventListener("click", async (event) => {
   const tab = activeTab();
   if (!tab || tab.kind !== "file") return;
   const ok = await copyToClipboard(event.currentTarget, tab.content ?? "");
-  if (!ok) bulle("Copie impossible : le presse-papiers est refusé par le navigateur.", "ko");
+  if (!ok) bulle(t("plugin.text-editor.copy.refused"), "ko");
 });
 
 el("file-path-copy-btn").addEventListener("click", async (event) => {
   const tab = activeTab();
   if (!tab || tab.kind !== "file") return;
   const ok = await copyToClipboard(event.currentTarget, tab.path ?? "");
-  if (!ok) bulle("Copie impossible : le presse-papiers est refusé par le navigateur.", "ko");
+  if (!ok) bulle(t("plugin.text-editor.copy.refused"), "ko");
 });
 
 // ---- Plein écran ----
@@ -969,7 +975,7 @@ function setFileFullscreen(on) {
   fileView.classList.toggle("is-fullscreen", on);
   const button = el("file-fullscreen-btn");
   button.innerHTML = on ? ICON_FULLSCREEN_EXIT : ICON_FULLSCREEN_ENTER;
-  button.title = on ? "Quitter le plein écran" : "Plein écran";
+  button.title = on ? t("plugin.text-editor.fullscreen.exit") : t("plugin.text-editor.fullscreen.enter");
   button.setAttribute("aria-label", button.title);
 }
 
@@ -996,15 +1002,15 @@ function renderFileSaveState(tab) {
   const stateEl = el("file-save-state");
   stateEl.className = "file-save-state";
   if (tab.saveState === "saving") {
-    stateEl.textContent = "Enregistrement…";
+    stateEl.textContent = t("common.saving");
   } else if (tab.saveState === "dirty") {
-    stateEl.textContent = "Modifications en attente";
+    stateEl.textContent = t("plugin.text-editor.save.pending");
     stateEl.classList.add("dirty");
   } else if (tab.saveState === "error") {
-    stateEl.textContent = "Échec de l'enregistrement";
+    stateEl.textContent = t("plugin.text-editor.save.failed");
     stateEl.classList.add("failed");
   } else if (tab.savedAt) {
-    stateEl.textContent = `Enregistré à ${tab.savedAt}`;
+    stateEl.textContent = t("plugin.text-editor.save.savedAt", { time: tab.savedAt });
     stateEl.classList.add("saved");
   } else {
     stateEl.textContent = "";
@@ -1045,16 +1051,16 @@ async function saveFileTab(tab, options = {}) {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || `Erreur ${res.status}`);
+      throw new Error(data.error || t("common.errorStatus", { status: res.status }));
     }
     if (tab.content === content) {
       tab.dirty = false;
       tab.saveState = "saved";
-      tab.savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      tab.savedAt = new Date().toLocaleTimeString(window.Allkin.i18n.locale, { hour: "2-digit", minute: "2-digit" });
     }
   } catch (err) {
     tab.saveState = "error";
-    if (activeTab() === tab) bulle(`Enregistrement impossible : ${err.message}`, "ko");
+    if (activeTab() === tab) bulle(t("common.saveFailed", { message: err.message }), "ko");
   }
   if (activeTab() === tab) renderFileSaveState(tab);
   renderTabBar();
@@ -1082,7 +1088,7 @@ window.Allkin.registerTabKind("file", {
   panels: ["file-view"],
   icon: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/></svg>',
   label: (tab) => tab.name,
-  meta: "Fichier",
+  meta: t("file.type.file"),
   tooltip: (tab) => tab.path,
   byPath: true,
   maxPerAgent: 6,

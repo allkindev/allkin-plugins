@@ -111,13 +111,13 @@ function readZip(buffer) {
       break;
     }
   }
-  if (endAt < 0) throw new Error("ce fichier n'est pas une archive zip.");
+  if (endAt < 0) throw new Error(window.Allkin.t("plugin.promptr.zip.notZip"));
 
   const count = view.getUint16(endAt + 10, true);
   let at = view.getUint32(endAt + 16, true);
   const entries = new Map();
   for (let n = 0; n < count; n++) {
-    if (view.getUint32(at, true) !== 0x02014b50) throw new Error("archive endommagée.");
+    if (view.getUint32(at, true) !== 0x02014b50) throw new Error(window.Allkin.t("plugin.promptr.zip.damaged"));
     const method = view.getUint16(at + 10, true);
     const size = view.getUint32(at + 20, true);
     const nameLength = view.getUint16(at + 28, true);

@@ -38,7 +38,8 @@ Règles d'écriture :
   Allkin les décrit lui-même, et les écrire ici les rendrait faux dès qu'ils
   changent.
 - Vise la concision : au plus 200 lignes. Écris dans la langue que le bloc
-  « Format des réponses » demande, en français sinon.
+  « Format des réponses » demande, sinon dans la langue de l'utilisateur
+  (ligne « LANGUE DE L'UTILISATEUR » de la tâche), en français à défaut.
 
 ## Tâche ANALYSER : du prompt au plan
 

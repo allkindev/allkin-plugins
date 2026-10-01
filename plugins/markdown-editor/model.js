@@ -612,6 +612,8 @@ function parseDocument(source, ctx) {
     if (end < lines.length && end > 1) {
       const pre = makePre(lines.slice(1, end).join("\n"), "");
       pre.classList.add("mde-frontmatter");
+      // The label the stylesheet shows in the corner of the block.
+      pre.dataset.label = Allkin.t("plugin.markdown-editor.frontmatter");
       parsed.push({ el: pre, from: 0, to: end + 1 });
       first = end + 1;
     }

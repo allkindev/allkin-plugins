@@ -43,6 +43,12 @@ const {
 const ICON_FILE = window.Allkin.core.icons.file;
 const ICON_FOLDER = window.Allkin.core.icons.folder;
 const core = window.Allkin.core;
+// Every text shown goes through the translation layer of the host; the
+// dictionaries of the plugin are in locales.js.
+const t = window.Allkin.t;
+const tn = window.Allkin.tn;
+/** The locale dates and numbers are formatted with. */
+const locale = () => window.Allkin.i18n.locale;
 
 /* Les fenêtres de l'application (confirmation, saisie) plutôt que celles du
    navigateur, qui bloquent l'onglet et jurent avec le reste ; repli sur les
@@ -201,7 +207,12 @@ for (const control of document.querySelectorAll("#data-view [data-sort-key]")) {
   });
 }
 
-const SORT_LABELS = { name: "Nom", size: "Taille", createdAt: "Créé", modifiedAt: "Modifié" };
+const SORT_LABELS = {
+  name: t("plugin.file-explorer.field.name"),
+  size: t("plugin.file-explorer.field.size"),
+  createdAt: t("plugin.file-explorer.field.created"),
+  modifiedAt: t("plugin.file-explorer.field.modified"),
+};
 
 function updateSortIndicators() {
   for (const control of document.querySelectorAll("#data-view [data-sort-key]")) {
@@ -211,7 +222,7 @@ function updateSortIndicators() {
     }
   }
   const label = el("data-sort-label");
-  if (label) label.textContent = SORT_LABELS[dataViewState.sortKey] ?? "Nom";
+  if (label) label.textContent = SORT_LABELS[dataViewState.sortKey] ?? SORT_LABELS.name;
 }
 
 /* Le menu de tri (téléphone) : s'ouvre sous son bouton, se referme au choix,
@@ -307,8 +318,8 @@ function renderDataTable() {
     const row = node.querySelector(".data-row");
     row.classList.add("is-parent");
     poserIcone(row.querySelector(".data-row-icon"), { type: "parent", name: ".." });
-    row.querySelector(".data-row-name-text").textContent = "Dossier parent";
-    row.querySelector(".data-row-meta").textContent = parent ? parent : `${agent.name} (racine)`;
+    row.querySelector(".data-row-name-text").textContent = t("plugin.file-explorer.parent.name");
+    row.querySelector(".data-row-meta").textContent = parent ? parent : t("plugin.file-explorer.parent.root", { name: agent.name });
     row.querySelector(".data-row-size").textContent = "";
     row.querySelector(".data-row-select").innerHTML = "";
     row.querySelector(".data-row-actions").innerHTML = "";
@@ -323,11 +334,11 @@ function renderDataTable() {
     cell.className = "data-table-empty";
     const filtre = dataViewState.filter.trim();
     cell.innerHTML = filtre
-      ? `<div class="data-empty"><strong>Rien ne correspond à « ${filtre.replace(/</g, "&lt;")} »</strong></div>`
+      ? `<div class="data-empty"><strong>${t("plugin.file-explorer.empty.noMatch", { query: filtre.replace(/</g, "&lt;") })}</strong></div>`
       : `<div class="data-empty">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-           <strong>Dossier vide</strong>
-           <span>Crée un fichier ou un dossier, ou dépose des fichiers ici.</span>
+           <strong>${t("plugin.file-explorer.empty.title")}</strong>
+           <span>${t("plugin.file-explorer.empty.hint")}</span>
          </div>`;
     row.appendChild(cell);
     bodyEl.appendChild(row);
@@ -344,13 +355,13 @@ function renderDataTable() {
     const taille = entry.type === "dir" ? "" : formatSize(entry.size);
     row.querySelector(".data-row-size").textContent = entry.type === "dir" ? "—" : taille;
     // La ligne de détail du téléphone : taille et dernière modification.
-    row.querySelector(".data-row-meta").textContent = [entry.type === "dir" ? "Dossier" : taille, quand(entry.modifiedAt)].filter(Boolean).join(" · ");
+    row.querySelector(".data-row-meta").textContent = [entry.type === "dir" ? t("plugin.file-explorer.kind.folder") : taille, quand(entry.modifiedAt)].filter(Boolean).join(" · ");
     const createdCell = row.querySelector(".data-row-created");
     const modifiedCell = row.querySelector(".data-row-modified");
     createdCell.textContent = formatDateTime(entry.createdAt);
-    createdCell.title = new Date(entry.createdAt).toLocaleString();
+    createdCell.title = new Date(entry.createdAt).toLocaleString(locale());
     modifiedCell.textContent = formatDateTime(entry.modifiedAt);
-    modifiedCell.title = new Date(entry.modifiedAt).toLocaleString();
+    modifiedCell.title = new Date(entry.modifiedAt).toLocaleString(locale());
 
     const checkbox = row.querySelector(".data-row-checkbox");
     checkbox.checked = dataViewState.selected.has(entryPath);
@@ -417,13 +428,20 @@ function renderDataTable() {
 async function supprimerElements(chemins, nom = null) {
   if (chemins.length === 0) return;
   const definitif = chemins.every((c) => isInTrash(c));
-  const quoi = nom && chemins.length === 1 ? `« ${nom} »` : `${chemins.length} élément${chemins.length > 1 ? "s" : ""}`;
+  // One whole sentence per case: a single item is called by its name, several
+  // are counted.
+  const named = Boolean(nom) && chemins.length === 1;
+  const count = chemins.length;
   const ok = await confirmer({
-    title: "Confirmation",
+    title: t("common.confirmation"),
     text: definitif
-      ? `Effacer définitivement ${quoi} ? Déjà dans la corbeille : ce sera irréversible.`
-      : `Mettre ${quoi} à la corbeille (${TRASH_DIR_NAME}/) ?`,
-    okLabel: definitif ? "Effacer" : "Mettre à la corbeille",
+      ? named
+        ? t("plugin.file-explorer.delete.confirm.eraseNamed", { name: nom })
+        : tn("plugin.file-explorer.delete.confirm.eraseCount", count)
+      : named
+        ? t("plugin.file-explorer.delete.confirm.binNamed", { name: nom, folder: TRASH_DIR_NAME })
+        : tn("plugin.file-explorer.delete.confirm.binCount", count, { folder: TRASH_DIR_NAME }),
+    okLabel: definitif ? t("plugin.file-explorer.bin.erase") : t("plugin.file-explorer.bin.move"),
     danger: true,
   });
   if (!ok) return;
@@ -434,8 +452,9 @@ async function supprimerElements(chemins, nom = null) {
     });
     await loadDataPath(dataViewState.path);
     const rates = Object.keys(errors ?? {});
-    if (rates.length) erreur(`Non supprimé : ${rates.join(", ")}.`);
-    else bulle(definitif ? `${quoi} effacé${chemins.length > 1 ? "s" : ""}.` : `${quoi} mis${chemins.length > 1 ? "" : ""} à la corbeille.`);
+    if (rates.length) erreur(t("plugin.file-explorer.delete.failed", { names: rates.join(", ") }));
+    else if (definitif) bulle(named ? t("plugin.file-explorer.delete.done.erasedNamed", { name: nom }) : tn("plugin.file-explorer.delete.done.erasedCount", count));
+    else bulle(named ? t("plugin.file-explorer.delete.done.binnedNamed", { name: nom }) : tn("plugin.file-explorer.delete.done.binnedCount", count));
   } catch (err) {
     erreur(err.message);
   }
@@ -476,8 +495,8 @@ async function deposerFichiers(agentId, destination, fichiers, dossiersVides = [
   document.body.appendChild(node);
   const total = fichiers.reduce((n, f) => n + f.fichier.size, 0);
   modal.querySelector("#upload-modal-target").textContent =
-    `${fichiers.length} fichier${fichiers.length > 1 ? "s" : ""} · ${formaterOctets(total)}` +
-    (dossiersVides.length ? ` · ${dossiersVides.length} dossier${dossiersVides.length > 1 ? "s" : ""} vide${dossiersVides.length > 1 ? "s" : ""}` : "") +
+    `${tn("plugin.file-explorer.upload.files", fichiers.length)} · ${formaterOctets(total)}` +
+    (dossiersVides.length ? ` · ${tn("plugin.file-explorer.upload.emptyFolders", dossiersVides.length)}` : "") +
     ` → ${destination ? `data/${destination}` : "data/"}`;
 
   const barre = modal.querySelector("#upload-progress-fill");
@@ -533,10 +552,10 @@ async function deposerFichiers(agentId, destination, fichiers, dossiersVides = [
   compte.textContent = `${envoyes} / ${fichiers.length}`;
   // Le titre suit : « Dépôt en cours » sur une fenêtre finie ferait attendre
   // quelque chose qui n'arrivera pas.
-  modal.querySelector("#upload-modal-title").textContent = erreurs.length ? "Dépôt incomplet" : "Dépôt terminé";
+  modal.querySelector("#upload-modal-title").textContent = erreurs.length ? t("plugin.file-explorer.upload.title.incomplete") : t("plugin.file-explorer.upload.title.done");
   courant.textContent = erreurs.length
-    ? `${fichiers.length - erreurs.length} déposé${fichiers.length - erreurs.length > 1 ? "s" : ""}, ${erreurs.length} en échec.`
-    : "Terminé.";
+    ? tn("plugin.file-explorer.upload.result", fichiers.length - erreurs.length, { failed: erreurs.length })
+    : t("plugin.file-explorer.upload.done");
   if (erreurs.length) {
     modal.querySelector(".update-progress")?.classList.add("is-error");
     zoneErreurs.classList.remove("hidden");
@@ -569,9 +588,7 @@ let profondeurGlisser = 0;
     e.preventDefault();
     profondeurGlisser += 1;
     vue.classList.add("is-dropping");
-    el("data-drop-veil-text").textContent = dataViewState.path
-      ? `Déposer dans ${dataViewState.path}`
-      : "Déposer dans data/";
+    el("data-drop-veil-text").textContent = t("plugin.file-explorer.drop.into", { folder: dataViewState.path ? dataViewState.path : "data/" });
   });
   vue.addEventListener("dragover", (e) => {
     if (!estUnDepotDeFichiers(e)) return;
@@ -597,11 +614,11 @@ let profondeurGlisser = 0;
     try {
       depot = await fichiersDeposes(e.dataTransfer);
     } catch (err) {
-      erreur(`Lecture du dossier impossible : ${err.message}`);
+      erreur(t("plugin.file-explorer.drop.readFailed", { message: err.message }));
       return;
     }
     if (depot.fichiers.length === 0 && depot.dossiers.length === 0) {
-      erreur("Rien à déposer.");
+      erreur(t("plugin.file-explorer.drop.nothing"));
       return;
     }
     await deposerFichiers(agent.id, dataViewState.path, depot.fichiers, depot.dossiers);
@@ -690,17 +707,16 @@ function renderDataContextHead(entry, chemin) {
     return;
   }
 
-  meta.textContent = "Calcul…";
+  meta.textContent = t("plugin.file-explorer.ctx.computing");
   const jeton = ++demandeStat;
   void api(`/api/agents/${dataViewState.agent.id}/data/stat?path=${encodeURIComponent(chemin)}`)
     .then((s) => {
       if (jeton !== demandeStat) return;
       const elements = s.files + s.dirs;
-      const nombre = `${s.partiel ? "plus de " : ""}${elements} élément${elements > 1 ? "s" : ""}`;
-      meta.textContent = `${nombre} · ${formatSize(s.bytes)}${s.partiel ? " au moins" : ""}`;
+      meta.textContent = tn(s.partiel ? "plugin.file-explorer.ctx.statPartial" : "plugin.file-explorer.ctx.stat", elements, { size: formatSize(s.bytes) });
     })
     .catch(() => {
-      if (jeton === demandeStat) meta.textContent = "Dossier";
+      if (jeton === demandeStat) meta.textContent = t("plugin.file-explorer.kind.folder");
     });
 }
 
@@ -728,7 +744,7 @@ function openDataContextMenu(entry, chemin, x, y, { alignRight = false } = {}) {
   el("data-ctx-delete").disabled = !surUnElement;
   el("data-ctx-paste").disabled = dataClipboard.paths.length === 0;
   el("data-ctx-archive").disabled = !surUnElement;
-  el("data-ctx-archive-label").textContent = plusieurs ? `Archiver (${cibles.length})` : "Archiver";
+  el("data-ctx-archive-label").textContent = plusieurs ? t("plugin.file-explorer.ctx.archiveCount", { count: cibles.length }) : t("plugin.file-explorer.ctx.archive");
   /* « Désarchiver » n'apparaît que sur une archive, et sur une seule : cachée
      plutôt que grisée, parce qu'elle n'a de sens nulle part ailleurs — un menu
      ne doit pas exhiber en permanence ce qui ne servira presque jamais. */
@@ -744,17 +760,17 @@ function openDataContextMenu(entry, chemin, x, y, { alignRight = false } = {}) {
     plusieurs || !surUnElement || dansCorbeille || entry?.type === "dir" || !estUnScript(entry?.name ?? "")
   );
 
-  el("data-ctx-download-label").textContent = plusieurs ? `Télécharger (${cibles.length})` : "Télécharger";
+  el("data-ctx-download-label").textContent = plusieurs ? t("plugin.file-explorer.ctx.downloadCount", { count: cibles.length }) : t("common.download");
   el("data-ctx-delete-label").textContent = dansCorbeille
-    ? "Effacer définitivement"
+    ? t("plugin.file-explorer.bin.eraseForGood")
     : plusieurs
-      ? `Mettre à la corbeille (${cibles.length})`
-      : "Mettre à la corbeille";
+      ? t("plugin.file-explorer.bin.moveCount", { count: cibles.length })
+      : t("plugin.file-explorer.bin.move");
   // « Vider la corbeille » n'a de sens que dans la corbeille.
   el("data-ctx-empty-trash").classList.toggle("hidden", !isInTrash(dataViewState.path));
   el("data-ctx-paste-label").textContent = dataClipboard.paths.length
-    ? `Coller (${dataClipboard.paths.length})`
-    : "Coller";
+    ? t("plugin.file-explorer.ctx.pasteCount", { count: dataClipboard.paths.length })
+    : t("plugin.file-explorer.ctx.paste");
 
   // Même placement que le menu d'un onglet : hors écran d'abord pour connaître
   // sa taille, puis recalé dans les bords sûrs.
@@ -867,7 +883,7 @@ for (const [id, mode] of [["data-ctx-copy", "copy"], ["data-ctx-cut", "move"]]) 
     if (cibles.length === 0) return;
     dataClipboard.mode = mode;
     dataClipboard.paths = cibles;
-    bulle(`${cibles.length} élément${cibles.length > 1 ? "s" : ""} ${mode === "copy" ? "copié" : "coupé"}${cibles.length > 1 ? "s" : ""} — colle où tu veux (menu ⋯ ou clic droit).`);
+    bulle(tn(mode === "copy" ? "plugin.file-explorer.clipboard.copied" : "plugin.file-explorer.clipboard.cut", cibles.length));
   });
 }
 
@@ -881,13 +897,13 @@ el("data-ctx-paste").addEventListener("click", async () => {
     const nom = source.split("/").pop();
     const cible = destination ? `${destination}/${nom}` : nom;
     if (cible === source) {
-      erreurs.push(`${nom} — déjà ici`);
+      erreurs.push(t("plugin.file-explorer.paste.alreadyHere", { name: nom }));
       continue;
     }
     // Coller un dossier dans lui-même produirait une descente infinie : le
     // système de fichiers ne s'en protège pas, nous si.
     if (destination === source || destination.startsWith(`${source}/`)) {
-      erreurs.push(`${nom} — on ne colle pas un dossier dans lui-même`);
+      erreurs.push(t("plugin.file-explorer.paste.intoItself", { name: nom }));
       continue;
     }
     try {
@@ -903,7 +919,7 @@ el("data-ctx-paste").addEventListener("click", async () => {
   const colles = dataClipboard.paths.length - erreurs.length;
   if (dataClipboard.mode === "move") dataClipboard.paths = [];
   if (erreurs.length) erreur(erreurs.join(" · "));
-  else bulle(`${colles} élément${colles > 1 ? "s" : ""} collé${colles > 1 ? "s" : ""}.`);
+  else bulle(tn("plugin.file-explorer.paste.done", colles));
   await loadDataPath(dataViewState.path);
 });
 
@@ -912,13 +928,13 @@ el("data-ctx-rename").addEventListener("click", async () => {
   closeDataContextMenu();
   if (!cible?.entry) return;
   const nom = (await demander({
-    title: "Renommer",
-    okLabel: "Renommer",
-    input: { value: cible.entry.name, placeholder: "Nouveau nom", maxLength: 255 },
+    title: t("common.rename"),
+    okLabel: t("common.rename"),
+    input: { value: cible.entry.name, placeholder: t("plugin.file-explorer.rename.placeholder"), maxLength: 255 },
   }))?.trim();
   if (!nom || nom === cible.entry.name) return;
   if (nom.includes("/")) {
-    erreur("Un nom ne contient pas de « / ».");
+    erreur(t("plugin.file-explorer.name.noSlash"));
     return;
   }
   const parent = cible.chemin.includes("/") ? cible.chemin.slice(0, cible.chemin.lastIndexOf("/")) : "";
@@ -928,7 +944,7 @@ el("data-ctx-rename").addEventListener("click", async () => {
       body: JSON.stringify({ from: cible.chemin, to: parent ? `${parent}/${nom}` : nom }),
     });
     await loadDataPath(dataViewState.path);
-    bulle(`Renommé en « ${nom} ».`);
+    bulle(t("plugin.file-explorer.rename.done", { name: nom }));
   } catch (err) {
     erreur(err.message);
   }
@@ -950,7 +966,7 @@ el("data-ctx-archive").addEventListener("click", async () => {
     if (e.target === modal) fermer();
   });
   modal.querySelector("#archive-modal-target").textContent =
-    cibles.length === 1 ? cibles[0] : `${cibles.length} éléments`;
+    cibles.length === 1 ? cibles[0] : tn("plugin.file-explorer.items", cibles.length);
 
   // La liste vient du serveur : lui seul sait ce qu'il peut produire.
   let formats = [{ value: "zip", label: "ZIP", description: "" }];
@@ -989,7 +1005,7 @@ el("data-ctx-archive").addEventListener("click", async () => {
     const bouton = e.currentTarget;
     const format = modal.querySelector('input[name="archiveFormat"]:checked')?.value ?? "zip";
     bouton.disabled = true;
-    bouton.textContent = "Création…";
+    bouton.textContent = t("plugin.file-explorer.archive.creating");
     try {
       const { path } = await api(`/api/agents/${dataViewState.agent.id}/data/archive`, {
         method: "POST",
@@ -997,13 +1013,13 @@ el("data-ctx-archive").addEventListener("click", async () => {
       });
       fermer();
       await loadDataPath(dataViewState.path);
-      bulle(`Archive créée : ${path}`);
+      bulle(t("plugin.file-explorer.archive.done", { path }));
     } catch (err) {
       const zone = modal.querySelector("#archive-modal-error");
       zone.textContent = err.message;
       zone.classList.remove("hidden");
       bouton.disabled = false;
-      bouton.textContent = "Créer l'archive";
+      bouton.textContent = t("plugin.file-explorer.archive.create");
     }
   });
 });
@@ -1012,14 +1028,14 @@ el("data-ctx-extract").addEventListener("click", async () => {
   const cible = dataContextTarget;
   closeDataContextMenu();
   if (!cible?.chemin) return;
-  bulle(`Extraction de ${cible.entry?.name ?? cible.chemin}…`);
+  bulle(t("plugin.file-explorer.extract.running", { name: cible.entry?.name ?? cible.chemin }));
   try {
     const r = await api(`/api/agents/${dataViewState.agent.id}/data/extract`, {
       method: "POST",
       body: JSON.stringify({ path: cible.chemin }),
     });
     await loadDataPath(dataViewState.path);
-    bulle(`${r.files} fichier${r.files > 1 ? "s" : ""} extrait${r.files > 1 ? "s" : ""} dans ${r.path}/`);
+    bulle(tn("plugin.file-explorer.extract.done", r.files, { path: r.path }));
   } catch (err) {
     erreur(err.message);
   }
@@ -1056,8 +1072,7 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
   q("script-run-name").textContent = nom;
   q("script-run-meta").textContent = `data/${chemin}`;
   const dossier = chemin.includes("/") ? `data/${chemin.slice(0, chemin.lastIndexOf("/"))}` : "data/";
-  q("script-run-warn").textContent =
-    `S'exécutera dans ${dossier}, avec les droits du serveur Allkin. Fermer cette fenêtre arrête le script.`;
+  q("script-run-warn").textContent = t("plugin.file-explorer.run.warn", { folder: dossier });
 
   /** L'exécution en cours, s'il y en a une. Sert à l'arrêt comme au ménage. */
   let controleur = null;
@@ -1084,7 +1099,7 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
   const source = q("script-run-source");
   const bouton = q("script-run-go");
   bouton.disabled = true;
-  source.textContent = "Lecture…";
+  source.textContent = t("plugin.file-explorer.run.reading");
   try {
     const rep = await fetch(dataFileUrl(agentId, chemin));
     if (!rep.ok) throw new Error(`HTTP ${rep.status}`);
@@ -1101,7 +1116,7 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
     if (!source.innerHTML) source.textContent = texte;
     bouton.disabled = false;
   } catch (err) {
-    source.textContent = `Impossible de lire ce fichier : ${err.message}`;
+    source.textContent = t("plugin.file-explorer.run.readFailed", { message: err.message });
     return;
   }
 
@@ -1111,8 +1126,8 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
     q("script-run-live").classList.remove("hidden");
     bouton.classList.add("hidden");
     q("script-run-stop").classList.remove("hidden");
-    q("script-run-cancel").textContent = "Fermer";
-    q("script-run-state").textContent = "en cours";
+    q("script-run-cancel").textContent = t("common.close");
+    q("script-run-state").textContent = t("plugin.file-explorer.run.state.running");
     q("script-run-state").className = "script-run-state running";
 
     const console_ = q("script-run-console");
@@ -1141,7 +1156,7 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
       q("script-run-state").textContent = libelle;
       q("script-run-state").className = `script-run-state ${classe}`;
       q("script-run-stop").classList.add("hidden");
-      q("script-run-cancel").textContent = "Fermer";
+      q("script-run-cancel").textContent = t("common.close");
     };
 
     try {
@@ -1175,32 +1190,35 @@ async function ouvrirExecutionScript(agentId, chemin, nom) {
           if (evt.type === "start") {
             runId = evt.runId;
             // Ce qui tourne réellement, une fois le shebang lu côté serveur.
-            q("script-run-meta").textContent = `${evt.argv.join(" ")} · dans ${evt.cwd} · ${evt.utilisateur}`;
+            q("script-run-meta").textContent = t("plugin.file-explorer.run.meta", { command: evt.argv.join(" "), folder: evt.cwd, user: evt.utilisateur });
             q("script-run-meta").title = q("script-run-meta").textContent;
           } else if (evt.type === "out" || evt.type === "err") {
             ajouter(evt.type, evt.texte);
           } else if (evt.type === "end") {
-            const secondes = ((evt.dureeMs ?? Date.now() - debut) / 1000).toFixed(1);
-            if (evt.cause === "arret") finir(`arrêté · ${secondes} s`, "stopped");
-            else if (evt.exitCode === 0) finir(`terminé · ${secondes} s`, "ok");
-            else finir(`code ${evt.exitCode ?? "?"} · ${secondes} s`, "fail");
+            const secondes = ((evt.dureeMs ?? Date.now() - debut) / 1000).toLocaleString(locale(), {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            });
+            if (evt.cause === "arret") finir(t("plugin.file-explorer.run.state.stopped", { seconds: secondes }), "stopped");
+            else if (evt.exitCode === 0) finir(t("plugin.file-explorer.run.state.done", { seconds: secondes }), "ok");
+            else finir(t("plugin.file-explorer.run.state.code", { code: evt.exitCode ?? "?", seconds: secondes }), "fail");
           }
         }
       }
       // Flux coupé sans « end » : le dire plutôt que de laisser « en cours »
       // éternellement, ce qui ferait croire à un script encore vivant.
-      if (!termine) finir("interrompu", "fail");
+      if (!termine) finir(t("plugin.file-explorer.run.state.interrupted"), "fail");
     } catch (err) {
       if (err.name !== "AbortError") {
         ajouter("err", `\n[Allkin] ${err.message}`);
-        finir("échec", "fail");
+        finir(t("plugin.file-explorer.run.state.failed"), "fail");
       }
     }
   });
 
   q("script-run-stop").addEventListener("click", async () => {
     q("script-run-stop").disabled = true;
-    q("script-run-stop").textContent = "Arrêt…";
+    q("script-run-stop").textContent = t("plugin.file-explorer.run.stopping");
     if (runId) await fetch(`/api/agents/${agentId}/data/run/${runId}/stop`, { method: "POST" }).catch(() => {});
   });
 }
@@ -1265,9 +1283,9 @@ function updateDataMenuActionsState() {
   el("data-move-selected-btn").disabled = !hasSelection;
   el("data-download-selected-btn").disabled = !hasSelection;
   el("data-select-bar").classList.toggle("hidden", !dataViewState.selectMode);
-  el("data-select-count").textContent = n === 0 ? "Aucune sélection" : `${n} sélectionné${n > 1 ? "s" : ""}`;
+  el("data-select-count").textContent = n === 0 ? t("plugin.file-explorer.select.none") : tn("plugin.file-explorer.select.count", n);
   const visibles = entreesVisibles().length;
-  el("data-select-all-btn").textContent = n >= visibles && visibles > 0 ? "Aucun" : "Tout";
+  el("data-select-all-btn").textContent = n >= visibles && visibles > 0 ? t("plugin.file-explorer.select.allOff") : t("plugin.file-explorer.select.all");
 }
 
 function setSelectMode(on) {
@@ -1293,16 +1311,16 @@ el("data-select-all-btn").addEventListener("click", () => {
 el("data-ctx-empty-trash").addEventListener("click", async () => {
   closeDataContextMenu();
   const ok = await confirmer({
-    title: "Vider la corbeille",
-    text: "Tout ce qu'elle contient sera effacé définitivement.",
-    okLabel: "Vider",
+    title: t("plugin.file-explorer.bin.empty"),
+    text: t("plugin.file-explorer.bin.empty.text"),
+    okLabel: t("plugin.file-explorer.bin.empty.ok"),
     danger: true,
   });
   if (!ok) return;
   try {
     await api(`/api/agents/${dataViewState.agent.id}/data/trash/empty`, { method: "POST" });
     await loadDataPath(dataViewState.path);
-    bulle("Corbeille vidée.");
+    bulle(t("plugin.file-explorer.bin.emptied"));
   } catch (err) {
     erreur(err.message);
   }
@@ -1320,10 +1338,10 @@ el("data-upload-input").addEventListener("change", async (e) => {
 
 el("file-new-btn").addEventListener("click", () => {
   openDataNameDialog({
-    title: "Nouveau fichier",
-    label: "Nom du fichier",
+    title: t("plugin.file-explorer.new.file"),
+    label: t("plugin.file-explorer.new.file.label"),
     placeholder: "notes.md",
-    submitLabel: "Créer",
+    submitLabel: t("common.create"),
     onSubmit: async (name) => {
       const fileName = /\.[a-z0-9]+$/i.test(name) ? name : `${name}.md`;
       const path = joinDataPath(dataViewState.path, fileName);
@@ -1332,7 +1350,7 @@ el("file-new-btn").addEventListener("click", () => {
         body: JSON.stringify({ content: "" }),
       });
       await loadDataPath(dataViewState.path);
-      bulle(`« ${fileName} » créé.`);
+      bulle(t("plugin.file-explorer.new.file.done", { name: fileName }));
       openFileTab(dataViewState.agent.id, path, fileName);
     },
   });
@@ -1340,10 +1358,10 @@ el("file-new-btn").addEventListener("click", () => {
 
 el("folder-new-btn").addEventListener("click", () => {
   openDataNameDialog({
-    title: "Nouveau dossier",
-    label: "Nom du dossier",
+    title: t("plugin.file-explorer.new.folder"),
+    label: t("plugin.file-explorer.new.folder.label"),
     placeholder: "notes",
-    submitLabel: "Créer",
+    submitLabel: t("common.create"),
     onSubmit: async (name) => {
       const path = joinDataPath(dataViewState.path, name);
       await api(`/api/agents/${dataViewState.agent.id}/data/mkdir`, {
@@ -1351,7 +1369,7 @@ el("folder-new-btn").addEventListener("click", () => {
         body: JSON.stringify({ path }),
       });
       await loadDataPath(dataViewState.path);
-      bulle(`Dossier « ${name} » créé.`);
+      bulle(t("plugin.file-explorer.new.folder.done", { name }));
     },
   });
 });
@@ -1399,7 +1417,7 @@ function openDataNameDialog({ title, label, placeholder, submitLabel, onSubmit }
     errorEl.classList.add("hidden");
     if (!name) return;
     if (name.includes("/")) {
-      errorEl.textContent = "Un nom ne contient pas de « / ».";
+      errorEl.textContent = t("plugin.file-explorer.name.noSlash");
       errorEl.classList.remove("hidden");
       return;
     }
@@ -1507,7 +1525,9 @@ function openDataMoveDialog() {
   const listEl = modalEl.querySelector("#data-move-list");
   const errorEl = modalEl.querySelector("#data-move-error");
   modalEl.querySelector("#data-move-source-label").textContent =
-    sourcePaths.length === 1 ? `Déplacer/copier « ${sourcePaths[0]} »` : `Déplacer/copier ${sourcePaths.length} éléments`;
+    sourcePaths.length === 1
+      ? t("plugin.file-explorer.move.sourceNamed", { name: sourcePaths[0] })
+      : tn("plugin.file-explorer.move.sourceCount", sourcePaths.length);
   modalEl.querySelector(".modal-cancel").addEventListener("click", () => modalEl.remove());
 
   async function renderPicker() {
@@ -1549,7 +1569,7 @@ function openDataMoveDialog() {
       if (dirs.length === 0) {
         const empty = document.createElement("p");
         empty.className = "dim";
-        empty.textContent = "Aucun sous-dossier ici.";
+        empty.textContent = t("plugin.file-explorer.move.noSubfolder");
         listEl.appendChild(empty);
       }
       for (const dir of dirs) {
@@ -1586,7 +1606,7 @@ function openDataMoveDialog() {
       modalEl.remove();
       dataViewState.selected.clear();
       await loadDataPath(dataViewState.path);
-      bulle(`${sourcePaths.length} élément${sourcePaths.length > 1 ? "s" : ""} ${apiPath === "copy" ? "copié" : "déplacé"}${sourcePaths.length > 1 ? "s" : ""}.`);
+      bulle(tn(apiPath === "copy" ? "plugin.file-explorer.move.copied" : "plugin.file-explorer.move.moved", sourcePaths.length));
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.classList.remove("hidden");
@@ -1686,7 +1706,7 @@ function renderExplorerEntries() {
 
   if (path) {
     const parent = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
-    body.appendChild(explorerRow({ name: "Dossier parent", type: "parent", meta: parent || "~/.allkin" }, () => loadExplorerPath(parent)));
+    body.appendChild(explorerRow({ name: t("plugin.file-explorer.parent.name"), type: "parent", meta: parent || "~/.allkin" }, () => loadExplorerPath(parent)));
   }
 
   const q = normaliser(explorerEntries.filter.trim());
@@ -1696,7 +1716,7 @@ function renderExplorerEntries() {
     const cell = document.createElement("td");
     cell.colSpan = 3;
     cell.className = "data-table-empty dim";
-    cell.textContent = q ? `Rien ne correspond à « ${explorerEntries.filter.trim()} ».` : "Dossier vide.";
+    cell.textContent = q ? t("plugin.file-explorer.explorer.noMatch", { query: explorerEntries.filter.trim() }) : t("plugin.file-explorer.explorer.empty");
     row.appendChild(cell);
     body.appendChild(row);
     return;
@@ -1736,7 +1756,7 @@ function explorerRow(entry, onOpen) {
   const meta = document.createElement("span");
   meta.className = "data-row-meta";
   meta.textContent =
-    entry.type === "parent" ? entry.meta : [entry.type === "dir" ? "Dossier" : formatSize(entry.size), quand(entry.modifiedAt)].filter(Boolean).join(" · ");
+    entry.type === "parent" ? entry.meta : [entry.type === "dir" ? t("plugin.file-explorer.kind.folder") : formatSize(entry.size), quand(entry.modifiedAt)].filter(Boolean).join(" · ");
   text.append(label, meta);
   nameCell.append(icon, text);
 
@@ -1748,7 +1768,7 @@ function explorerRow(entry, onOpen) {
   dateCell.className = "explorer-col-date";
   if (entry.modifiedAt) {
     dateCell.textContent = formatRelativeTime(entry.modifiedAt);
-    dateCell.title = new Date(entry.modifiedAt).toLocaleString();
+    dateCell.title = new Date(entry.modifiedAt).toLocaleString(locale());
   }
 
   row.append(nameCell, sizeCell, dateCell);
@@ -1766,8 +1786,8 @@ window.Allkin.registerTabKind("files", {
   // L'onglet porte le nom de l'agent : avoir les fichiers de plusieurs agents
   // ouverts reste lisible, l'icône dit la nature de l'onglet.
   label: (tab) => window.Allkin.core.agentName(tab.agentId),
-  meta: "Fichiers",
-  tooltip: (tab, label) => `Fichiers — ${label}`,
+  meta: t("chat.strip.files"),
+  tooltip: (tab, label) => t("plugin.file-explorer.tab.files.tooltip", { name: label }),
   scroller: () => document.querySelector("#data-view .data-table-wrap"),
   activate: (tab) => openFilesTabView(tab),
 });
@@ -1775,7 +1795,7 @@ window.Allkin.registerTabKind("files", {
 window.Allkin.registerTabKind("explorer", {
   panels: ["explorer-view"],
   icon: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
-  label: () => "Explorateur",
+  label: () => t("tabs.group.explorer"),
   scroller: () => document.querySelector("#explorer-view .explorer-table-wrap"),
   activate: (tab) => loadExplorerPath(tab.path ?? ""),
 });

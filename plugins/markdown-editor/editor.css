@@ -165,7 +165,7 @@
   user-select: none;
 }
 .mde-doc pre.mde-frontmatter { border-style: dashed; background: transparent; color: var(--text-dim); }
-.mde-doc pre.mde-frontmatter::before { content: "En-tête"; }
+.mde-doc pre.mde-frontmatter::before { content: attr(data-label); }
 
 /* ---- Tableaux ---- */
 .mde-table-wrap {

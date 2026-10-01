@@ -1,6 +1,6 @@
 {
   "name": "Éditeur markdown",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
   "author": "Allkin",
   "permissions": [
@@ -10,6 +10,29 @@
     "apiVersion": 1,
     "provides": ["markdown-editor"],
     "styles": ["editor.css"],
-    "scripts": ["model.js", "ui.js", "editor.js"]
+    "scripts": ["locales.js", "model.js", "ui.js", "editor.js"]
+  },
+  "locales": {
+    "en": {
+      "name": "Markdown editor",
+      "description": "Allkin's Markdown editor: you write in the formatted document, without ever seeing a tag. Missions, role of the agents (CLAUDE.md) and .md files.",
+      "permissions": {
+        "interface": "Fits into Allkin's page to edit missions, the role of agents and Markdown files."
+      }
+    },
+    "es": {
+      "name": "Editor Markdown",
+      "description": "El editor Markdown de Allkin: escribes en el documento con formato, sin ver nunca una etiqueta. Misiones, rol de los agentes (CLAUDE.md) y archivos .md.",
+      "permissions": {
+        "interface": "Se integra en la página de Allkin para editar las misiones, el rol de los agentes y los archivos Markdown."
+      }
+    },
+    "de": {
+      "name": "Markdown-Editor",
+      "description": "Der Markdown-Editor von Allkin: Du schreibst im formatierten Dokument, ohne je ein Tag zu sehen. Missionen, Rolle der Agenten (CLAUDE.md) und .md-Dateien.",
+      "permissions": {
+        "interface": "Fügt sich in die Seite von Allkin ein, um Missionen, die Rolle der Agenten und Markdown-Dateien zu bearbeiten."
+      }
+    }
   }
 }

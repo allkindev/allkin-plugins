@@ -1,6 +1,6 @@
 {
   "name": "Promptr",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "L'atelier de prompts : dessinez un agent en blocs, ou ouvrez un prompt existant pour le voir en plan. Son agent dédié écrit le prompt depuis le plan, et le plan depuis un prompt.",
   "author": "Allkin",
   "permissions": [
@@ -17,6 +17,32 @@
     "provides": ["promptr"],
     "html": ["view.html"],
     "styles": ["promptr.css"],
-    "scripts": ["zip.js", "blocks.js", "app.js"]
+    "scripts": ["locales.js", "zip.js", "blocks.js", "app.js"]
+  },
+  "locales": {
+    "en": {
+      "name": "Promptr",
+      "description": "The prompt workshop: design an agent in blocks, or open an existing prompt to see it as a plan. Its dedicated agent writes the prompt from the plan, and the plan from a prompt.",
+      "permissions": {
+        "interface": "Adds the Promptr app to the Allkin page. With your session, it creates a test agent with no rights at all for the test conversation, and creates the final agent when you click “Deploy”.",
+        "agent": "Promptr hands its agent the writing of the prompt from the plan, and the reading of an existing prompt to turn it into a plan."
+      }
+    },
+    "es": {
+      "name": "Promptr",
+      "description": "El taller de prompts: diseña un agente en bloques, o abre un prompt existente para verlo como plan. Su agente dedicado escribe el prompt a partir del plan, y el plan a partir de un prompt.",
+      "permissions": {
+        "interface": "Añade la app Promptr a la página de Allkin. Con tu sesión, crea un agente de prueba sin ningún permiso para la conversación de prueba, y crea el agente final cuando haces clic en «Desplegar».",
+        "agent": "Promptr confía a su agente la escritura del prompt a partir del plan, y la lectura de un prompt existente para convertirlo en plan."
+      }
+    },
+    "de": {
+      "name": "Promptr",
+      "description": "Die Prompt-Werkstatt: Entwirf einen Agenten in Blöcken oder öffne einen vorhandenen Prompt, um ihn als Plan zu sehen. Sein eigener Agent schreibt den Prompt aus dem Plan und den Plan aus einem Prompt.",
+      "permissions": {
+        "interface": "Fügt die App Promptr der Allkin-Seite hinzu. Mit deiner Sitzung erstellt sie für die Testunterhaltung einen Testagenten ganz ohne Rechte und erstellt den endgültigen Agenten, wenn du auf „Bereitstellen“ klickst.",
+        "agent": "Promptr überlässt seinem Agenten das Schreiben des Prompts aus dem Plan und das Lesen eines vorhandenen Prompts, um daraus einen Plan zu machen."
+      }
+    }
   }
 }

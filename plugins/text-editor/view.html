@@ -12,7 +12,7 @@
         <!-- Chemin complet du fichier, visible en aperçu seulement. -->
         <div class="file-path hidden" id="file-path-wrap">
           <span class="file-path-text" id="file-path-text"></span>
-          <button type="button" class="ghost file-float-btn" id="file-path-copy-btn" title="Copier le chemin" aria-label="Copier le chemin">
+          <button type="button" class="ghost file-float-btn" id="file-path-copy-btn" title="Copy the path" aria-label="Copy the path" data-i18n-title="plugin.text-editor.path.copy" data-i18n-aria-label="plugin.text-editor.path.copy">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
           </button>
         </div>
@@ -20,61 +20,61 @@
              main), puis les outils. Chaque outil a son raccourci, dit dans
              l'infobulle. -->
         <div class="code-toolbar hidden" id="code-toolbar">
-          <select class="code-lang" id="code-lang" title="Langage de coloration" aria-label="Langage de coloration"></select>
-          <button type="button" class="ghost code-tool" id="code-find-btn" title="Rechercher et remplacer (Ctrl+F)" aria-label="Rechercher et remplacer">
+          <select class="code-lang" id="code-lang" title="Highlighting language" aria-label="Highlighting language" data-i18n-title="plugin.text-editor.toolbar.language" data-i18n-aria-label="plugin.text-editor.toolbar.language"></select>
+          <button type="button" class="ghost code-tool" id="code-find-btn" title="Find and replace (Ctrl+F)" aria-label="Find and replace" data-i18n-title="plugin.text-editor.toolbar.find" data-i18n-aria-label="plugin.text-editor.toolbar.findLabel">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
           </button>
-          <button type="button" class="ghost code-tool code-tool-wide" id="code-goto-btn" title="Aller à la ligne (Ctrl+G)" aria-label="Aller à la ligne">
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-goto-btn" title="Go to line (Ctrl+G)" aria-label="Go to line" data-i18n-title="plugin.text-editor.toolbar.goto" data-i18n-aria-label="plugin.text-editor.goto.title">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h6M4 18h10"/><path d="M15 12h5m0 0l-3-3m3 3l-3 3"/></svg>
           </button>
-          <button type="button" class="ghost code-tool" id="code-comment-btn" title="Commenter / décommenter (Ctrl+/)" aria-label="Commenter ou décommenter">
+          <button type="button" class="ghost code-tool" id="code-comment-btn" title="Comment / uncomment (Ctrl+/)" aria-label="Comment or uncomment" data-i18n-title="plugin.text-editor.toolbar.comment" data-i18n-aria-label="plugin.text-editor.toolbar.commentLabel">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5"/><path d="M16 7l5 5-5 5"/><path d="M14 4l-4 16"/></svg>
           </button>
-          <button type="button" class="ghost code-tool" id="code-wrap-btn" title="Retour à la ligne automatique" aria-label="Retour à la ligne automatique" aria-pressed="false">
+          <button type="button" class="ghost code-tool" id="code-wrap-btn" title="Word wrap" aria-label="Word wrap" data-i18n-title="plugin.text-editor.toolbar.wrap" data-i18n-aria-label="plugin.text-editor.toolbar.wrap" aria-pressed="false">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h12a3 3 0 010 6h-3"/><path d="M4 18h5"/><path d="M15 15l-2 3 2 3"/></svg>
           </button>
-          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-minus-btn" title="Réduire la police" aria-label="Réduire la police">
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-minus-btn" title="Smaller font" aria-label="Smaller font" data-i18n-title="plugin.text-editor.toolbar.fontSmaller" data-i18n-aria-label="plugin.text-editor.toolbar.fontSmaller">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L9.5 5l5.5 13"/><path d="M6 14h7"/><path d="M16 12h5"/></svg>
           </button>
-          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-plus-btn" title="Agrandir la police" aria-label="Agrandir la police">
+          <button type="button" class="ghost code-tool code-tool-wide" id="code-font-plus-btn" title="Larger font" aria-label="Larger font" data-i18n-title="plugin.text-editor.toolbar.fontLarger" data-i18n-aria-label="plugin.text-editor.toolbar.fontLarger">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18L9.5 5l5.5 13"/><path d="M6 14h7"/><path d="M16 12h5M18.5 9.5v5"/></svg>
           </button>
         </div>
         <span class="file-save-state" id="file-save-state"></span>
-        <button type="button" class="ghost file-float-btn file-fullscreen-btn hidden" id="file-fullscreen-btn" title="Plein écran" aria-label="Plein écran">
+        <button type="button" class="ghost file-float-btn file-fullscreen-btn hidden" id="file-fullscreen-btn" title="Full screen" aria-label="Full screen" data-i18n-title="plugin.text-editor.fullscreen.enter" data-i18n-aria-label="plugin.text-editor.fullscreen.enter">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3m11-5v3a2 2 0 01-2 2h-3"/></svg>
         </button>
-        <button type="button" class="secondary file-mode-btn hidden" id="file-mode-btn">Éditer</button>
+        <button type="button" class="secondary file-mode-btn hidden" id="file-mode-btn" data-i18n="plugin.text-editor.mode.edit">Edit</button>
       </div>
       <!-- Rechercher / remplacer : une barre sous l'en-tête, pas une fenêtre —
            on cherche en regardant le texte. -->
       <div class="code-find hidden" id="code-find" role="search">
         <label class="code-find-field">
-          <input type="text" id="code-find-input" placeholder="Rechercher" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Rechercher" />
+          <input type="text" id="code-find-input" placeholder="Search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search" data-i18n-placeholder="common.search" data-i18n-aria-label="common.search" />
           <span class="code-find-count" id="code-find-count"></span>
         </label>
-        <button type="button" class="ghost code-tool" id="code-find-case" title="Respecter la casse" aria-label="Respecter la casse" aria-pressed="false"><span class="code-find-case-label">Aa</span></button>
-        <button type="button" class="ghost code-tool" id="code-find-prev" title="Précédent (Maj+Entrée)" aria-label="Occurrence précédente">
+        <button type="button" class="ghost code-tool" id="code-find-case" title="Match case" aria-label="Match case" data-i18n-title="plugin.text-editor.find.case" data-i18n-aria-label="plugin.text-editor.find.case" aria-pressed="false"><span class="code-find-case-label">Aa</span></button>
+        <button type="button" class="ghost code-tool" id="code-find-prev" title="Previous (Shift+Enter)" aria-label="Previous match" data-i18n-title="plugin.text-editor.find.previous" data-i18n-aria-label="plugin.text-editor.find.previousLabel">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
         </button>
-        <button type="button" class="ghost code-tool" id="code-find-next" title="Suivant (Entrée)" aria-label="Occurrence suivante">
+        <button type="button" class="ghost code-tool" id="code-find-next" title="Next (Enter)" aria-label="Next match" data-i18n-title="plugin.text-editor.find.next" data-i18n-aria-label="plugin.text-editor.find.nextLabel">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <label class="code-find-field code-find-replace">
-          <input type="text" id="code-replace-input" placeholder="Remplacer par" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Remplacer par" />
+          <input type="text" id="code-replace-input" placeholder="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Replace with" data-i18n-placeholder="plugin.text-editor.find.replaceWith" data-i18n-aria-label="plugin.text-editor.find.replaceWith" />
         </label>
-        <button type="button" class="secondary code-find-act" id="code-replace-one">Remplacer</button>
-        <button type="button" class="secondary code-find-act" id="code-replace-all">Tout</button>
-        <button type="button" class="ghost code-tool" id="code-find-close" title="Fermer (Échap)" aria-label="Fermer la recherche">
+        <button type="button" class="secondary code-find-act" id="code-replace-one" data-i18n="common.replace">Replace</button>
+        <button type="button" class="secondary code-find-act" id="code-replace-all" data-i18n="plugin.text-editor.find.replaceAll">All</button>
+        <button type="button" class="ghost code-tool" id="code-find-close" title="Close (Esc)" aria-label="Close the search" data-i18n-title="plugin.text-editor.find.close" data-i18n-aria-label="plugin.text-editor.find.closeLabel">
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>
         </button>
       </div>
       <div class="file-view-body" id="file-view-body">
         <div class="file-float-actions" id="file-float-actions">
-          <button type="button" class="ghost file-float-btn" id="file-copy-btn" title="Copier le contenu" aria-label="Copier le contenu">
+          <button type="button" class="ghost file-float-btn" id="file-copy-btn" title="Copy the content" aria-label="Copy the content" data-i18n-title="plugin.text-editor.content.copy" data-i18n-aria-label="plugin.text-editor.content.copy">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
           </button>
-          <button type="button" class="ghost file-float-btn" id="file-download-btn" title="Télécharger" aria-label="Télécharger">
+          <button type="button" class="ghost file-float-btn" id="file-download-btn" title="Download" aria-label="Download" data-i18n-title="common.download" data-i18n-aria-label="common.download">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
           </button>
         </div>
@@ -96,7 +96,7 @@
       </div>
       <!-- Barre d'état de l'éditeur de code : où l'on est, ce qu'on édite. -->
       <div class="code-status hidden" id="code-status">
-        <span id="code-status-pos">Ln 1, Col 1</span>
+        <span id="code-status-pos" data-i18n="plugin.text-editor.status.positionStart">Ln 1, Col 1</span>
         <span id="code-status-lines"></span>
         <span id="code-status-indent"></span>
         <span id="code-status-lang"></span>

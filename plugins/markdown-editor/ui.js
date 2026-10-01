@@ -15,7 +15,8 @@
 const MDE = (window.AllkinMde = window.AllkinMde || {});
 
 const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "");
-const MOD = IS_MAC ? "⌘" : "Ctrl";
+const MOD = IS_MAC ? "⌘" : Allkin.t("plugin.markdown-editor.key.ctrl");
+const ALT = Allkin.t("plugin.markdown-editor.key.alt");
 const keys = (...parts) => parts.join(IS_MAC ? "" : "+");
 
 /* Tracés 24×24, trait de 2, sans fond : ils prennent la couleur du texte. */
@@ -217,7 +218,7 @@ function menu({ anchor, items, onPick, owner, align, className, onClose, title }
   const paint = () => {
     listEl.replaceChildren();
     if (!shown.length) {
-      listEl.appendChild(make("div", "mde-menu-empty", "Aucun bloc ne correspond"));
+      listEl.appendChild(make("div", "mde-menu-empty", Allkin.t("plugin.markdown-editor.menu.empty")));
       return;
     }
     shown.forEach((item, i) => {
@@ -292,44 +293,44 @@ function menu({ anchor, items, onPick, owner, align, className, onClose, title }
 /* ---- Barre d'outils ------------------------------------------------------ */
 
 const BLOCK_LABELS = {
-  p: "Texte",
-  h1: "Titre 1",
-  h2: "Titre 2",
-  h3: "Titre 3",
-  h4: "Titre 4",
-  h5: "Titre 5",
-  h6: "Titre 6",
-  ul: "Liste",
-  ol: "Liste numérotée",
-  task: "Liste de tâches",
-  quote: "Citation",
-  pre: "Bloc de code",
-  table: "Tableau",
+  p: Allkin.t("plugin.markdown-editor.block.text"),
+  h1: Allkin.t("plugin.markdown-editor.block.heading", { level: 1 }),
+  h2: Allkin.t("plugin.markdown-editor.block.heading", { level: 2 }),
+  h3: Allkin.t("plugin.markdown-editor.block.heading", { level: 3 }),
+  h4: Allkin.t("plugin.markdown-editor.block.heading", { level: 4 }),
+  h5: Allkin.t("plugin.markdown-editor.block.heading", { level: 5 }),
+  h6: Allkin.t("plugin.markdown-editor.block.heading", { level: 6 }),
+  ul: Allkin.t("plugin.markdown-editor.block.list"),
+  ol: Allkin.t("plugin.markdown-editor.block.ol"),
+  task: Allkin.t("plugin.markdown-editor.block.task"),
+  quote: Allkin.t("plugin.markdown-editor.block.quote"),
+  pre: Allkin.t("plugin.markdown-editor.block.pre"),
+  table: Allkin.t("plugin.markdown-editor.block.table"),
 };
 
 const BLOCK_CHOICES = [
-  { id: "p", label: "Texte", sample: "T", hint: "Paragraphe courant", keys: keys(MOD, "Alt", "0") },
-  { id: "h1", label: "Titre 1", sample: "H1", hint: "Grand titre", keys: keys(MOD, "Alt", "1") },
-  { id: "h2", label: "Titre 2", sample: "H2", hint: "Titre de section", keys: keys(MOD, "Alt", "2") },
-  { id: "h3", label: "Titre 3", sample: "H3", hint: "Sous-titre", keys: keys(MOD, "Alt", "3") },
+  { id: "p", label: Allkin.t("plugin.markdown-editor.block.text"), sample: "T", hint: Allkin.t("plugin.markdown-editor.hint.text"), keys: keys(MOD, ALT, "0") },
+  { id: "h1", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 1 }), sample: "H1", hint: Allkin.t("plugin.markdown-editor.hint.h1"), keys: keys(MOD, ALT, "1") },
+  { id: "h2", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 2 }), sample: "H2", hint: Allkin.t("plugin.markdown-editor.hint.h2"), keys: keys(MOD, ALT, "2") },
+  { id: "h3", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 3 }), sample: "H3", hint: Allkin.t("plugin.markdown-editor.hint.h3"), keys: keys(MOD, ALT, "3") },
 ];
 
 /** Les blocs du menu « / » — et, pour moitié, ceux de la barre. */
 const INSERT_CHOICES = [
-  { id: "p", label: "Texte", icon: "text", hint: "Paragraphe courant", words: "paragraphe normal" },
-  { id: "h1", label: "Titre 1", sample: "H1", hint: "Grand titre", words: "heading titre" },
-  { id: "h2", label: "Titre 2", sample: "H2", hint: "Titre de section", words: "heading titre" },
-  { id: "h3", label: "Titre 3", sample: "H3", hint: "Sous-titre", words: "heading titre" },
-  { id: "ul", label: "Liste à puces", icon: "ul", hint: "Une liste simple", words: "bullet puce" },
-  { id: "ol", label: "Liste numérotée", icon: "ol", hint: "Des étapes dans l'ordre", words: "numero ordonnee" },
-  { id: "task", label: "Liste de tâches", icon: "task", hint: "Des cases à cocher", words: "todo case cocher checkbox" },
-  { id: "quote", label: "Citation", icon: "quote", hint: "Un passage mis en retrait", words: "blockquote" },
-  { id: "pre", label: "Bloc de code", icon: "pre", hint: "Du code, tel quel", words: "code source" },
-  { id: "table", label: "Tableau", icon: "table", hint: "Lignes et colonnes", words: "table grille" },
-  { id: "hr", label: "Séparateur", icon: "hr", hint: "Un filet horizontal", words: "filet ligne separateur hr" },
-  { id: "image", label: "Image", icon: "image", hint: "Depuis l'appareil ou une adresse", words: "photo picture" },
-  { id: "file", label: "Fichier", icon: "file", hint: "Joindre un document", words: "piece jointe document" },
-  { id: "link", label: "Lien", icon: "link", hint: "Vers une page web", words: "url adresse" },
+  { id: "p", label: Allkin.t("plugin.markdown-editor.block.text"), icon: "text", hint: Allkin.t("plugin.markdown-editor.hint.text"), words: Allkin.t("plugin.markdown-editor.words.text") },
+  { id: "h1", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 1 }), sample: "H1", hint: Allkin.t("plugin.markdown-editor.hint.h1"), words: Allkin.t("plugin.markdown-editor.words.heading") },
+  { id: "h2", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 2 }), sample: "H2", hint: Allkin.t("plugin.markdown-editor.hint.h2"), words: Allkin.t("plugin.markdown-editor.words.heading") },
+  { id: "h3", label: Allkin.t("plugin.markdown-editor.block.heading", { level: 3 }), sample: "H3", hint: Allkin.t("plugin.markdown-editor.hint.h3"), words: Allkin.t("plugin.markdown-editor.words.heading") },
+  { id: "ul", label: Allkin.t("plugin.markdown-editor.block.ul"), icon: "ul", hint: Allkin.t("plugin.markdown-editor.hint.ul"), words: Allkin.t("plugin.markdown-editor.words.ul") },
+  { id: "ol", label: Allkin.t("plugin.markdown-editor.block.ol"), icon: "ol", hint: Allkin.t("plugin.markdown-editor.hint.ol"), words: Allkin.t("plugin.markdown-editor.words.ol") },
+  { id: "task", label: Allkin.t("plugin.markdown-editor.block.task"), icon: "task", hint: Allkin.t("plugin.markdown-editor.hint.task"), words: Allkin.t("plugin.markdown-editor.words.task") },
+  { id: "quote", label: Allkin.t("plugin.markdown-editor.block.quote"), icon: "quote", hint: Allkin.t("plugin.markdown-editor.hint.quote"), words: Allkin.t("plugin.markdown-editor.words.quote") },
+  { id: "pre", label: Allkin.t("plugin.markdown-editor.block.pre"), icon: "pre", hint: Allkin.t("plugin.markdown-editor.hint.pre"), words: Allkin.t("plugin.markdown-editor.words.pre") },
+  { id: "table", label: Allkin.t("plugin.markdown-editor.block.table"), icon: "table", hint: Allkin.t("plugin.markdown-editor.hint.table"), words: Allkin.t("plugin.markdown-editor.words.table") },
+  { id: "hr", label: Allkin.t("plugin.markdown-editor.block.hr"), icon: "hr", hint: Allkin.t("plugin.markdown-editor.hint.hr"), words: Allkin.t("plugin.markdown-editor.words.hr") },
+  { id: "image", label: Allkin.t("plugin.markdown-editor.block.image"), icon: "image", hint: Allkin.t("plugin.markdown-editor.hint.image"), words: Allkin.t("plugin.markdown-editor.words.image") },
+  { id: "file", label: Allkin.t("plugin.markdown-editor.block.file"), icon: "file", hint: Allkin.t("plugin.markdown-editor.hint.file"), words: Allkin.t("plugin.markdown-editor.words.file") },
+  { id: "link", label: Allkin.t("plugin.markdown-editor.block.link"), icon: "link", hint: Allkin.t("plugin.markdown-editor.hint.link"), words: Allkin.t("plugin.markdown-editor.words.link") },
 ];
 
 /* Quand la barre manque de place, ses outils se replient dans le menu « ⋯ »,
@@ -338,19 +339,19 @@ const INSERT_CHOICES = [
 const COLLAPSE_ORDER = [["blocks", "media"], ["lists"], ["history"], ["marks-more"]];
 
 const MORE_ITEMS = [
-  { id: "undo", group: "history", label: "Annuler", icon: "undo" },
-  { id: "redo", group: "history", label: "Rétablir", icon: "redo" },
-  { id: "del", group: "marks-more", label: "Barré", icon: "del" },
-  { id: "code", group: "marks-more", label: "Code", icon: "code" },
-  { id: "ul", group: "lists", label: "Liste à puces", icon: "ul" },
-  { id: "ol", group: "lists", label: "Liste numérotée", icon: "ol" },
-  { id: "task", group: "lists", label: "Liste de tâches", icon: "task" },
-  { id: "quote", group: "blocks", label: "Citation", icon: "quote" },
-  { id: "pre", group: "blocks", label: "Bloc de code", icon: "pre" },
-  { id: "table", group: "blocks", label: "Tableau", icon: "table" },
-  { id: "hr", group: "blocks", label: "Séparateur", icon: "hr" },
-  { id: "image", group: "media", label: "Image", icon: "image" },
-  { id: "file", group: "media", label: "Joindre un fichier", icon: "file" },
+  { id: "undo", group: "history", label: Allkin.t("plugin.markdown-editor.toolbar.undo"), icon: "undo" },
+  { id: "redo", group: "history", label: Allkin.t("plugin.markdown-editor.toolbar.redo"), icon: "redo" },
+  { id: "del", group: "marks-more", label: Allkin.t("plugin.markdown-editor.toolbar.del"), icon: "del" },
+  { id: "code", group: "marks-more", label: Allkin.t("plugin.markdown-editor.toolbar.code"), icon: "code" },
+  { id: "ul", group: "lists", label: Allkin.t("plugin.markdown-editor.block.ul"), icon: "ul" },
+  { id: "ol", group: "lists", label: Allkin.t("plugin.markdown-editor.block.ol"), icon: "ol" },
+  { id: "task", group: "lists", label: Allkin.t("plugin.markdown-editor.block.task"), icon: "task" },
+  { id: "quote", group: "blocks", label: Allkin.t("plugin.markdown-editor.block.quote"), icon: "quote" },
+  { id: "pre", group: "blocks", label: Allkin.t("plugin.markdown-editor.block.pre"), icon: "pre" },
+  { id: "table", group: "blocks", label: Allkin.t("plugin.markdown-editor.block.table"), icon: "table" },
+  { id: "hr", group: "blocks", label: Allkin.t("plugin.markdown-editor.block.hr"), icon: "hr" },
+  { id: "image", group: "media", label: Allkin.t("plugin.markdown-editor.block.image"), icon: "image" },
+  { id: "file", group: "media", label: Allkin.t("plugin.markdown-editor.toolbar.attachFile"), icon: "file" },
 ];
 
 /**
@@ -363,7 +364,7 @@ function buildToolbar(container, { run, withFiles }) {
   container.replaceChildren();
   container.classList.add("mde-toolbar");
   container.setAttribute("role", "toolbar");
-  container.setAttribute("aria-label", "Mise en forme");
+  container.setAttribute("aria-label", Allkin.t("plugin.markdown-editor.toolbar.label"));
   const buttons = new Map();
   let blockMenu = null;
   let tableMenu = null;
@@ -389,17 +390,17 @@ function buildToolbar(container, { run, withFiles }) {
     buttons.set(id, btn);
     return put(btn);
   };
-  const shift = IS_MAC ? "⇧" : "Maj";
+  const shift = IS_MAC ? "⇧" : Allkin.t("plugin.markdown-editor.key.shift");
 
   group = "history";
-  add("undo", { icon: "undo", tip: "Annuler", shortcut: keys(MOD, "Z") });
-  add("redo", { icon: "redo", tip: "Rétablir", shortcut: keys(MOD, shift, "Z") });
+  add("undo", { icon: "undo", tip: Allkin.t("plugin.markdown-editor.toolbar.undo"), shortcut: keys(MOD, "Z") });
+  add("redo", { icon: "redo", tip: Allkin.t("plugin.markdown-editor.toolbar.redo"), shortcut: keys(MOD, shift, "Z") });
 
   // Le style du bloc : un seul bouton qui dit où l'on est, plutôt que trois
   // « H1 H2 H3 » dont aucun ne dit qu'on est dans du texte courant.
   open("history");
   group = "";
-  const block = put(button({ className: "mde-select", tip: "Style du bloc", text: "Texte" }));
+  const block = put(button({ className: "mde-select", tip: Allkin.t("plugin.markdown-editor.toolbar.blockStyle"), text: Allkin.t("plugin.markdown-editor.block.text") }));
   block.insertAdjacentHTML("beforeend", icon("chevron"));
   block.setAttribute("aria-haspopup", "listbox");
   const blockLabel = block.querySelector(".mde-btn-text");
@@ -422,23 +423,23 @@ function buildToolbar(container, { run, withFiles }) {
   buttons.set("block", block);
 
   put(make("span", "mde-sep"));
-  add("strong", { icon: "strong", tip: "Gras", shortcut: keys(MOD, "B") });
-  add("em", { icon: "em", tip: "Italique", shortcut: keys(MOD, "I") });
+  add("strong", { icon: "strong", tip: Allkin.t("plugin.markdown-editor.toolbar.strong"), shortcut: keys(MOD, "B") });
+  add("em", { icon: "em", tip: Allkin.t("plugin.markdown-editor.toolbar.em"), shortcut: keys(MOD, "I") });
   group = "marks-more";
-  add("del", { icon: "del", tip: "Barré", shortcut: keys(MOD, shift, "X") });
-  add("code", { icon: "code", tip: "Code", shortcut: keys(MOD, "E") });
+  add("del", { icon: "del", tip: Allkin.t("plugin.markdown-editor.toolbar.del"), shortcut: keys(MOD, shift, "X") });
+  add("code", { icon: "code", tip: Allkin.t("plugin.markdown-editor.toolbar.code"), shortcut: keys(MOD, "E") });
   group = "";
-  add("link", { icon: "link", tip: "Lien", shortcut: keys(MOD, "K") });
+  add("link", { icon: "link", tip: Allkin.t("plugin.markdown-editor.block.link"), shortcut: keys(MOD, "K") });
 
   open("lists");
-  add("ul", { icon: "ul", tip: "Liste à puces" });
-  add("ol", { icon: "ol", tip: "Liste numérotée" });
-  add("task", { icon: "task", tip: "Liste de tâches" });
+  add("ul", { icon: "ul", tip: Allkin.t("plugin.markdown-editor.block.ul") });
+  add("ol", { icon: "ol", tip: Allkin.t("plugin.markdown-editor.block.ol") });
+  add("task", { icon: "task", tip: Allkin.t("plugin.markdown-editor.block.task") });
 
   open("blocks");
-  add("quote", { icon: "quote", tip: "Citation" });
-  add("pre", { icon: "pre", tip: "Bloc de code" });
-  const table = put(button({ icon: "table", tip: "Tableau" }));
+  add("quote", { icon: "quote", tip: Allkin.t("plugin.markdown-editor.block.quote") });
+  add("pre", { icon: "pre", tip: Allkin.t("plugin.markdown-editor.block.pre") });
+  const table = put(button({ icon: "table", tip: Allkin.t("plugin.markdown-editor.block.table") }));
   table.dataset.cmd = "table";
   table.setAttribute("aria-haspopup", "dialog");
   table.addEventListener("click", () => {
@@ -454,15 +455,15 @@ function buildToolbar(container, { run, withFiles }) {
     table.classList.add("is-open");
   });
   buttons.set("table", table);
-  add("hr", { icon: "hr", tip: "Séparateur" });
+  add("hr", { icon: "hr", tip: Allkin.t("plugin.markdown-editor.block.hr") });
 
   open("media");
-  add("image", { icon: "image", tip: "Image" });
-  if (withFiles) add("file", { icon: "file", tip: "Joindre un fichier" });
+  add("image", { icon: "image", tip: Allkin.t("plugin.markdown-editor.block.image") });
+  if (withFiles) add("file", { icon: "file", tip: Allkin.t("plugin.markdown-editor.toolbar.attachFile") });
 
   group = "";
   put(make("span", "mde-sep")).dataset.group = "more";
-  const more = put(button({ icon: "more", tip: "Plus d'outils" }));
+  const more = put(button({ icon: "more", tip: Allkin.t("plugin.markdown-editor.toolbar.more") }));
   more.dataset.group = "more";
   more.setAttribute("aria-haspopup", "menu");
   more.addEventListener("click", () => {
@@ -486,7 +487,7 @@ function buildToolbar(container, { run, withFiles }) {
   });
 
   put(make("span", "mde-spacer"));
-  add("source", { icon: "source", tip: "Markdown brut", className: "mde-btn-source" });
+  add("source", { icon: "source", tip: Allkin.t("plugin.markdown-editor.toolbar.source"), className: "mde-btn-source" });
 
   function collapse(level) {
     collapsed = new Set(COLLAPSE_ORDER.slice(0, level).flat());
@@ -544,7 +545,7 @@ function buildToolbar(container, { run, withFiles }) {
       more.disabled = Boolean(state.source);
       const kind = state.block ?? "p";
       block.dataset.block = kind;
-      blockLabel.textContent = BLOCK_LABELS[kind] ?? "Texte";
+      blockLabel.textContent = BLOCK_LABELS[kind] ?? Allkin.t("plugin.markdown-editor.block.text");
     },
     destroy() {
       resize.disconnect();
@@ -563,18 +564,28 @@ function buildToolbar(container, { run, withFiles }) {
 /** La grille où l'on choisit la taille du tableau en la survolant. */
 function tablePicker({ anchor, onPick, onClose }) {
   const SIZE = 6;
+  // One whole sentence per case: the number of rows picks the key, the number
+  // of columns picks the plural form.
+  const sizeText = (rows, cols) =>
+    rows === 1
+      ? Allkin.tn("plugin.markdown-editor.table.sizeOneRow", cols, { rows })
+      : Allkin.tn("plugin.markdown-editor.table.sizeRows", cols, { rows });
+  const cellText = (rows, cols) =>
+    rows === 1
+      ? Allkin.tn("plugin.markdown-editor.table.cellOneRow", cols, { rows })
+      : Allkin.tn("plugin.markdown-editor.table.cellRows", cols, { rows });
   return popover({
     anchor,
     owner: anchor,
     onClose,
     className: "mde-grid-pop",
     build: (el, close) => {
-      const label = make("div", "mde-grid-label", "Tableau");
+      const label = make("div", "mde-grid-label", Allkin.t("plugin.markdown-editor.block.table"));
       const grid = make("div", "mde-grid");
       const cells = [];
       const light = (rows, cols) => {
         cells.forEach((cell) => cell.classList.toggle("is-lit", cell.row <= rows && cell.col <= cols));
-        label.textContent = rows ? `${cols} colonnes × ${rows} lignes` : "Tableau";
+        label.textContent = rows ? sizeText(rows, cols) : Allkin.t("plugin.markdown-editor.block.table");
       };
       for (let row = 1; row <= SIZE; row++) {
         for (let col = 1; col <= SIZE; col++) {
@@ -582,7 +593,7 @@ function tablePicker({ anchor, onPick, onClose }) {
           cell.type = "button";
           cell.row = row;
           cell.col = col;
-          cell.setAttribute("aria-label", `${col} colonnes, ${row} lignes`);
+          cell.setAttribute("aria-label", cellText(row, col));
           cell.addEventListener("mousedown", (event) => event.preventDefault());
           cell.addEventListener("pointerenter", () => light(row, col));
           cell.addEventListener("focus", () => light(row, col));

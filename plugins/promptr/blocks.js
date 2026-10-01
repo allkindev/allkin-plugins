@@ -20,136 +20,160 @@
    ========================================================================== */
 (() => {
 
+// Names, hints, labels, placeholders and options are in the language of the
+// interface (see locales.js): read once, when this script loads — the page is
+// reloaded when the language changes. Option values and cursor readings are
+// also written into the plan, hence into the prompt the user builds.
+const t = (key) => window.Allkin.t(key);
+
 const BLOCK_TYPES = {
   role: {
-    label: "Rôle et mission",
-    hint: "Qui est l'agent, ce qu'il fait, et pour qui.",
+    label: t("plugin.promptr.block.role.label"),
+    hint: t("plugin.promptr.block.role.hint"),
     color: "#8b5cf6",
     icon: '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/>',
     fields: [
-      { key: "role", label: "Rôle", kind: "text", placeholder: "Conseiller culinaire, juriste d'entreprise…" },
-      { key: "mission", label: "Mission", kind: "textarea", placeholder: "Ce que l'agent doit accomplir, et pourquoi." },
-      { key: "audience", label: "Pour qui", kind: "text", placeholder: "Débutants, équipe technique, clients…" },
+      { key: "role", label: t("plugin.promptr.block.role.field.role.label"), kind: "text", placeholder: t("plugin.promptr.block.role.field.role.placeholder") },
+      { key: "mission", label: t("plugin.promptr.block.role.field.mission.label"), kind: "textarea", placeholder: t("plugin.promptr.block.role.field.mission.placeholder") },
+      { key: "audience", label: t("plugin.promptr.block.role.field.audience.label"), kind: "text", placeholder: t("plugin.promptr.block.role.field.audience.placeholder") },
     ],
   },
   personality: {
-    label: "Personnalité",
-    hint: "Le ton et le caractère de l'agent.",
+    label: t("plugin.promptr.block.personality.label"),
+    hint: t("plugin.promptr.block.personality.hint"),
     color: "#ec4899",
     icon: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><circle cx="9" cy="10" r=".8" fill="currentColor"/><circle cx="15" cy="10" r=".8" fill="currentColor"/>',
     fields: [
       {
         key: "tone",
-        label: "Ton",
+        label: t("plugin.promptr.block.personality.field.tone.label"),
         kind: "select",
-        options: ["", "chaleureux", "neutre et posé", "direct", "enjoué", "pédagogue", "solennel"],
+        options: ["", t("plugin.promptr.block.personality.field.tone.option.warm"), t("plugin.promptr.block.personality.field.tone.option.calm"), t("plugin.promptr.block.personality.field.tone.option.direct"), t("plugin.promptr.block.personality.field.tone.option.playful"), t("plugin.promptr.block.personality.field.tone.option.teaching"), t("plugin.promptr.block.personality.field.tone.option.solemn")],
       },
-      { key: "formality", label: "Formalité", kind: "scale", ends: ["Familier", "Soutenu"] },
-      { key: "concision", label: "Concision", kind: "scale", ends: ["Développé", "Concis"] },
-      { key: "humor", label: "Humour", kind: "scale", ends: ["Sérieux", "Plein d'humour"] },
-      { key: "assertiveness", label: "Assurance", kind: "scale", ends: ["Prudent", "Affirmé"] },
-      { key: "notes", label: "Autres traits", kind: "textarea", placeholder: "Curieux, patient, franc sur les limites…" },
+      { key: "formality", label: t("plugin.promptr.block.personality.field.formality.label"), kind: "scale", ends: [t("plugin.promptr.block.personality.field.formality.low"), t("plugin.promptr.block.personality.field.formality.high")],
+        readings: { lowStrong: t("plugin.promptr.block.personality.field.formality.reading.lowStrong"), low: t("plugin.promptr.block.personality.field.formality.reading.low"), high: t("plugin.promptr.block.personality.field.formality.reading.high"), highStrong: t("plugin.promptr.block.personality.field.formality.reading.highStrong") } },
+      { key: "concision", label: t("plugin.promptr.block.personality.field.concision.label"), kind: "scale", ends: [t("plugin.promptr.block.personality.field.concision.low"), t("plugin.promptr.block.personality.field.concision.high")],
+        readings: { lowStrong: t("plugin.promptr.block.personality.field.concision.reading.lowStrong"), low: t("plugin.promptr.block.personality.field.concision.reading.low"), high: t("plugin.promptr.block.personality.field.concision.reading.high"), highStrong: t("plugin.promptr.block.personality.field.concision.reading.highStrong") } },
+      { key: "humor", label: t("plugin.promptr.block.personality.field.humor.label"), kind: "scale", ends: [t("plugin.promptr.block.personality.field.humor.low"), t("plugin.promptr.block.personality.field.humor.high")],
+        readings: { lowStrong: t("plugin.promptr.block.personality.field.humor.reading.lowStrong"), low: t("plugin.promptr.block.personality.field.humor.reading.low"), high: t("plugin.promptr.block.personality.field.humor.reading.high"), highStrong: t("plugin.promptr.block.personality.field.humor.reading.highStrong") } },
+      { key: "assertiveness", label: t("plugin.promptr.block.personality.field.assertiveness.label"), kind: "scale", ends: [t("plugin.promptr.block.personality.field.assertiveness.low"), t("plugin.promptr.block.personality.field.assertiveness.high")],
+        readings: { lowStrong: t("plugin.promptr.block.personality.field.assertiveness.reading.lowStrong"), low: t("plugin.promptr.block.personality.field.assertiveness.reading.low"), high: t("plugin.promptr.block.personality.field.assertiveness.reading.high"), highStrong: t("plugin.promptr.block.personality.field.assertiveness.reading.highStrong") } },
+      { key: "notes", label: t("plugin.promptr.block.personality.field.notes.label"), kind: "textarea", placeholder: t("plugin.promptr.block.personality.field.notes.placeholder") },
     ],
   },
   skills: {
-    label: "Compétences",
-    hint: "Ce que l'agent sait faire, et à quel niveau.",
+    label: t("plugin.promptr.block.skills.label"),
+    hint: t("plugin.promptr.block.skills.hint"),
     color: "#f59e0b",
     icon: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
     fields: [
       {
         key: "level",
-        label: "Niveau",
+        label: t("plugin.promptr.block.skills.field.level.label"),
         kind: "select",
-        options: ["", "généraliste", "confirmé", "expert", "référence du domaine"],
+        options: ["", t("plugin.promptr.block.skills.field.level.option.generalist"), t("plugin.promptr.block.skills.field.level.option.experienced"), t("plugin.promptr.block.skills.field.level.option.expert"), t("plugin.promptr.block.skills.field.level.option.authority")],
       },
-      { key: "items", label: "Compétences", kind: "list", placeholder: "Une compétence par ligne" },
+      { key: "items", label: t("plugin.promptr.block.skills.field.items.label"), kind: "list", placeholder: t("plugin.promptr.block.skills.field.items.placeholder") },
     ],
   },
   knowledge: {
-    label: "Connaissances",
-    hint: "Les domaines, le contexte et le vocabulaire qu'il doit connaître.",
+    label: t("plugin.promptr.block.knowledge.label"),
+    hint: t("plugin.promptr.block.knowledge.hint"),
     color: "#0ea5e9",
     icon: '<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
     fields: [
-      { key: "domains", label: "Domaines", kind: "list", placeholder: "Un domaine par ligne" },
-      { key: "context", label: "Contexte", kind: "textarea", placeholder: "Ce qu'il doit savoir de la situation, de l'entreprise, du projet…" },
-      { key: "glossary", label: "Vocabulaire", kind: "pairs", pair: ["Terme", "Définition"] },
+      { key: "domains", label: t("plugin.promptr.block.knowledge.field.domains.label"), kind: "list", placeholder: t("plugin.promptr.block.knowledge.field.domains.placeholder") },
+      { key: "context", label: t("plugin.promptr.block.knowledge.field.context.label"), kind: "textarea", placeholder: t("plugin.promptr.block.knowledge.field.context.placeholder") },
+      { key: "glossary", label: t("plugin.promptr.block.knowledge.field.glossary.label"), kind: "pairs", pair: [t("plugin.promptr.block.knowledge.field.glossary.a"), t("plugin.promptr.block.knowledge.field.glossary.b")],
+        addLabel: t("plugin.promptr.block.knowledge.field.glossary.add"), countKey: "plugin.promptr.block.knowledge.field.glossary.count" },
     ],
   },
   method: {
-    label: "Méthode",
-    hint: "Comment il travaille, étape par étape.",
+    label: t("plugin.promptr.block.method.label"),
+    hint: t("plugin.promptr.block.method.hint"),
     color: "#10b981",
     icon: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
     fields: [
-      { key: "steps", label: "Étapes", kind: "list", placeholder: "Une étape par ligne, dans l'ordre" },
+      { key: "steps", label: t("plugin.promptr.block.method.field.steps.label"), kind: "list", placeholder: t("plugin.promptr.block.method.field.steps.placeholder") },
       {
         key: "clarify",
-        label: "Questions de clarification",
+        label: t("plugin.promptr.block.method.field.clarify.label"),
         kind: "select",
-        options: ["", "jamais, il fait au mieux", "seulement si la demande est ambiguë", "toujours avant de commencer"],
+        options: ["", t("plugin.promptr.block.method.field.clarify.option.never"), t("plugin.promptr.block.method.field.clarify.option.ifAmbiguous"), t("plugin.promptr.block.method.field.clarify.option.always")],
       },
-      { key: "uncertainty", label: "Face à l'incertitude", kind: "text", placeholder: "Le dire franchement, proposer des pistes…" },
-      { key: "done", label: "Travail terminé quand…", kind: "text", placeholder: "Le critère qui dit que la réponse est complète" },
+      { key: "uncertainty", label: t("plugin.promptr.block.method.field.uncertainty.label"), kind: "text", placeholder: t("plugin.promptr.block.method.field.uncertainty.placeholder") },
+      { key: "done", label: t("plugin.promptr.block.method.field.done.label"), kind: "text", placeholder: t("plugin.promptr.block.method.field.done.placeholder") },
     ],
   },
   format: {
-    label: "Format des réponses",
-    hint: "La forme de ses réponses : langue, longueur, mise en page.",
+    label: t("plugin.promptr.block.format.label"),
+    hint: t("plugin.promptr.block.format.hint"),
     color: "#6366f1",
     icon: '<path d="M4 6h16M4 12h10M4 18h14"/>',
     fields: [
-      { key: "language", label: "Langue", kind: "text", placeholder: "français" },
-      { key: "address", label: "Adresse", kind: "select", options: ["", "tutoiement", "vouvoiement"] },
-      { key: "length", label: "Longueur", kind: "select", options: ["", "brève", "moyenne", "détaillée", "adaptée à la question"] },
+      { key: "language", label: t("plugin.promptr.block.format.field.language.label"), kind: "text", placeholder: t("plugin.promptr.block.format.field.language.placeholder") },
+      {
+        key: "address",
+        label: t("plugin.promptr.block.format.field.address.label"),
+        kind: "select",
+        options: ["", t("plugin.promptr.block.format.field.address.option.informal"), t("plugin.promptr.block.format.field.address.option.formal")],
+      },
+      {
+        key: "length",
+        label: t("plugin.promptr.block.format.field.length.label"),
+        kind: "select",
+        options: ["", t("plugin.promptr.block.format.field.length.option.short"), t("plugin.promptr.block.format.field.length.option.medium"), t("plugin.promptr.block.format.field.length.option.detailed"), t("plugin.promptr.block.format.field.length.option.adaptive")],
+      },
       {
         key: "structure",
-        label: "Mise en forme",
+        label: t("plugin.promptr.block.format.field.structure.label"),
         kind: "select",
-        options: ["", "texte suivi", "listes à puces", "titres et sections", "tableaux si utile"],
+        options: ["", t("plugin.promptr.block.format.field.structure.option.prose"), t("plugin.promptr.block.format.field.structure.option.bullets"), t("plugin.promptr.block.format.field.structure.option.sections"), t("plugin.promptr.block.format.field.structure.option.tables")],
       },
-      { key: "notes", label: "Autres consignes", kind: "textarea", placeholder: "Commencer par la réponse, finir par une piste d'action…" },
+      { key: "notes", label: t("plugin.promptr.block.format.field.notes.label"), kind: "textarea", placeholder: t("plugin.promptr.block.format.field.notes.placeholder") },
     ],
   },
   scope: {
-    label: "Périmètre et limites",
-    hint: "Ce qu'il fait, ce qu'il ne fait pas, ses lignes rouges.",
+    label: t("plugin.promptr.block.scope.label"),
+    hint: t("plugin.promptr.block.scope.hint"),
     color: "#ef4444",
     icon: '<path d="M12 3l7 3v5c0 4.5-3 8.4-7 10-4-1.6-7-5.5-7-10V6z"/>',
     fields: [
-      { key: "inScope", label: "Dans son périmètre", kind: "list", placeholder: "Un sujet par ligne" },
-      { key: "outOfScope", label: "Hors périmètre", kind: "list", placeholder: "Un sujet par ligne" },
-      { key: "redLines", label: "Lignes rouges", kind: "list", placeholder: "Ce qu'il refuse, quoi qu'on lui demande" },
-      { key: "offTopic", label: "Face à une demande hors sujet", kind: "text", placeholder: "La décliner poliment et réorienter…" },
+      { key: "inScope", label: t("plugin.promptr.block.scope.field.inScope.label"), kind: "list", placeholder: t("plugin.promptr.block.scope.field.inScope.placeholder") },
+      { key: "outOfScope", label: t("plugin.promptr.block.scope.field.outOfScope.label"), kind: "list", placeholder: t("plugin.promptr.block.scope.field.outOfScope.placeholder") },
+      { key: "redLines", label: t("plugin.promptr.block.scope.field.redLines.label"), kind: "list", placeholder: t("plugin.promptr.block.scope.field.redLines.placeholder") },
+      { key: "offTopic", label: t("plugin.promptr.block.scope.field.offTopic.label"), kind: "text", placeholder: t("plugin.promptr.block.scope.field.offTopic.placeholder") },
     ],
   },
   examples: {
-    label: "Exemples",
-    hint: "Des échanges types, qui montrent la réponse attendue.",
+    label: t("plugin.promptr.block.examples.label"),
+    hint: t("plugin.promptr.block.examples.hint"),
     color: "#14b8a6",
     icon: '<path d="M21 12a8 8 0 01-8 8H7l-4 3V12a8 8 0 018-8h2a8 8 0 018 8z"/>',
-    fields: [{ key: "items", label: "Échanges", kind: "pairs", pair: ["Question", "Réponse attendue"], long: true }],
+    fields: [
+      { key: "items", label: t("plugin.promptr.block.examples.field.items.label"), kind: "pairs", pair: [t("plugin.promptr.block.examples.field.items.a"), t("plugin.promptr.block.examples.field.items.b")],
+        addLabel: t("plugin.promptr.block.examples.field.items.add"), countKey: "plugin.promptr.block.examples.field.items.count", long: true },
+    ],
   },
   greeting: {
-    label: "Accueil",
-    hint: "Son premier message, et des idées de questions à lui poser.",
+    label: t("plugin.promptr.block.greeting.label"),
+    hint: t("plugin.promptr.block.greeting.hint"),
     color: "#84cc16",
     icon: '<path d="M7 11V7a2 2 0 114 0v4"/><path d="M11 10V5a2 2 0 114 0v6"/><path d="M15 10a2 2 0 114 0v3a8 8 0 01-8 8h-1a6 6 0 01-5-2.7L3 15a2 2 0 013-2.6l1 1.1"/>',
     fields: [
-      { key: "message", label: "Message d'accueil", kind: "textarea", placeholder: "Bonjour ! Je peux t'aider à…" },
-      { key: "starters", label: "Questions pour démarrer", kind: "list", placeholder: "Une question par ligne" },
+      { key: "message", label: t("plugin.promptr.block.greeting.field.message.label"), kind: "textarea", placeholder: t("plugin.promptr.block.greeting.field.message.placeholder") },
+      { key: "starters", label: t("plugin.promptr.block.greeting.field.starters.label"), kind: "list", placeholder: t("plugin.promptr.block.greeting.field.starters.placeholder") },
     ],
   },
   custom: {
-    label: "Bloc libre",
-    hint: "Une section de votre choix, écrite librement.",
+    label: t("plugin.promptr.block.custom.label"),
+    hint: t("plugin.promptr.block.custom.hint"),
     color: "#64748b",
     icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>',
     multiple: true,
     fields: [
-      { key: "title", label: "Titre", kind: "text", placeholder: "Règles de sécurité, outils, ton de marque…" },
-      { key: "content", label: "Contenu", kind: "textarea", placeholder: "Le texte de la section." },
+      { key: "title", label: t("plugin.promptr.block.custom.field.title.label"), kind: "text", placeholder: t("plugin.promptr.block.custom.field.title.placeholder") },
+      { key: "content", label: t("plugin.promptr.block.custom.field.content.label"), kind: "textarea", placeholder: t("plugin.promptr.block.custom.field.content.placeholder") },
     ],
   },
 };
@@ -191,7 +215,8 @@ function cleanField(field, value) {
       // L'agent peut répondre avec une valeur approchante : on retient la
       // première option qui la contient, sinon rien.
       const lower = v.toLowerCase();
-      return (lower && field.options.find((o) => o && (o.includes(lower) || lower.includes(o)))) || "";
+      // Compared in lower case: German options start with a capital letter.
+      return (lower && field.options.find((o) => o && (o.toLowerCase().includes(lower) || lower.includes(o.toLowerCase())))) || "";
     }
     case "scale": {
       const n = Math.round(Number(value));
@@ -288,9 +313,10 @@ function normalizePlan(raw) {
 
 function scaleWord(field, v) {
   if (!v) return "";
-  const [low, high] = field.ends;
-  const strong = Math.abs(v) === 2 ? "très " : "";
-  return `${field.label} : ${strong}${(v < 0 ? low : high).toLowerCase()}`;
+  // One whole reading per position of the cursor (see locales.js).
+  const strong = Math.abs(v) === 2;
+  if (v < 0) return strong ? field.readings.lowStrong : field.readings.low;
+  return strong ? field.readings.highStrong : field.readings.high;
 }
 
 /** Le résumé d'un bloc, sur sa carte : quelques fragments, dans l'ordre. */
@@ -302,7 +328,7 @@ function blockSummary(block) {
     if (block.type === "custom" && field.key === "title") continue;
     const v = block.data[field.key];
     if (field.kind === "list" && v.length) parts.push(v.slice(0, 4).join(" · ") + (v.length > 4 ? ` · +${v.length - 4}` : ""));
-    else if (field.kind === "pairs" && v.length) parts.push(`${v.length} ${field.pair[0].toLowerCase()}${v.length > 1 ? "s" : ""}`);
+    else if (field.kind === "pairs" && v.length) parts.push(window.Allkin.tn(field.countKey, v.length));
     else if (field.kind === "scale" && v) parts.push(scaleWord(field, v));
     else if (typeof v === "string" && v) parts.push(v);
   }
@@ -310,15 +336,17 @@ function blockSummary(block) {
 }
 
 /** Le contenu d'un bloc en texte, pour le convertir en bloc libre. */
+// These lines end up in the plan, hence in the prompt: in the user's language.
+const t_ = (key, vars) => window.Allkin.t(key, vars);
 function describeBlockData(type, data) {
   const block = createBlock(type, data);
   const lines = [];
   for (const field of BLOCK_TYPES[type].fields) {
     const v = block.data[field.key];
-    if (field.kind === "list" && v.length) lines.push(`${field.label} :\n${v.map((x) => `- ${x}`).join("\n")}`);
-    else if (field.kind === "pairs" && v.length) lines.push(`${field.label} :\n${v.map((p) => `- ${p.a} → ${p.b}`).join("\n")}`);
+    if (field.kind === "list" && v.length) lines.push(t_("plugin.promptr.inserted.fieldList", { label: field.label, items: v.map((x) => `- ${x}`).join("\n") }));
+    else if (field.kind === "pairs" && v.length) lines.push(t_("plugin.promptr.inserted.fieldList", { label: field.label, items: v.map((p) => `- ${p.a} → ${p.b}`).join("\n") }));
     else if (field.kind === "scale" && v) lines.push(scaleWord(field, v));
-    else if (typeof v === "string" && v) lines.push(`${field.label} : ${v}`);
+    else if (typeof v === "string" && v) lines.push(t_("plugin.promptr.inserted.fieldValue", { label: field.label, value: v }));
   }
   return lines.join("\n");
 }

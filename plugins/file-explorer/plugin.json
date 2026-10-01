@@ -1,16 +1,39 @@
 {
   "name": "Explorateur de fichiers",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
   "author": "Allkin",
   "permissions": [
     { "id": "interface", "reason": "Ajoute l'onglet Fichiers des agents et l'explorateur de ~/.allkin à la page d'Allkin." }
   ],
+  "locales": {
+    "en": {
+      "name": "File explorer",
+      "description": "The Files tab of each agent (upload, archives, scripts, bin) and the explorer of ~/.allkin.",
+      "permissions": {
+        "interface": "Adds the Files tab of the agents and the explorer of ~/.allkin to the page of Allkin."
+      }
+    },
+    "es": {
+      "name": "Explorador de archivos",
+      "description": "La pestaña Archivos de cada agente (subida, archivos comprimidos, scripts, papelera) y el explorador de ~/.allkin.",
+      "permissions": {
+        "interface": "Añade la pestaña Archivos de los agentes y el explorador de ~/.allkin a la página de Allkin."
+      }
+    },
+    "de": {
+      "name": "Datei-Explorer",
+      "description": "Der Tab Dateien jedes Agenten (Hochladen, Archive, Skripte, Papierkorb) und der Explorer von ~/.allkin.",
+      "permissions": {
+        "interface": "Fügt der Seite von Allkin den Tab Dateien der Agenten und den Explorer von ~/.allkin hinzu."
+      }
+    }
+  },
   "ui": {
     "apiVersion": 1,
     "provides": ["file-explorer"],
     "html": ["view.html"],
     "styles": ["explorer.css"],
-    "scripts": ["explorer.js"]
+    "scripts": ["locales.js", "explorer.js"]
   }
 }

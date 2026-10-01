@@ -5,7 +5,7 @@
            affiché, et le voile doit désigner cette zone-là. -->
       <div class="data-drop-veil" id="data-drop-veil" aria-hidden="true">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
-        <span id="data-drop-veil-text">Déposer ici</span>
+        <span id="data-drop-veil-text" data-i18n="plugin.file-explorer.drop.here">Drop here</span>
       </div>
       <!-- En-tête : où l'on est, et ce qu'on peut y créer. -->
       <div class="data-view-header">
@@ -13,29 +13,29 @@
         <!-- Tout ce qu'on fait ici tient dans ces boutons : le menu ⋮ de
              l'en-tête d'Allkin n'a rien à proposer sur cette page. -->
         <div class="data-header-actions">
-          <button type="button" class="secondary data-header-btn" id="data-filter-btn" title="Rechercher" aria-label="Rechercher" aria-expanded="false" aria-controls="data-toolbar">
+          <button type="button" class="secondary data-header-btn" id="data-filter-btn" title="Search" data-i18n-title="common.search" aria-label="Search" data-i18n-aria-label="common.search" aria-expanded="false" aria-controls="data-toolbar">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
           </button>
           <div class="data-sort" id="data-sort">
-            <button type="button" class="secondary data-header-btn" id="data-sort-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="data-sort-menu" title="Trier" aria-label="Trier">
+            <button type="button" class="secondary data-header-btn" id="data-sort-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="data-sort-menu" title="Sort" data-i18n-title="common.sort" aria-label="Sort" data-i18n-aria-label="common.sort">
               <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16"/><path d="M3.5 16.5L7 20l3.5-3.5"/><path d="M17 20V4"/><path d="M13.5 7.5L17 4l3.5 3.5"/></svg>
             </button>
-            <div class="tl-menu data-sort-menu hidden" id="data-sort-menu" role="menu" aria-label="Trier les fichiers">
-              <button type="button" class="tl-menu-item" data-sort-key="name" role="menuitemradio">Nom</button>
-              <button type="button" class="tl-menu-item" data-sort-key="size" role="menuitemradio">Taille</button>
-              <button type="button" class="tl-menu-item" data-sort-key="modifiedAt" role="menuitemradio">Modifié</button>
+            <div class="tl-menu data-sort-menu hidden" id="data-sort-menu" role="menu" aria-label="Sort the files" data-i18n-aria-label="plugin.file-explorer.sort.menuLabel">
+              <button type="button" class="tl-menu-item" data-sort-key="name" role="menuitemradio" data-i18n="plugin.file-explorer.field.name">Name</button>
+              <button type="button" class="tl-menu-item" data-sort-key="size" role="menuitemradio" data-i18n="plugin.file-explorer.field.size">Size</button>
+              <button type="button" class="tl-menu-item" data-sort-key="modifiedAt" role="menuitemradio" data-i18n="plugin.file-explorer.field.modified">Modified</button>
             </div>
           </div>
-          <button type="button" class="secondary data-header-btn" id="data-upload-btn" title="Déposer des fichiers" aria-label="Déposer des fichiers">
+          <button type="button" class="secondary data-header-btn" id="data-upload-btn" title="Upload files" data-i18n-title="plugin.file-explorer.upload.button" aria-label="Upload files" data-i18n-aria-label="plugin.file-explorer.upload.button">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
           </button>
-          <button type="button" class="secondary data-header-btn" id="folder-new-btn" title="Nouveau dossier" aria-label="Nouveau dossier">
+          <button type="button" class="secondary data-header-btn" id="folder-new-btn" title="New folder" data-i18n-title="plugin.file-explorer.new.folder" aria-label="New folder" data-i18n-aria-label="plugin.file-explorer.new.folder">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M12 11v4M10 13h4"/></svg>
           </button>
-          <button type="button" class="secondary data-header-btn" id="file-new-btn" title="Nouveau fichier" aria-label="Nouveau fichier">
+          <button type="button" class="secondary data-header-btn" id="file-new-btn" title="New file" data-i18n-title="plugin.file-explorer.new.file" aria-label="New file" data-i18n-aria-label="plugin.file-explorer.new.file">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 12v6M9 15h6"/></svg>
           </button>
-          <button type="button" class="secondary data-header-btn" id="data-select-btn" title="Sélectionner plusieurs éléments" aria-label="Sélectionner plusieurs éléments" aria-pressed="false">
+          <button type="button" class="secondary data-header-btn" id="data-select-btn" title="Select several items" data-i18n-title="plugin.file-explorer.select.button" aria-label="Select several items" data-i18n-aria-label="plugin.file-explorer.select.button" aria-pressed="false">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
           </button>
         </div>
@@ -44,8 +44,8 @@
       <div class="data-toolbar hidden" id="data-toolbar">
         <label class="data-filter">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
-          <input type="search" id="data-filter-input" placeholder="Filtrer par nom" autocomplete="off" aria-label="Filtrer les fichiers par nom" />
-          <button type="button" class="data-filter-clear hidden" id="data-filter-clear" title="Effacer le filtre" aria-label="Effacer le filtre">
+          <input type="search" id="data-filter-input" placeholder="Filter by name" data-i18n-placeholder="plugin.file-explorer.filter.placeholder" autocomplete="off" aria-label="Filter the files by name" data-i18n-aria-label="plugin.file-explorer.filter.label" />
+          <button type="button" class="data-filter-clear hidden" id="data-filter-clear" title="Clear the filter" data-i18n-title="plugin.file-explorer.filter.clear" aria-label="Clear the filter" data-i18n-aria-label="plugin.file-explorer.filter.clear">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
         </label>
@@ -53,32 +53,32 @@
       <!-- Barre de sélection : n'existe qu'en mode sélection. Les actions
            groupées y sont sous la main, plutôt que cachées dans le menu ⋮. -->
       <div class="data-select-bar hidden" id="data-select-bar">
-        <span class="data-select-count" id="data-select-count">0 sélectionné</span>
-        <button type="button" class="data-select-act" id="data-select-all-btn">Tout</button>
+        <span class="data-select-count" id="data-select-count" data-i18n="plugin.file-explorer.select.none">No selection</span>
+        <button type="button" class="data-select-act" id="data-select-all-btn" data-i18n="plugin.file-explorer.select.all">All</button>
         <span class="data-select-spacer"></span>
-        <button type="button" class="data-select-act" id="data-download-selected-btn" title="Télécharger" disabled>
+        <button type="button" class="data-select-act" id="data-download-selected-btn" title="Download" data-i18n-title="common.download" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-          <span>Télécharger</span>
+          <span data-i18n="common.download">Download</span>
         </button>
-        <button type="button" class="data-select-act" id="data-move-selected-btn" title="Copier ou déplacer" disabled>
+        <button type="button" class="data-select-act" id="data-move-selected-btn" title="Copy or move" data-i18n-title="plugin.file-explorer.move.button.title" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
-          <span>Déplacer</span>
+          <span data-i18n="plugin.file-explorer.move.button">Move</span>
         </button>
-        <button type="button" class="data-select-act is-danger" id="data-delete-selected-btn" title="Supprimer" disabled>
+        <button type="button" class="data-select-act is-danger" id="data-delete-selected-btn" title="Delete" data-i18n-title="common.delete" disabled>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12"/><path d="M9 7V4h6v3"/></svg>
-          <span>Supprimer</span>
+          <span data-i18n="common.delete">Delete</span>
         </button>
-        <button type="button" class="data-select-act data-select-done" id="data-select-done-btn">Terminé</button>
+        <button type="button" class="data-select-act data-select-done" id="data-select-done-btn" data-i18n="plugin.file-explorer.select.done">Done</button>
       </div>
       <div class="data-table-wrap">
         <table class="data-table" id="data-table">
           <thead>
             <tr>
               <th class="data-table-select-col"></th>
-              <th data-sort-key="name">Nom</th>
-              <th data-sort-key="size">Taille</th>
-              <th data-sort-key="createdAt">Créé le</th>
-              <th data-sort-key="modifiedAt">Modifié le</th>
+              <th data-sort-key="name" data-i18n="plugin.file-explorer.field.name">Name</th>
+              <th data-sort-key="size" data-i18n="plugin.file-explorer.field.size">Size</th>
+              <th data-sort-key="createdAt" data-i18n="plugin.file-explorer.column.created">Created on</th>
+              <th data-sort-key="modifiedAt" data-i18n="plugin.file-explorer.column.modified">Modified on</th>
               <th class="data-table-actions-col"></th>
             </tr>
           </thead>
@@ -94,9 +94,9 @@
     <div class="explorer-view hidden" id="explorer-view">
       <div class="data-view-header">
         <div class="data-breadcrumb" id="explorer-breadcrumb"></div>
-        <span class="explorer-readonly">lecture seule</span>
+        <span class="explorer-readonly" data-i18n="plugin.file-explorer.explorer.readOnly">read only</span>
         <div class="data-header-actions">
-          <button type="button" class="secondary data-header-btn" id="explorer-filter-btn" title="Rechercher" aria-label="Rechercher" aria-expanded="false" aria-controls="explorer-toolbar">
+          <button type="button" class="secondary data-header-btn" id="explorer-filter-btn" title="Search" data-i18n-title="common.search" aria-label="Search" data-i18n-aria-label="common.search" aria-expanded="false" aria-controls="explorer-toolbar">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
           </button>
         </div>
@@ -104,8 +104,8 @@
       <div class="data-toolbar hidden" id="explorer-toolbar">
         <label class="data-filter">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
-          <input type="search" id="explorer-filter-input" placeholder="Filtrer par nom" autocomplete="off" aria-label="Filtrer par nom" />
-          <button type="button" class="data-filter-clear hidden" id="explorer-filter-clear" title="Effacer le filtre" aria-label="Effacer le filtre">
+          <input type="search" id="explorer-filter-input" placeholder="Filter by name" data-i18n-placeholder="plugin.file-explorer.filter.placeholder" autocomplete="off" aria-label="Filter by name" data-i18n-aria-label="plugin.file-explorer.filter.placeholder" />
+          <button type="button" class="data-filter-clear hidden" id="explorer-filter-clear" title="Clear the filter" data-i18n-title="plugin.file-explorer.filter.clear" aria-label="Clear the filter" data-i18n-aria-label="plugin.file-explorer.filter.clear">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
         </label>
@@ -115,9 +115,9 @@
         <table class="data-table explorer-table">
           <thead>
             <tr>
-              <th>Nom</th>
-              <th class="explorer-col-size">Taille</th>
-              <th class="explorer-col-date">Modifié</th>
+              <th data-i18n="plugin.file-explorer.field.name">Name</th>
+              <th class="explorer-col-size" data-i18n="plugin.file-explorer.field.size">Size</th>
+              <th class="explorer-col-date" data-i18n="plugin.file-explorer.field.modified">Modified</th>
             </tr>
           </thead>
           <tbody id="explorer-body"></tbody>
@@ -142,85 +142,85 @@
 
   <button type="button" class="chat-menu-item" id="data-ctx-open" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#8b8bf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/></svg>
-    Ouvrir
+    <span data-i18n="common.open">Open</span>
   </button>
   <button type="button" class="chat-menu-item hidden" id="data-ctx-run" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l12 8-12 8z"/></svg>
-    Exécuter
+    <span data-i18n="plugin.file-explorer.run.action">Run</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-download" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-    <span id="data-ctx-download-label">Télécharger</span>
+    <span id="data-ctx-download-label" data-i18n="common.download">Download</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-select" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
-    Sélectionner
+    <span data-i18n="plugin.file-explorer.select.one">Select</span>
   </button>
 
   <div class="chat-menu-sep"></div>
   <button type="button" class="chat-menu-item" id="data-ctx-copy" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
-    Copier
+    <span data-i18n="common.copy">Copy</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-cut" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88"/><path d="M14.47 14.48L20 20"/><path d="M8.12 8.12L12 12"/></svg>
-    Couper
+    <span data-i18n="plugin.file-explorer.ctx.cut">Cut</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-paste" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v3H9z"/><path d="M15 4.5h2A2 2 0 0119 6.5V20a2 2 0 01-2 2H7a2 2 0 01-2-2V6.5a2 2 0 012-2h2"/></svg>
-    <span id="data-ctx-paste-label">Coller</span>
+    <span id="data-ctx-paste-label" data-i18n="plugin.file-explorer.ctx.paste">Paste</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-rename" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M14.5 4.5l5 5L9 20H4v-5z"/></svg>
-    Renommer
+    <span data-i18n="common.rename">Rename</span>
   </button>
 
   <div class="chat-menu-sep"></div>
   <button type="button" class="chat-menu-item" id="data-ctx-archive" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M10 12h4"/></svg>
-    <span id="data-ctx-archive-label">Archiver</span>
+    <span id="data-ctx-archive-label" data-i18n="plugin.file-explorer.ctx.archive">Archive</span>
   </button>
   <button type="button" class="chat-menu-item hidden" id="data-ctx-extract" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8"/><path d="M12 18v-6m0 0l-2.5 2.5M12 12l2.5 2.5"/></svg>
-    Désarchiver
+    <span data-i18n="plugin.file-explorer.ctx.extract">Extract</span>
   </button>
 
   <div class="chat-menu-sep"></div>
   <button type="button" class="chat-menu-item" id="data-ctx-new-file" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M12 11v6M9 14h6"/></svg>
-    Nouveau fichier
+    <span data-i18n="plugin.file-explorer.new.file">New file</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-new-dir" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 11v5M9.5 13.5h5"/></svg>
-    Nouveau dossier
+    <span data-i18n="plugin.file-explorer.new.folder">New folder</span>
   </button>
   <button type="button" class="chat-menu-item" id="data-ctx-upload" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
-    Déposer des fichiers…
+    <span data-i18n="plugin.file-explorer.ctx.upload">Upload files…</span>
   </button>
 
   <div class="chat-menu-sep"></div>
   <button type="button" class="chat-menu-item" id="data-ctx-delete" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2"/><path d="M6 7l1 13a1 1 0 001 1h8a1 1 0 001-1l1-13"/></svg>
-    <span id="data-ctx-delete-label">Supprimer</span>
+    <span id="data-ctx-delete-label" data-i18n="common.delete">Delete</span>
   </button>
   <!-- Dans la corbeille seulement. -->
   <button type="button" class="chat-menu-item hidden" id="data-ctx-empty-trash" role="menuitem">
     <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0v13a1 1 0 001 1h6a1 1 0 001-1V7"/><path d="M10 11v6M14 11v6"/></svg>
-    Vider la corbeille
+    <span data-i18n="plugin.file-explorer.bin.empty">Empty the bin</span>
   </button>
 </div>
 <!-- Choix du format d'archive. La liste est remplie par le serveur. -->
 <template id="archive-format-template">
   <div class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="archive-modal-title">
-      <h2 id="archive-modal-title">Archiver</h2>
+      <h2 id="archive-modal-title" data-i18n="plugin.file-explorer.ctx.archive">Archive</h2>
       <p class="dim" id="archive-modal-target"></p>
       <div class="archive-format-list" id="archive-format-list"></div>
       <p id="archive-modal-error" class="error hidden"></p>
       <div class="modal-actions">
-        <button type="button" class="ghost modal-cancel">Annuler</button>
-        <button type="button" id="archive-modal-go">Créer l'archive</button>
+        <button type="button" class="ghost modal-cancel" data-i18n="common.cancel">Cancel</button>
+        <button type="button" id="archive-modal-go" data-i18n="plugin.file-explorer.archive.create">Create the archive</button>
       </div>
     </div>
   </div>
@@ -230,15 +230,15 @@
 <template id="data-move-dialog-template">
   <div class="modal-backdrop">
     <div class="modal modal-wide">
-      <h2>Copier / déplacer</h2>
+      <h2 data-i18n="plugin.file-explorer.move.title">Copy / move</h2>
       <p class="dim" id="data-move-source-label"></p>
       <div class="data-breadcrumb" id="data-move-breadcrumb"></div>
       <div class="data-move-list" id="data-move-list"></div>
       <p id="data-move-error" class="error hidden"></p>
       <div class="modal-actions">
-        <button type="button" class="ghost modal-cancel">Annuler</button>
-        <button type="button" class="secondary" id="data-move-copy-btn">Copier ici</button>
-        <button type="button" id="data-move-move-btn">Déplacer ici</button>
+        <button type="button" class="ghost modal-cancel" data-i18n="common.cancel">Cancel</button>
+        <button type="button" class="secondary" id="data-move-copy-btn" data-i18n="plugin.file-explorer.move.copyHere">Copy here</button>
+        <button type="button" id="data-move-move-btn" data-i18n="plugin.file-explorer.move.moveHere">Move here</button>
       </div>
     </div>
   </div>
@@ -251,7 +251,7 @@
       <label><span id="data-name-dialog-label"></span><input type="text" id="data-name-dialog-input" autocomplete="off" autocapitalize="off" spellcheck="false" /></label>
       <p id="data-name-dialog-error" class="error hidden"></p>
       <div class="modal-actions">
-        <button type="button" class="ghost modal-cancel">Annuler</button>
+        <button type="button" class="ghost modal-cancel" data-i18n="common.cancel">Cancel</button>
         <button type="submit" id="data-name-dialog-submit"></button>
       </div>
     </form>
@@ -260,7 +260,7 @@
 <template id="data-row-template">
   <tr class="data-row">
     <td class="data-row-select">
-      <input type="checkbox" class="data-row-checkbox" aria-label="Sélectionner" />
+      <input type="checkbox" class="data-row-checkbox" aria-label="Select" data-i18n-aria-label="plugin.file-explorer.select.one" />
     </td>
     <td class="data-row-name">
       <span class="data-row-icon"></span>
@@ -273,13 +273,13 @@
     <td class="data-row-created"></td>
     <td class="data-row-modified"></td>
     <td class="data-row-actions">
-      <button type="button" class="data-row-act data-row-download" title="Télécharger" aria-label="Télécharger">
+      <button type="button" class="data-row-act data-row-download" title="Download" data-i18n-title="common.download" aria-label="Download" data-i18n-aria-label="common.download">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
       </button>
-      <button type="button" class="data-row-act data-row-delete" title="Supprimer" aria-label="Supprimer">
+      <button type="button" class="data-row-act data-row-delete" title="Delete" data-i18n-title="common.delete" aria-label="Delete" data-i18n-aria-label="common.delete">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12"/><path d="M9 7V4h6v3"/></svg>
       </button>
-      <button type="button" class="data-row-act data-row-more" title="Plus d'actions" aria-label="Plus d'actions" aria-haspopup="menu">
+      <button type="button" class="data-row-act data-row-more" title="More actions" data-i18n-title="plugin.file-explorer.row.more" aria-label="More actions" data-i18n-aria-label="plugin.file-explorer.row.more" aria-haspopup="menu">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg>
       </button>
     </td>
@@ -308,9 +308,9 @@
         <pre class="script-run-console" id="script-run-console" role="log" aria-live="polite"></pre>
       </div>
       <div class="modal-actions script-run-actions">
-        <button type="button" class="modal-cancel" id="script-run-cancel">Annuler</button>
-        <button type="button" id="script-run-go">Exécuter</button>
-        <button type="button" class="danger hidden" id="script-run-stop">Arrêter</button>
+        <button type="button" class="modal-cancel" id="script-run-cancel" data-i18n="common.cancel">Cancel</button>
+        <button type="button" id="script-run-go" data-i18n="plugin.file-explorer.run.action">Run</button>
+        <button type="button" class="danger hidden" id="script-run-stop" data-i18n="plugin.file-explorer.run.stop">Stop</button>
       </div>
     </div>
   </div>
@@ -319,7 +319,7 @@
 <template id="upload-progress-template">
   <div class="modal-backdrop upload-modal-backdrop">
     <div class="modal upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
-      <h2 id="upload-modal-title">Dépôt en cours</h2>
+      <h2 id="upload-modal-title" data-i18n="plugin.file-explorer.upload.title.running">Upload in progress</h2>
       <p class="dim upload-modal-target" id="upload-modal-target"></p>
       <div class="update-progress">
         <div class="update-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100">
@@ -330,7 +330,7 @@
       <p class="upload-modal-current dim" id="upload-modal-current"></p>
       <div class="upload-errors hidden" id="upload-errors"></div>
       <div class="modal-actions hidden" id="upload-modal-actions">
-        <button type="button" class="modal-cancel">Fermer</button>
+        <button type="button" class="modal-cancel" data-i18n="common.close">Close</button>
       </div>
     </div>
   </div>

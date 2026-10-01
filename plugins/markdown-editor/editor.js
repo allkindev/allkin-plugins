@@ -43,7 +43,7 @@ const BLOCK_TAGS = new Set(["P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL",
 const IMAGE_TYPES = /^image\/(png|jpe?g|gif|webp|avif|svg\+xml)$/i;
 const HOSTS_KEY = "allkin.markdown-editor.image-hosts";
 const UNDO_DEPTH = 100;
-const PLACEHOLDER = "Écris ici… ou tape « / » pour insérer un bloc";
+const PLACEHOLDER = Allkin.t("plugin.markdown-editor.placeholder");
 
 const indexOf = (node) => Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 const isHeading = (el) => /^H[1-6]$/.test(el?.tagName ?? "");
@@ -342,7 +342,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
   root.setAttribute("contenteditable", "true");
   root.setAttribute("role", "textbox");
   root.setAttribute("aria-multiline", "true");
-  root.setAttribute("aria-label", "Texte");
+  root.setAttribute("aria-label", Allkin.t("plugin.markdown-editor.document.label"));
   root.dataset.placeholder = PLACEHOLDER;
   root.spellcheck = spellcheck;
   /* Calque posé par-dessus le document : il porte la barre du tableau et le
@@ -371,8 +371,8 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
     img.classList.toggle("is-blocked", Boolean(shown.blocked));
     img.classList.toggle("is-missing", Boolean(shown.missing));
     if (shown.url) img.src = shown.url;
-    else if (shown.blocked) img.src = placeholderImage("Image externe masquée", `${hostOf(src)} — clique pour l'afficher`);
-    else img.src = placeholderImage("Image introuvable", src);
+    else if (shown.blocked) img.src = placeholderImage(Allkin.t("plugin.markdown-editor.image.blocked"), Allkin.t("plugin.markdown-editor.image.blockedDetail", { host: hostOf(src) }));
+    else img.src = placeholderImage(Allkin.t("plugin.markdown-editor.image.missing"), src);
   }
 
   /* ---- Suivi des modifications -------------------------------------------
@@ -448,18 +448,45 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
   }
 
   /** Après toute modification : remet le DOM d'aplomb, puis rend le texte. */
-  function commit() {
+  /**
+   * Records the document after a change. `tidyNow` false (plain typing): the
+   * DOM is read but not rewritten. Rewriting it under the caret — merging
+   * text nodes, re-posing the selection — breaks iOS dictation, which keeps
+   * writing into the node it started in: its corrections and the final text
+   * it lays when one switches to the keyboard then land in a node that is
+   * gone, and words vanish. The tidy-up runs later, once typing pauses (see
+   * scheduleTidy), on blur, and with every structural edit.
+   */
+  function commit({ tidyNow = true } = {}) {
     if (destroyed || sourceMode) return;
     flushMutations();
-    tidy(false);
-    flushMutations();
-    touched.clear();
+    if (tidyNow) {
+      clearTimeout(tidyTimer);
+      tidyTimer = null;
+      tidy(false);
+      flushMutations();
+      touched.clear();
+    }
     const md = serialize();
     if (md !== lastMd) {
       lastMd = md;
       doc.setContent(md);
     }
     refresh();
+  }
+
+  let tidyTimer = null;
+  const TIDY_IDLE_MS = 3000;
+
+  /** A tidy-up once the typing has paused long enough for a dictation to
+   *  have laid its final text. */
+  function scheduleTidy() {
+    clearTimeout(tidyTimer);
+    tidyTimer = setTimeout(() => {
+      tidyTimer = null;
+      if (destroyed || sourceMode || composing || !host.isConnected) return;
+      commit();
+    }, TIDY_IDLE_MS);
   }
 
   /* ---- Sélection ---------------------------------------------------------- */
@@ -1883,7 +1910,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
     },
     rowDel({ rows, row, col, wrap }) {
       // L'en-tête ne se retire pas : sans lui, ce n'est plus un tableau markdown.
-      if (row === 0) return toast("La ligne d'en-tête ne se retire pas : supprime le tableau entier.", "ko");
+      if (row === 0) return toast(Allkin.t("plugin.markdown-editor.table.headerStays"), "ko");
       rows[row].remove();
       const next = rows[row + 1] ?? rows[row - 1];
       if (next?.isConnected) caretToEnd(next.cells[col] ?? next.cells[0]);
@@ -1936,19 +1963,19 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
      cellule quand la marge est trop étroite. Rien ne bouge quand il apparaît,
      et il ne masque pas la ligne de texte qui précède le tableau. */
   const TABLE_MENU = [
-    { id: "rowAddAbove", group: "add", label: "Insérer une ligne au-dessus", icon: "rowAddAbove" },
-    { id: "rowAdd", group: "add", label: "Insérer une ligne en dessous", icon: "rowAdd" },
-    { id: "colAddLeft", group: "add", label: "Insérer une colonne à gauche", icon: "colAddLeft" },
-    { id: "colAdd", group: "add", label: "Insérer une colonne à droite", icon: "colAdd" },
-    { id: "alignLeft", group: "align", label: "Aligner la colonne à gauche", icon: "alignLeft" },
-    { id: "alignCenter", group: "align", label: "Centrer la colonne", icon: "alignCenter" },
-    { id: "alignRight", group: "align", label: "Aligner la colonne à droite", icon: "alignRight" },
-    { id: "rowDel", group: "remove", label: "Supprimer la ligne", icon: "rowDel" },
-    { id: "colDel", group: "remove", label: "Supprimer la colonne", icon: "colDel" },
-    { id: "remove", group: "remove", label: "Supprimer le tableau", icon: "trash", danger: true },
+    { id: "rowAddAbove", group: "add", label: Allkin.t("plugin.markdown-editor.table.rowAddAbove"), icon: "rowAddAbove" },
+    { id: "rowAdd", group: "add", label: Allkin.t("plugin.markdown-editor.table.rowAdd"), icon: "rowAdd" },
+    { id: "colAddLeft", group: "add", label: Allkin.t("plugin.markdown-editor.table.colAddLeft"), icon: "colAddLeft" },
+    { id: "colAdd", group: "add", label: Allkin.t("plugin.markdown-editor.table.colAdd"), icon: "colAdd" },
+    { id: "alignLeft", group: "align", label: Allkin.t("plugin.markdown-editor.table.alignLeft"), icon: "alignLeft" },
+    { id: "alignCenter", group: "align", label: Allkin.t("plugin.markdown-editor.table.alignCenter"), icon: "alignCenter" },
+    { id: "alignRight", group: "align", label: Allkin.t("plugin.markdown-editor.table.alignRight"), icon: "alignRight" },
+    { id: "rowDel", group: "remove", label: Allkin.t("plugin.markdown-editor.table.rowDel"), icon: "rowDel" },
+    { id: "colDel", group: "remove", label: Allkin.t("plugin.markdown-editor.table.colDel"), icon: "colDel" },
+    { id: "remove", group: "remove", label: Allkin.t("plugin.markdown-editor.table.remove"), icon: "trash", danger: true },
   ];
 
-  const cellButton = layer.appendChild(MDE.button({ icon: "more", tip: "Lignes et colonnes", className: "mde-cell-btn" }));
+  const cellButton = layer.appendChild(MDE.button({ icon: "more", tip: Allkin.t("plugin.markdown-editor.table.menu"), className: "mde-cell-btn" }));
   cellButton.hidden = true;
   let tableMenu = null;
   let currentCell = null;
@@ -2015,10 +2042,10 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
 
   function openTarget(href) {
     if (/^(https?:\/\/|mailto:)/i.test(href)) return void window.open(href, "_blank", "noopener,noreferrer");
-    if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return toast("Ce type d'adresse ne s'ouvre pas d'ici.", "ko");
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return toast(Allkin.t("plugin.markdown-editor.link.cannotOpen"), "ko");
     const url = files?.resolve?.(href, "open");
     if (url) window.open(url, "_blank", "noopener");
-    else toast("Ce lien désigne un fichier local : il ne s'ouvre pas d'ici.", "ko");
+    else toast(Allkin.t("plugin.markdown-editor.link.localFile"), "ko");
   }
 
   function applyLink(href, text, existing) {
@@ -2072,11 +2099,11 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       anchor,
       className: "mde-form",
       build: (el, close) => {
-        const url = MDE.field("Adresse", {
+        const url = MDE.field(Allkin.t("plugin.markdown-editor.link.address"), {
           value: link?.dataset.href ?? (/^(https?:\/\/|www\.)\S+$/i.test(selected) ? selected : ""),
           placeholder: "https://…",
         });
-        const label = needsText || link ? MDE.field("Texte", { value: link ? link.textContent : "", placeholder: "Texte du lien" }) : null;
+        const label = needsText || link ? MDE.field(Allkin.t("plugin.markdown-editor.link.text"), { value: link ? link.textContent : "", placeholder: Allkin.t("plugin.markdown-editor.link.textPlaceholder") }) : null;
         const submit = () => {
           const href = normalizeUrl(url.input.value);
           if (!href) return url.input.focus();
@@ -2086,7 +2113,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
         };
         const actions = make("div", "mde-form-actions");
         if (link) {
-          const remove = MDE.action("Retirer", { icon: "unlink" });
+          const remove = MDE.action(Allkin.t("common.remove"), { icon: "unlink" });
           remove.addEventListener("click", () => {
             close();
             restoreSelection(saved);
@@ -2094,7 +2121,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
           });
           actions.appendChild(remove);
         }
-        const apply = MDE.action(link ? "Enregistrer" : "Ajouter le lien", { primary: true });
+        const apply = MDE.action(link ? Allkin.t("common.save") : Allkin.t("plugin.markdown-editor.link.add"), { primary: true });
         apply.addEventListener("click", submit);
         actions.appendChild(apply);
         el.append(url.wrap);
@@ -2119,13 +2146,13 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       className: "mde-bubble",
       owner: root,
       build: (el) => {
-        const address = make("span", "mde-bubble-text", a.dataset.href || "(adresse vide)");
+        const address = make("span", "mde-bubble-text", a.dataset.href || Allkin.t("plugin.markdown-editor.link.empty"));
         address.title = a.dataset.href ?? "";
-        const open = MDE.button({ icon: "open", tip: "Ouvrir le lien" });
+        const open = MDE.button({ icon: "open", tip: Allkin.t("plugin.markdown-editor.link.open") });
         open.addEventListener("click", () => openTarget(a.dataset.href ?? ""));
-        const change = MDE.button({ icon: "link", tip: "Modifier le lien" });
+        const change = MDE.button({ icon: "link", tip: Allkin.t("plugin.markdown-editor.link.edit") });
         change.addEventListener("click", () => openLinkForm(a));
-        const remove = MDE.button({ icon: "unlink", tip: "Retirer le lien" });
+        const remove = MDE.button({ icon: "unlink", tip: Allkin.t("plugin.markdown-editor.link.remove") });
         remove.addEventListener("click", () => edit(() => removeLink(a)));
         el.append(address, open, change, remove);
       },
@@ -2147,7 +2174,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       owner: root,
       build: (el) => {
         if (img.classList.contains("is-blocked")) {
-          const show = MDE.action(`Afficher (${hostOf(img.dataset.src)})`, { icon: "eye", primary: true });
+          const show = MDE.action(Allkin.t("plugin.markdown-editor.image.show", { host: hostOf(img.dataset.src) }), { icon: "eye", primary: true });
           show.addEventListener("mousedown", (event) => event.preventDefault());
           show.addEventListener("click", () => {
             allowHost(hostOf(img.dataset.src));
@@ -2158,9 +2185,9 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
         }
         const alt = make("input", "mde-input mde-bubble-input");
         alt.type = "text";
-        alt.placeholder = "Description de l'image";
+        alt.placeholder = Allkin.t("plugin.markdown-editor.image.alt");
         alt.value = img.getAttribute("alt") ?? "";
-        alt.setAttribute("aria-label", "Description de l'image");
+        alt.setAttribute("aria-label", Allkin.t("plugin.markdown-editor.image.alt"));
         let recorded = false;
         alt.addEventListener("input", () => {
           if (!recorded) record("command");
@@ -2179,7 +2206,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
           closeBubbles();
           selectNode(img);
         });
-        const remove = MDE.button({ icon: "trash", tip: "Supprimer l'image", className: "is-danger" });
+        const remove = MDE.button({ icon: "trash", tip: Allkin.t("plugin.markdown-editor.image.delete"), className: "is-danger" });
         remove.addEventListener("click", () => {
           closeBubbles();
           edit(() => {
@@ -2216,7 +2243,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
     const chosen = [...(list ?? [])];
     if (!chosen.length) return;
     if (!files?.upload) {
-      toast("Ici, une image s'ajoute par son adresse : bouton Image de la barre d'outils.", "ko");
+      toast(Allkin.t("plugin.markdown-editor.image.byAddressOnly"), "ko");
       return;
     }
     record("command");
@@ -2236,7 +2263,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
         uploads.add(holder);
         placeImage(holder);
       } else {
-        holder = make("span", "mde-upload", `Envoi de ${file.name}…`);
+        holder = make("span", "mde-upload", Allkin.t("plugin.markdown-editor.upload.sending", { name: file.name }));
         holder.dataset.mdeSkip = "";
         holder.setAttribute("contenteditable", "false");
         const at = currentRange();
@@ -2248,7 +2275,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       Promise.resolve()
         .then(() => files.upload(file))
         .then((result) => {
-          if (!result?.src) throw new Error("aucun chemin rendu");
+          if (!result?.src) throw new Error(Allkin.t("plugin.markdown-editor.upload.noPath"));
           uploads.delete(holder);
           if (destroyed || !holder.isConnected) return;
           if (image) {
@@ -2276,7 +2303,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
           uploads.delete(holder);
           if (preview) URL.revokeObjectURL(preview);
           holder.remove();
-          toast(`« ${file.name} » n'a pas pu être ajouté : ${error?.message ?? error}`, "ko");
+          toast(Allkin.t("plugin.markdown-editor.upload.failed", { name: file.name, error: error?.message ?? error }), "ko");
           if (!destroyed) commit();
         });
     }
@@ -2307,17 +2334,17 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       className: "mde-form",
       build: (el, close) => {
         if (files?.upload) {
-          const pick = MDE.action("Choisir une image…", { icon: "upload", primary: true });
+          const pick = MDE.action(Allkin.t("plugin.markdown-editor.image.choose"), { icon: "upload", primary: true });
           pick.classList.add("is-wide");
           pick.addEventListener("click", () => {
             close();
             restoreSelection(saved);
             pickFiles("image/*");
           });
-          el.append(pick, make("div", "mde-form-note", "ou glisse-la directement dans le texte"), make("div", "mde-form-rule", "ou par son adresse"));
+          el.append(pick, make("div", "mde-form-note", Allkin.t("plugin.markdown-editor.image.orDrop")), make("div", "mde-form-rule", Allkin.t("plugin.markdown-editor.image.orAddress")));
         }
-        const url = MDE.field("Adresse de l'image", { placeholder: "https://…/image.png" });
-        const alt = MDE.field("Description", { placeholder: "Ce que montre l'image" });
+        const url = MDE.field(Allkin.t("plugin.markdown-editor.image.address"), { placeholder: "https://…/image.png" });
+        const alt = MDE.field(Allkin.t("plugin.markdown-editor.image.description"), { placeholder: Allkin.t("plugin.markdown-editor.image.descriptionPlaceholder") });
         const submit = () => {
           const src = normalizeUrl(url.input.value);
           if (!src) return url.input.focus();
@@ -2328,7 +2355,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
           edit(() => placeImage(MDE.makeImage(alt.input.value.trim(), src, "", ctx)));
         };
         const actions = make("div", "mde-form-actions");
-        const apply = MDE.action("Insérer", { primary: !files?.upload });
+        const apply = MDE.action(Allkin.t("plugin.markdown-editor.insert"), { primary: !files?.upload });
         apply.addEventListener("click", submit);
         actions.appendChild(apply);
         el.append(url.wrap, alt.wrap, actions);
@@ -2363,7 +2390,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
         anchor: () => caretRect(),
         owner: root,
         items,
-        title: "Insérer",
+        title: Allkin.t("plugin.markdown-editor.insert"),
         className: "mde-menu-slash",
         onPick: (item) => {
           const at = slashQuery();
@@ -2527,14 +2554,21 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
   function onInput(event) {
     if (composing || event.isComposing) return;
     const range = currentRange();
+    let rewritten = false;
     if (event.inputType === "insertText" && range?.collapsed && event.data) {
       const block = textblockOf(range.startContainer);
       if (block && block.tagName !== "PRE") {
-        if (event.data === " " || event.data === " ") blockRule(block, range);
-        else inlineRule(range);
+        if (event.data === " " || event.data === " ") rewritten = blockRule(block, range) === true;
+        else rewritten = inlineRule(range) === true;
       }
     }
-    commit();
+    // A markdown shortcut just rewrote the block: tidy at once. Plain typing
+    // (dictation included) only reads the DOM and tidies later.
+    if (rewritten) commit();
+    else {
+      commit({ tidyNow: false });
+      scheduleTidy();
+    }
     updateSlash();
   }
 
@@ -2840,7 +2874,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
     if (img?.tagName !== "IMG" || !img.classList.contains("mde-img")) return;
     if (img.classList.contains("is-missing") || img.classList.contains("is-blocked") || img.classList.contains("is-uploading")) return;
     img.classList.add("is-missing");
-    img.src = placeholderImage("Image introuvable", img.dataset.src ?? "");
+    img.src = placeholderImage(Allkin.t("plugin.markdown-editor.image.missing"), img.dataset.src ?? "");
   }
 
   function onSelectionChange() {
@@ -2855,10 +2889,19 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
   };
   const onCompositionEnd = () => {
     composing = false;
-    commit();
+    commit({ tidyNow: false });
+    scheduleTidy();
   };
   const onDragStart = (event) => event.preventDefault();
-  const onBlur = () => queueRefresh();
+  const onBlur = () => {
+    // Leaving the editor: the pending tidy-up runs now.
+    if (tidyTimer) {
+      clearTimeout(tidyTimer);
+      tidyTimer = null;
+      if (!destroyed && !sourceMode && host.isConnected) commit();
+    }
+    queueRefresh();
+  };
 
   root.addEventListener("beforeinput", onBeforeInput);
   root.addEventListener("input", onInput);
@@ -2900,7 +2943,7 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
       sourceMode = true;
       sourceField = make("textarea", "mde-source");
       sourceField.spellcheck = spellcheck;
-      sourceField.setAttribute("aria-label", "Markdown brut");
+      sourceField.setAttribute("aria-label", Allkin.t("plugin.markdown-editor.toolbar.source"));
       sourceField.value = String(doc.getContent() ?? "");
       sourceField.addEventListener("input", () => {
         lastMd = null;
@@ -2995,6 +3038,8 @@ function createEditor({ host, toolbar = null, doc, spellcheck = false, files = n
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      clearTimeout(tidyTimer);
+      tidyTimer = null;
       observer.disconnect();
       closeBubbles();
       MDE.closeAllPopovers();

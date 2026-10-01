@@ -4,7 +4,7 @@
     {
       "id": "file-explorer",
       "name": "Explorateur de fichiers",
-      "version": "1.0.4",
+      "version": "1.0.6",
       "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
       "author": "Allkin",
       "permissions": [
@@ -17,7 +17,50 @@
       "web": false,
       "ui": true,
       "icon": "icon.svg",
+      "validation": {
+        "status": "validated",
+        "date": "2026-10-01",
+        "by": "Tony"
+      },
+      "locales": {
+        "en": {
+          "name": "File explorer",
+          "description": "The Files tab of each agent (upload, archives, scripts, bin) and the explorer of ~/.allkin.",
+          "permissions": {
+            "interface": "Adds the Files tab of the agents and the explorer of ~/.allkin to the page of Allkin."
+          }
+        },
+        "es": {
+          "name": "Explorador de archivos",
+          "description": "La pestaña Archivos de cada agente (subida, archivos comprimidos, scripts, papelera) y el explorador de ~/.allkin.",
+          "permissions": {
+            "interface": "Añade la pestaña Archivos de los agentes y el explorador de ~/.allkin a la página de Allkin."
+          }
+        },
+        "de": {
+          "name": "Datei-Explorer",
+          "description": "Der Tab Dateien jedes Agenten (Hochladen, Archive, Skripte, Papierkorb) und der Explorer von ~/.allkin.",
+          "permissions": {
+            "interface": "Fügt der Seite von Allkin den Tab Dateien der Agenten und den Explorer von ~/.allkin hinzu."
+          }
+        }
+      },
       "files": [
+        {
+          "path": "README-DE.md",
+          "size": 2661,
+          "sha256": "e510b1c6215bc881bc4374afbabd1a0ac2f3c526d40c20a908e783fbce4cb8dd"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 2271,
+          "sha256": "6443983b6360eeb844e261d6c9587be7e14d565b6be73bdad87b1b7a9b32675f"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 2560,
+          "sha256": "1efdbea08fbe355a4c02c38e615bafda843537b76b45b8f9d17d567a5984122f"
+        },
         {
           "path": "README.md",
           "size": 2564,
@@ -30,8 +73,8 @@
         },
         {
           "path": "explorer.js",
-          "size": 74715,
-          "sha256": "1f7e6791f34368aa617690f623f3d475e78959d264c4cf5f165be66b70faa95d"
+          "size": 77075,
+          "sha256": "8dd5fe322a10bf0396d4904d84dd085fa305692e3f1e27f050d6493f9aa79b34"
         },
         {
           "path": "icon.svg",
@@ -39,21 +82,123 @@
           "sha256": "7d1ef7c8f58efa3d08ebf4b350f820153ce33dcbfee317f5661c5bc104746ad5"
         },
         {
+          "path": "locales.js",
+          "size": 38732,
+          "sha256": "64b58d2fd8c9f7a12d13d0106f59e22f54af5e541b0704d8b33d46c788e803b9"
+        },
+        {
           "path": "plugin.json",
-          "size": 520,
-          "sha256": "a6336edbdda98873bf23eded9fa7c46cb21942e6c858beae2ae55cded851267c"
+          "size": 1534,
+          "sha256": "90e99edb3c2d7230087e51dc6f82a2cc51867c112cc613756640085c3737a87f"
+        },
+        {
+          "path": "validation.json",
+          "size": 68,
+          "sha256": "06e6b180e692cc4459b1e2e97cf06fe184a1edd923bbe7aa129fa9fe6387bf60"
         },
         {
           "path": "view.html",
-          "size": 23108,
-          "sha256": "9e16ae00e34481a1fc3a726fc91aa9348541deac6bc1c55b559a2d6cd7562d40"
+          "size": 26413,
+          "sha256": "658030af715277ef6f5558ca18e59db33349329bbba1b8c35dd08afa77d1263b"
+        }
+      ]
+    },
+    {
+      "id": "home-assistant-bridge",
+      "name": "Pont Home Assistant",
+      "version": "1.0.1",
+      "description": "Tes agents réagissent à la maison : un événement Home Assistant (une porte qui s'ouvre, un capteur, un bouton) réveille l'agent de ton choix avec le message que tu as écrit, et sa réponse revient en notification dans Home Assistant.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "network",
+          "reason": "Reste connecté au websocket de Home Assistant pour recevoir ses événements, et y renvoie les réponses des agents en notification."
+        },
+        {
+          "id": "agents",
+          "reason": "Réveille l'agent désigné par chaque règle par la socket d'Allkin, et lui transmet le message de la règle."
+        }
+      ],
+      "service": true,
+      "web": false,
+      "ui": false,
+      "icon": "icon.svg",
+      "validation": {
+        "status": "pending"
+      },
+      "locales": {
+        "en": {
+          "name": "Home Assistant bridge",
+          "description": "Your agents react to the house: a Home Assistant event (a door opening, a sensor, a button) wakes the agent of your choice with the message you wrote, and its answer comes back as a notification in Home Assistant.",
+          "permissions": {
+            "network": "Stays connected to Home Assistant's websocket to receive its events, and sends the agents' answers back as notifications.",
+            "agents": "Wakes the agent named by each rule through Allkin's socket, and passes it the rule's message."
+          }
+        },
+        "es": {
+          "name": "Puente Home Assistant",
+          "description": "Tus agentes reaccionan a la casa: un evento de Home Assistant (una puerta que se abre, un sensor, un botón) despierta al agente que elijas con el mensaje que escribiste, y su respuesta vuelve como notificación en Home Assistant.",
+          "permissions": {
+            "network": "Permanece conectado al websocket de Home Assistant para recibir sus eventos, y devuelve las respuestas de los agentes como notificaciones.",
+            "agents": "Despierta al agente indicado por cada regla a través del socket de Allkin, y le pasa el mensaje de la regla."
+          }
+        },
+        "de": {
+          "name": "Home-Assistant-Brücke",
+          "description": "Deine Agenten reagieren auf das Haus: Ein Home-Assistant-Ereignis (eine Tür geht auf, ein Sensor, ein Taster) weckt den gewählten Agenten mit der Nachricht, die du geschrieben hast, und seine Antwort kommt als Benachrichtigung in Home Assistant zurück.",
+          "permissions": {
+            "network": "Bleibt mit dem Websocket von Home Assistant verbunden, um seine Ereignisse zu empfangen, und schickt die Antworten der Agenten als Benachrichtigungen zurück.",
+            "agents": "Weckt den in jeder Regel genannten Agenten über die Socket von Allkin und übergibt ihm die Nachricht der Regel."
+          }
+        }
+      },
+      "files": [
+        {
+          "path": "README-DE.md",
+          "size": 3015,
+          "sha256": "48bb64ee41433db7feeae28f2ecbc2abc1088894ef89d17ee497138a27850e17"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 2721,
+          "sha256": "2281ef71ef7897a1699e168d788908972a81f75c9853cd53a1e7c70fc4082c30"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 2904,
+          "sha256": "94f258822bff4627b81685062b461700684569996fca9a57ce583c8ce7103137"
+        },
+        {
+          "path": "README.md",
+          "size": 2982,
+          "sha256": "1e6d17dbddb2616025e51a45a782d48614a25901b72a502a50ac7722fb095fc2"
+        },
+        {
+          "path": "bridge.mjs",
+          "size": 12698,
+          "sha256": "ad83db8ec3a72a5c45ac70a209aa2eb231c1c540a31f0709d50575e774cd9762"
+        },
+        {
+          "path": "icon.svg",
+          "size": 257,
+          "sha256": "37be8095cf69f17171b75579be112d6244df090e81b3dffd2cff549d0223e478"
+        },
+        {
+          "path": "plugin.json",
+          "size": 8849,
+          "sha256": "84a43c55170598c41748f6589b90f12856ff2028a3b4aecd48f4dc15302d23ab"
+        },
+        {
+          "path": "validation.json",
+          "size": 26,
+          "sha256": "d4d1dcecd7ac05002f48dd7b057271ec05a27be70b8ea64ae76119d3f90f8e2c"
         }
       ]
     },
     {
       "id": "markdown-editor",
       "name": "Éditeur markdown",
-      "version": "1.0.1",
+      "version": "1.0.4",
       "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
       "author": "Allkin",
       "permissions": [
@@ -66,7 +211,50 @@
       "web": false,
       "ui": true,
       "icon": "icon.svg",
+      "validation": {
+        "status": "validated",
+        "date": "2026-10-01",
+        "by": "Tony"
+      },
+      "locales": {
+        "en": {
+          "name": "Markdown editor",
+          "description": "Allkin's Markdown editor: you write in the formatted document, without ever seeing a tag. Missions, role of the agents (CLAUDE.md) and .md files.",
+          "permissions": {
+            "interface": "Fits into Allkin's page to edit missions, the role of agents and Markdown files."
+          }
+        },
+        "es": {
+          "name": "Editor Markdown",
+          "description": "El editor Markdown de Allkin: escribes en el documento con formato, sin ver nunca una etiqueta. Misiones, rol de los agentes (CLAUDE.md) y archivos .md.",
+          "permissions": {
+            "interface": "Se integra en la página de Allkin para editar las misiones, el rol de los agentes y los archivos Markdown."
+          }
+        },
+        "de": {
+          "name": "Markdown-Editor",
+          "description": "Der Markdown-Editor von Allkin: Du schreibst im formatierten Dokument, ohne je ein Tag zu sehen. Missionen, Rolle der Agenten (CLAUDE.md) und .md-Dateien.",
+          "permissions": {
+            "interface": "Fügt sich in die Seite von Allkin ein, um Missionen, die Rolle der Agenten und Markdown-Dateien zu bearbeiten."
+          }
+        }
+      },
       "files": [
+        {
+          "path": "README-DE.md",
+          "size": 5656,
+          "sha256": "5c2562c94d70d8b6122dc3bdd7fc2f214e82feaf07264f2d5c690e9a45f8877d"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 4811,
+          "sha256": "a38a3890c32e8194cc29ac8c8f372288f5ff3d2eea3c3dd703b06a6675dafd3d"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 5155,
+          "sha256": "58aded9f594876d46f646b2208ab71a772e59b7db5497026a477b9027a203286"
+        },
         {
           "path": "README.md",
           "size": 5150,
@@ -74,13 +262,13 @@
         },
         {
           "path": "editor.css",
-          "size": 18654,
-          "sha256": "bec997b36d0d8d7e73116303f017502116b0a38608437a2e0084e53dbf8c28e6"
+          "size": 18660,
+          "sha256": "cfed4e99fb89a4ef85c714693943ac1392aa8713c6213ec17e21aed4c2a6468c"
         },
         {
           "path": "editor.js",
-          "size": 117901,
-          "sha256": "39f0caa3164262855ad6a7b4c96e3529e1115f633e41ad5f73c3ae7a56b49c70"
+          "size": 120661,
+          "sha256": "f4a532600b25c3beed55bce0246db25bff183469bfeea8a8d4e5ae5808259562"
         },
         {
           "path": "icon.svg",
@@ -88,26 +276,36 @@
           "sha256": "66cb29730da698a7c96731350eb59f2a1b739a1c27a000fd2c2e0ef9400cb24c"
         },
         {
+          "path": "locales.js",
+          "size": 29067,
+          "sha256": "23c7f0903e33b1011a6bf389688f191175c2f88e50c0527eb276a7cf931d8684"
+        },
+        {
           "path": "model.js",
-          "size": 30754,
-          "sha256": "c885c068725ca9c536415b0d491fd682e31d7dd778609588acd6d01789c50f35"
+          "size": 30896,
+          "sha256": "e1f91917088745a17793b73d93d8a77bfbbf271edeeb76ee61a2eb3737f1059a"
         },
         {
           "path": "plugin.json",
-          "size": 575,
-          "sha256": "57ffbabe8e02f0269ec78b5104f82a65fdb21c264a0811b09a09a2235c106007"
+          "size": 1753,
+          "sha256": "c49b799cbcdd635c1c8ad5b18c338c06ba1c422adadb544c1ab98d07e78fabaf"
         },
         {
           "path": "ui.js",
-          "size": 26450,
-          "sha256": "8489fc4450a6cff96badc0bed87e6a76198c790ad035e301c4d322c2ebec2e1b"
+          "size": 30451,
+          "sha256": "b137400d0e1da12d21c2d6448f1b9a87524c97af134e40ceb495c5cfe7a6f7ca"
+        },
+        {
+          "path": "validation.json",
+          "size": 68,
+          "sha256": "06e6b180e692cc4459b1e2e97cf06fe184a1edd923bbe7aa129fa9fe6387bf60"
         }
       ]
     },
     {
       "id": "promptr",
       "name": "Promptr",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "description": "L'atelier de prompts : dessinez un agent en blocs, ou ouvrez un prompt existant pour le voir en plan. Son agent dédié écrit le prompt depuis le plan, et le plan depuis un prompt.",
       "author": "Allkin",
       "permissions": [
@@ -127,7 +325,53 @@
         "name": "Promptr"
       },
       "icon": "icon.svg",
+      "validation": {
+        "status": "validated",
+        "date": "2026-10-01",
+        "by": "Tony"
+      },
+      "locales": {
+        "en": {
+          "name": "Promptr",
+          "description": "The prompt workshop: design an agent in blocks, or open an existing prompt to see it as a plan. Its dedicated agent writes the prompt from the plan, and the plan from a prompt.",
+          "permissions": {
+            "interface": "Adds the Promptr app to the Allkin page. With your session, it creates a test agent with no rights at all for the test conversation, and creates the final agent when you click “Deploy”.",
+            "agent": "Promptr hands its agent the writing of the prompt from the plan, and the reading of an existing prompt to turn it into a plan."
+          }
+        },
+        "es": {
+          "name": "Promptr",
+          "description": "El taller de prompts: diseña un agente en bloques, o abre un prompt existente para verlo como plan. Su agente dedicado escribe el prompt a partir del plan, y el plan a partir de un prompt.",
+          "permissions": {
+            "interface": "Añade la app Promptr a la página de Allkin. Con tu sesión, crea un agente de prueba sin ningún permiso para la conversación de prueba, y crea el agente final cuando haces clic en «Desplegar».",
+            "agent": "Promptr confía a su agente la escritura del prompt a partir del plan, y la lectura de un prompt existente para convertirlo en plan."
+          }
+        },
+        "de": {
+          "name": "Promptr",
+          "description": "Die Prompt-Werkstatt: Entwirf einen Agenten in Blöcken oder öffne einen vorhandenen Prompt, um ihn als Plan zu sehen. Sein eigener Agent schreibt den Prompt aus dem Plan und den Plan aus einem Prompt.",
+          "permissions": {
+            "interface": "Fügt die App Promptr der Allkin-Seite hinzu. Mit deiner Sitzung erstellt sie für die Testunterhaltung einen Testagenten ganz ohne Rechte und erstellt den endgültigen Agenten, wenn du auf „Bereitstellen“ klickst.",
+            "agent": "Promptr überlässt seinem Agenten das Schreiben des Prompts aus dem Plan und das Lesen eines vorhandenen Prompts, um daraus einen Plan zu machen."
+          }
+        }
+      },
       "files": [
+        {
+          "path": "README-DE.md",
+          "size": 4124,
+          "sha256": "99a59af7cf87ed32d34a4cd050170c554469bebab023725fd32bbb83d5d95d34"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 3553,
+          "sha256": "13b7d7eb35a52bdbba6c5cb8832a2a5af5557ce444a603e349b4c9ee40360430"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 3809,
+          "sha256": "2645a9712a9f80d5c58c831e29ea644fd90fd043cad14ddadcd619638f5825da"
+        },
         {
           "path": "README.md",
           "size": 3827,
@@ -135,18 +379,18 @@
         },
         {
           "path": "agent.md",
-          "size": 3600,
-          "sha256": "1e18db1065c556dff56692f64987d1f3eae6b7719edf766a7aa12ed04a6f0fb5"
+          "size": 3697,
+          "sha256": "a39451c34c9eee2e4e9e5262b79b657e70807290b541361a28d5238a6091b7a1"
         },
         {
           "path": "app.js",
-          "size": 57797,
-          "sha256": "086effbf62690bf5b8af265d3468abdc49826513f0424e6b2dc73f78d0b8ade3"
+          "size": 60263,
+          "sha256": "928e5a086c1e69b88236aa5e510460359352619088d0a6b2e7e4df3cb085e768"
         },
         {
           "path": "blocks.js",
-          "size": 16917,
-          "sha256": "c636eaf09533b6183284fc82561ffd5a8b771b3cbce46f355c79e761caff9ef6"
+          "size": 22740,
+          "sha256": "3bad4497f31ac721aa852b4c661d4f1d6fcdec9bbdc0fd048a3f9ca00d5fb849"
         },
         {
           "path": "icon.svg",
@@ -154,9 +398,14 @@
           "sha256": "399bd9b659a13f0e6f8cfb64439949fd9fb77700722524795b20ff01be6906a6"
         },
         {
+          "path": "locales.js",
+          "size": 100961,
+          "sha256": "ff6f2a21c22901fa08608ee88b0164970319f0590d3670c06aacb972c422c6bf"
+        },
+        {
           "path": "plugin.json",
-          "size": 1023,
-          "sha256": "c669bb00d1fa7f92d4dbdd3b33886b12698ef1f714e36a9407e0d15e05fe8e5a"
+          "size": 3067,
+          "sha256": "a30bc6b8ad4da40e78bb1333bb89abc4492be17dfa7ea2c288b3021875a32ba5"
         },
         {
           "path": "promptr.css",
@@ -164,21 +413,125 @@
           "sha256": "144bf1da9bb9edd0981e2ef1dfb5b17b1dea55021ba7feea5e2132e9226b8a40"
         },
         {
+          "path": "validation.json",
+          "size": 68,
+          "sha256": "06e6b180e692cc4459b1e2e97cf06fe184a1edd923bbe7aa129fa9fe6387bf60"
+        },
+        {
           "path": "view.html",
-          "size": 11604,
-          "sha256": "d775d0bc6bc2c3cab22ceef71efbcf77e58118f2200ebe2da32cfc05c5121ed3"
+          "size": 13630,
+          "sha256": "26c4d2e2934ab4a511b200e99b8defb60c5b4c6d1ad9425cd13916e0250d30aa"
         },
         {
           "path": "zip.js",
-          "size": 5625,
-          "sha256": "5fc17c1493e76c5385fefcb78d9e397440e94a9b4602289a515d763390c6802e"
+          "size": 5653,
+          "sha256": "a08424ea4f2e930a4a705e17fa38b600fcd437829c6356f0c61397c5861593d4"
+        }
+      ]
+    },
+    {
+      "id": "telegram-bridge",
+      "name": "Pont Telegram",
+      "version": "1.0.1",
+      "description": "Parle à tes agents depuis Telegram : un bot écoute en continu, relaie chaque message à l'agent de ton choix et renvoie sa réponse. Les commandes à valider arrivent avec deux boutons.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "network",
+          "reason": "Interroge l'API de Telegram en continu (long polling) et y renvoie les réponses des agents ; télécharge les fichiers reçus."
+        },
+        {
+          "id": "agents",
+          "reason": "Ouvre une conversation avec l'agent choisi par la socket d'Allkin, lui transmet les messages et valide ou refuse ses commandes depuis Telegram."
+        },
+        {
+          "id": "filesystem",
+          "reason": "Dépose les photos et fichiers reçus dans le dossier Upload de l'agent."
+        }
+      ],
+      "service": true,
+      "web": false,
+      "ui": false,
+      "icon": "icon.svg",
+      "validation": {
+        "status": "pending"
+      },
+      "locales": {
+        "en": {
+          "name": "Telegram bridge",
+          "description": "Talk to your agents from Telegram: a bot listens continuously, relays every message to the agent of your choice and sends its answer back. Commands to approve come with two buttons.",
+          "permissions": {
+            "network": "Polls the Telegram API continuously (long polling) and sends the agents' answers back; downloads received files.",
+            "agents": "Opens a conversation with the chosen agent through Allkin's socket, passes the messages on, and approves or refuses its commands from Telegram.",
+            "filesystem": "Drops received photos and files into the agent's Upload folder."
+          }
+        },
+        "es": {
+          "name": "Puente Telegram",
+          "description": "Habla con tus agentes desde Telegram: un bot escucha en continuo, reenvía cada mensaje al agente que elijas y devuelve su respuesta. Los comandos por validar llegan con dos botones.",
+          "permissions": {
+            "network": "Consulta la API de Telegram en continuo (long polling) y devuelve las respuestas de los agentes; descarga los archivos recibidos.",
+            "agents": "Abre una conversación con el agente elegido a través del socket de Allkin, le pasa los mensajes y autoriza o rechaza sus comandos desde Telegram.",
+            "filesystem": "Deposita las fotos y archivos recibidos en la carpeta Upload del agente."
+          }
+        },
+        "de": {
+          "name": "Telegram-Brücke",
+          "description": "Sprich von Telegram aus mit deinen Agenten: Ein Bot hört ständig zu, leitet jede Nachricht an den gewählten Agenten weiter und schickt seine Antwort zurück. Freizugebende Befehle kommen mit zwei Schaltflächen.",
+          "permissions": {
+            "network": "Fragt die Telegram-API fortlaufend ab (Long Polling) und schickt die Antworten der Agenten zurück; lädt empfangene Dateien herunter.",
+            "agents": "Öffnet über die Socket von Allkin eine Unterhaltung mit dem gewählten Agenten, reicht die Nachrichten weiter und gibt seine Befehle aus Telegram frei oder lehnt sie ab.",
+            "filesystem": "Legt empfangene Fotos und Dateien im Upload-Ordner des Agenten ab."
+          }
+        }
+      },
+      "files": [
+        {
+          "path": "README-DE.md",
+          "size": 2729,
+          "sha256": "5c8aefe9c8408756a338b023c18536087769873150d2f15f4aa6826adbc595ba"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 2561,
+          "sha256": "68b87cb752faf3d622d807a61d35e00eadb74af7a7202b084d73c26d81a437b6"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 2695,
+          "sha256": "873c6e5031c452cdbc96563f1eb6fe292d49652aff18466b0a46fab16e2304dc"
+        },
+        {
+          "path": "README.md",
+          "size": 2807,
+          "sha256": "cb3224482bcc70d6a2ba878a9f5d2df41bf6729ed9bd409db4d708801883da85"
+        },
+        {
+          "path": "bridge.mjs",
+          "size": 23072,
+          "sha256": "6154397e8255b6a1a6784fc40b4be5e8486057b39d26bd1befe3e0224200f84b"
+        },
+        {
+          "path": "icon.svg",
+          "size": 222,
+          "sha256": "9d323978c2971ad5becf9fdf3bb1afdb471571d762395def0339e1a244925fd9"
+        },
+        {
+          "path": "plugin.json",
+          "size": 7582,
+          "sha256": "7dba9f8072ce6564e646a2581185752b1d286a2b0d3d9e6bb8490d8e40288970"
+        },
+        {
+          "path": "validation.json",
+          "size": 26,
+          "sha256": "d4d1dcecd7ac05002f48dd7b057271ec05a27be70b8ea64ae76119d3f90f8e2c"
         }
       ]
     },
     {
       "id": "text-editor",
       "name": "Éditeur de texte",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "description": "Ouvre les fichiers des agents dans un onglet : éditeur de code (80 langages colorés, numéros de ligne, recherche/remplacement, commentaires, indentation), aperçu markdown, images et PDF.",
       "author": "Allkin",
       "permissions": [
@@ -191,7 +544,50 @@
       "web": false,
       "ui": true,
       "icon": "icon.svg",
+      "validation": {
+        "status": "validated",
+        "date": "2026-10-01",
+        "by": "Tony"
+      },
+      "locales": {
+        "en": {
+          "name": "Text editor",
+          "description": "Opens the files of the agents in a tab: code editor (80 highlighted languages, line numbers, find and replace, comments, indentation), Markdown preview, images and PDF.",
+          "permissions": {
+            "interface": "Adds the file tab to the page of Allkin."
+          }
+        },
+        "es": {
+          "name": "Editor de texto",
+          "description": "Abre los archivos de los agentes en una pestaña: editor de código (80 lenguajes resaltados, números de línea, buscar y sustituir, comentarios, sangría), vista previa de Markdown, imágenes y PDF.",
+          "permissions": {
+            "interface": "Añade la pestaña de archivo a la página de Allkin."
+          }
+        },
+        "de": {
+          "name": "Texteditor",
+          "description": "Öffnet die Dateien der Agenten in einem Tab: Code-Editor (80 Sprachen mit Hervorhebung, Zeilennummern, Suchen und Ersetzen, Kommentare, Einrückung), Markdown-Vorschau, Bilder und PDF.",
+          "permissions": {
+            "interface": "Fügt der Seite von Allkin den Datei-Tab hinzu."
+          }
+        }
+      },
       "files": [
+        {
+          "path": "README-DE.md",
+          "size": 2635,
+          "sha256": "315cf30e8c6bb250a81d02e56ab546b817f1ccadd065207000cbb96b68d93dec"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 2316,
+          "sha256": "abdb335e0890112c998ed63b2872347d561546bca0dc001b4dc00ab144b9405a"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 2604,
+          "sha256": "f659423b9f2edbd68f2327e13ccefaf6b7e906c59a63b7ee7f3460482b8b1e74"
+        },
         {
           "path": "README.md",
           "size": 2568,
@@ -204,8 +600,8 @@
         },
         {
           "path": "editor.js",
-          "size": 43500,
-          "sha256": "e444ffdbec4112b3c5d0bfede5b6dbab93b450744941fd6fa3afb2c97bade984"
+          "size": 44488,
+          "sha256": "598b52556da9d99b84da5f44923d9974f1d966ddd08ec755ae9677bf48a98c5a"
         },
         {
           "path": "hljs.js",
@@ -218,21 +614,31 @@
           "sha256": "f54e59c9bb79d3e856b48bcabff6a8d8b77ee3c0426975071615ef677ca54a30"
         },
         {
+          "path": "locales.js",
+          "size": 16903,
+          "sha256": "9664b1416ece9adf0ab423036f31604221fe0086be914ffae654bc0432421ccc"
+        },
+        {
           "path": "plugin.json",
-          "size": 657,
-          "sha256": "b6bb4907c2360e685b164ec8e1b75e83801dd935da91dbe207c831bd280baf1b"
+          "size": 1776,
+          "sha256": "d07ef77da12b0df5eeae7cd473a4f6d8548a58023994583bd97ed6424438ed10"
+        },
+        {
+          "path": "validation.json",
+          "size": 68,
+          "sha256": "06e6b180e692cc4459b1e2e97cf06fe184a1edd923bbe7aa129fa9fe6387bf60"
         },
         {
           "path": "view.html",
-          "size": 9388,
-          "sha256": "2d13505bb5013c6a140c0745e0a4f25aafa4db69f229775ad62af665eaacce92"
+          "size": 11152,
+          "sha256": "2ead0a921af9ff3e7d76b437663ad710b98cc412f28c9f47b8f6ad007b42d9a7"
         }
       ]
     },
     {
       "id": "wetty",
       "name": "WeTTY",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "description": "Terminal dans le navigateur (WeTTY) : une session SSH sur la machine, ouverte dans un onglet d'Allkin.",
       "author": "butlerx/wetty — intégration Allkin",
       "homepage": "https://github.com/butlerx/wetty",
@@ -254,7 +660,56 @@
       "web": true,
       "ui": false,
       "icon": "icon.svg",
+      "validation": {
+        "status": "validated",
+        "date": "2026-10-01",
+        "by": "Tony"
+      },
+      "locales": {
+        "en": {
+          "name": "WeTTY",
+          "description": "Terminal in the browser (WeTTY): an SSH session on the machine, opened in an Allkin tab.",
+          "permissions": {
+            "network": "Downloads WeTTY from npm on first start, listens on a local port and connects to the SSH server.",
+            "exec": "Runs npm to install WeTTY, then ssh: the terminal executes the commands you type.",
+            "filesystem": "A terminal gives access to every file of the account you log in with."
+          }
+        },
+        "es": {
+          "name": "WeTTY",
+          "description": "Terminal en el navegador (WeTTY): una sesión SSH en la máquina, abierta en una pestaña de Allkin.",
+          "permissions": {
+            "network": "Descarga WeTTY desde npm en el primer inicio, escucha en un puerto local y se conecta al servidor SSH.",
+            "exec": "Ejecuta npm para instalar WeTTY y luego ssh: el terminal ejecuta los comandos que escribes.",
+            "filesystem": "Un terminal da acceso a todos los archivos de la cuenta con la que te conectas."
+          }
+        },
+        "de": {
+          "name": "WeTTY",
+          "description": "Terminal im Browser (WeTTY): eine SSH-Sitzung auf der Maschine, geöffnet in einem Tab von Allkin.",
+          "permissions": {
+            "network": "Lädt WeTTY beim ersten Start von npm herunter, lauscht auf einem lokalen Port und verbindet sich mit dem SSH-Server.",
+            "exec": "Startet npm, um WeTTY zu installieren, dann ssh: Das Terminal führt die Befehle aus, die du eingibst.",
+            "filesystem": "Ein Terminal gibt Zugriff auf alle Dateien des Kontos, mit dem du dich anmeldest."
+          }
+        }
+      },
       "files": [
+        {
+          "path": "README-DE.md",
+          "size": 3048,
+          "sha256": "176448f0a26bf41b2093193575915da0b2905b36ab61235afdd6ee2ad20deb4d"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 2750,
+          "sha256": "4c102980f55df9725751a7859fcb0ff98ce5614eba492b9d09a60eee02a991ae"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 2871,
+          "sha256": "0f5a820f9ca0290dd65fcf7a8cf1f18b3f4accfe11c564dc6165eee7a29d5faf"
+        },
         {
           "path": "README.md",
           "size": 2910,
@@ -267,13 +722,18 @@
         },
         {
           "path": "plugin.json",
-          "size": 2383,
-          "sha256": "8fec53818d63a6a84f82ad71223c84eaf9aec60b0a68e22cf85885df970309a9"
+          "size": 7343,
+          "sha256": "59aa101761662deb3ce4491035cdff9541ce3b5b5df6bb0796d649289f2ae5fc"
         },
         {
           "path": "start.mjs",
-          "size": 4586,
-          "sha256": "4cc4c78752616515a702610ad4418e26cb68d04930bdde9cd27aaf93987aad5b"
+          "size": 4535,
+          "sha256": "447f57861dea7710be1b498d3cb633c2152d37fed6fc69568711541515cce2a4"
+        },
+        {
+          "path": "validation.json",
+          "size": 68,
+          "sha256": "06e6b180e692cc4459b1e2e97cf06fe184a1edd923bbe7aa129fa9fe6387bf60"
         }
       ]
     }
