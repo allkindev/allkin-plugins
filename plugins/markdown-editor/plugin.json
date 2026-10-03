@@ -1,6 +1,6 @@
 {
   "name": "Éditeur markdown",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
   "author": "Allkin",
   "permissions": [

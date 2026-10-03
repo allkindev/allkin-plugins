@@ -1,0 +1,105 @@
+<template data-slot="views">
+    <!-- Creator: the plugin workshop. One global tab (agentId null) — the
+         workbench of one project at a time: its state, the actions that test
+         it, and three panes (check, files, debug). The conversation with the
+         Creator agent sits on the right of the page (the split pane of Allkin).
+         Lists are built in creator.js: this file only carries the frame. -->
+    <div class="cr-view hidden" id="cr-view">
+      <header class="cr-head">
+        <span class="cr-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 005.2-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6z"/></svg>
+        </span>
+        <h2 class="cr-title">Creator</h2>
+        <div class="cr-picker">
+          <button type="button" class="cr-picker-btn" id="cr-picker-btn" aria-haspopup="listbox" aria-expanded="false">
+            <span class="cr-picker-label" id="cr-picker-label" data-i18n="plugin.creator.picker.none"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="cr-picker-menu hidden" id="cr-picker-menu" role="listbox"></div>
+        </div>
+        <button type="button" class="cr-btn cr-btn-main" id="cr-new-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span data-i18n="plugin.creator.new"></span>
+        </button>
+        <span class="cr-head-space"></span>
+        <button type="button" class="cr-btn" id="cr-chat-btn" data-i18n-title="plugin.creator.chat.title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-8 8H7l-4 3V12a8 8 0 018-8h2a8 8 0 018 8z"/></svg>
+          <span data-i18n="plugin.creator.chat"></span>
+        </button>
+      </header>
+
+      <!-- The plugin is installed but its agent does not exist yet. -->
+      <div class="cr-notice hidden" id="cr-notready">
+        <p data-i18n="plugin.creator.notReady"></p>
+        <button type="button" class="cr-btn cr-btn-main" id="cr-rights-btn" data-i18n="plugin.creator.notReady.open"></button>
+      </div>
+
+      <!-- No project chosen, or none yet. -->
+      <div class="cr-notice hidden" id="cr-empty">
+        <h3 data-i18n="plugin.creator.empty.title"></h3>
+        <p data-i18n="plugin.creator.empty.text"></p>
+        <div class="cr-empty-actions">
+          <button type="button" class="cr-btn cr-btn-main" data-cr-new="plugin" data-i18n="plugin.creator.new.plugin"></button>
+          <button type="button" class="cr-btn" data-cr-new="service" data-i18n="plugin.creator.new.service"></button>
+        </div>
+      </div>
+
+      <div class="cr-project hidden" id="cr-project">
+        <div class="cr-status" id="cr-status"></div>
+        <div class="cr-actions" id="cr-actions"></div>
+        <div class="cr-directives">
+          <span class="cr-directives-label" data-i18n="plugin.creator.ask"></span>
+          <div class="cr-chips" id="cr-directives"></div>
+        </div>
+        <nav class="cr-tabs" role="tablist">
+          <button type="button" class="cr-tab" role="tab" data-cr-pane="check"><span data-i18n="plugin.creator.pane.check"></span><span class="cr-tab-count hidden" id="cr-check-count"></span></button>
+          <button type="button" class="cr-tab" role="tab" data-cr-pane="files"><span data-i18n="plugin.creator.pane.files"></span><span class="cr-tab-count cr-tab-count--quiet hidden" id="cr-files-count"></span></button>
+          <button type="button" class="cr-tab" role="tab" data-cr-pane="debug"><span data-i18n="plugin.creator.pane.debug"></span><span class="cr-tab-count hidden" id="cr-debug-count"></span></button>
+        </nav>
+        <section class="cr-pane" id="cr-pane-check"></section>
+        <section class="cr-pane hidden" id="cr-pane-files"></section>
+        <section class="cr-pane hidden" id="cr-pane-debug">
+          <div class="cr-debug-bar">
+            <span class="cr-debug-state" id="cr-debug-state"></span>
+            <span class="cr-head-space"></span>
+            <button type="button" class="cr-btn cr-btn-small" id="cr-log-copy" data-i18n="plugin.creator.debug.copy"></button>
+            <button type="button" class="cr-btn cr-btn-small" id="cr-log-send" data-i18n="plugin.creator.debug.send"></button>
+          </div>
+          <h4 class="cr-debug-title" data-i18n="plugin.creator.debug.log"></h4>
+          <pre class="cr-log" id="cr-log"></pre>
+          <h4 class="cr-debug-title" data-i18n="plugin.creator.debug.errors"></h4>
+          <div class="cr-errors" id="cr-errors"></div>
+        </section>
+      </div>
+    </div>
+</template>
+
+<template data-slot="body">
+  <!-- New project: what it is, its name, its identifier, and a brief the
+       agent starts from. -->
+  <template id="cr-new-template">
+    <div class="modal-backdrop">
+      <form class="modal modal-wide cr-new">
+        <h2 data-i18n="plugin.creator.new.title"></h2>
+        <div class="cr-seg" role="group">
+          <button type="button" class="cr-seg-btn" data-cr-kind="plugin" data-i18n="plugin.creator.kind.plugin"></button>
+          <button type="button" class="cr-seg-btn" data-cr-kind="service" data-i18n="plugin.creator.kind.service"></button>
+        </div>
+        <p class="dim cr-new-hint"></p>
+        <label><span data-i18n="plugin.creator.new.name"></span>
+          <input type="text" class="cr-new-name" maxlength="60" autocomplete="off" required />
+        </label>
+        <label><span data-i18n="plugin.creator.new.id"></span>
+          <input type="text" class="cr-new-id" maxlength="64" autocomplete="off" spellcheck="false" pattern="[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?" required />
+        </label>
+        <label><span data-i18n="plugin.creator.new.brief"></span>
+          <textarea class="cr-new-brief" rows="5" data-i18n-placeholder="plugin.creator.new.brief.placeholder"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="ghost modal-cancel" data-i18n="common.cancel"></button>
+          <button type="submit" data-i18n="plugin.creator.new.create"></button>
+        </div>
+      </form>
+    </div>
+  </template>
+</template>

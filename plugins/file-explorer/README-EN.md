@@ -33,7 +33,9 @@ otherwise.
 ## Explorer of `~/.allkin`
 
 From the home page, a **read-only** walk through Allkin's installation folder: agents, sessions,
-backups. Secrets cannot be read there.
+backups. Secrets cannot be read there. A file opens in a **viewer** tab, on a blue ground: raw
+text without colouring or layout, an image, a PDF, or the entries of an archive (zip, tar) without
+extracting it; other kinds are downloaded.
 
 ## Without this plugin
 

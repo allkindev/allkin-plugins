@@ -1727,10 +1727,8 @@ function renderExplorerEntries() {
     body.appendChild(
       explorerRow(entry, () => {
         if (entry.type === "dir") loadExplorerPath(target);
-        // Un fichier s'ouvre dans un onglet du navigateur : l'aperçu est celui
-        // du navigateur lui-même (texte, image, PDF), et il n'y a rien à
-        // enregistrer puisque tout est en lecture seule ici.
-        else window.open(`/api/allkin/fs/file?path=${encodeURIComponent(target)}`, "_blank", "noopener");
+        // A file opens in the viewer: a tab of Allkin, read-only.
+        else openViewer(target, entry.name, entry.size);
       }),
     );
   }
@@ -1790,6 +1788,152 @@ window.Allkin.registerTabKind("files", {
   tooltip: (tab, label) => t("plugin.file-explorer.tab.files.tooltip", { name: label }),
   scroller: () => document.querySelector("#data-view .data-table-wrap"),
   activate: (tab) => openFilesTabView(tab),
+});
+
+
+/* ---- Viewer: a read-only file in a tab of its own ---------------------------
+   The explorer of ~/.allkin opens a file here rather than in a browser tab:
+   the same place as everything else, a blue ground that says "you only look".
+   Text shows raw, without colouring or layout; an image and a PDF show as
+   the browser renders them; an archive shows its entries, read from the
+   server without extracting anything; anything else offers the download. */
+
+const VIEWER_TEXT_EXT = new Set(["txt", "md", "markdown", "json", "jsonl", "js", "mjs", "cjs", "ts", "css", "html", "htm", "xml", "svg", "yml", "yaml", "toml", "ini", "cfg", "conf", "env", "sh", "bash", "zsh", "py", "rb", "php", "go", "rs", "java", "c", "h", "cpp", "hpp", "cs", "sql", "csv", "tsv", "log", "lock", "gitignore", "service"]);
+const VIEWER_IMAGE_EXT = new Set(["png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "ico"]);
+const VIEWER_ARCHIVE_EXT = new Set(["zip", "allkin", "jar", "tar", "tgz", "tbz2", "txz", "gz", "bz2", "xz"]);
+/** Past this, a text is downloaded rather than read in the page. */
+const VIEWER_TEXT_MAX = 2 * 1024 * 1024;
+
+function viewerKind(name) {
+  const lower = name.toLowerCase();
+  if (lower.endsWith(".tar.gz") || lower.endsWith(".tar.bz2") || lower.endsWith(".tar.xz")) return "archive";
+  const ext = lower.includes(".") ? lower.slice(lower.lastIndexOf(".") + 1) : "";
+  if (VIEWER_ARCHIVE_EXT.has(ext)) return "archive";
+  if (VIEWER_IMAGE_EXT.has(ext)) return "image";
+  if (ext === "pdf") return "pdf";
+  if (VIEWER_TEXT_EXT.has(ext) || !lower.includes(".")) return "text";
+  return "none";
+}
+
+function openViewer(path, name, size) {
+  openTab(null, "viewer", { path, name: name || path.split("/").pop(), meta: { size } });
+}
+
+async function activateViewer(tab) {
+  const name = tab.name || tab.path.split("/").pop();
+  const fileUrl = `/api/allkin/fs/file?path=${encodeURIComponent(tab.path)}`;
+  const body = el("viewer-body");
+  el("viewer-name").textContent = name;
+  el("viewer-name").title = tab.path;
+  el("viewer-download").href = `${fileUrl}&download=1`;
+  poserIcone(el("viewer-icon"), { name, type: "file" }, "x/x");
+  const size = tab.meta?.size;
+  const kind = viewerKind(name);
+  el("viewer-meta").textContent = [size != null ? formatSize(size) : "", tab.path].filter(Boolean).join(" · ");
+  body.replaceChildren();
+  body.dataset.kind = kind;
+  const note = (key, vars) => {
+    const p = document.createElement("p");
+    p.className = "viewer-note";
+    p.textContent = t(key, vars);
+    body.appendChild(p);
+    return p;
+  };
+  if (kind === "image") {
+    const img = document.createElement("img");
+    img.className = "viewer-image";
+    img.alt = name;
+    img.src = fileUrl;
+    body.appendChild(img);
+    return;
+  }
+  if (kind === "pdf") {
+    const frame = document.createElement("iframe");
+    frame.className = "viewer-frame";
+    frame.title = name;
+    frame.src = fileUrl;
+    body.appendChild(frame);
+    return;
+  }
+  if (kind === "archive") {
+    note("plugin.file-explorer.viewer.loading");
+    try {
+      const data = await api(`/api/allkin/fs/archive?path=${encodeURIComponent(tab.path)}`);
+      if (activeTab() !== tab) return;
+      body.replaceChildren();
+      // A plural: the count picks the form.
+      const head = document.createElement("p");
+      head.className = "viewer-archive-head";
+      head.textContent = tn("plugin.file-explorer.viewer.archive.count", data.total);
+      body.appendChild(head);
+      if (data.truncated) note("plugin.file-explorer.viewer.archive.truncated", { count: data.entries.length });
+      const table = document.createElement("table");
+      table.className = "data-table viewer-archive";
+      const tbody = document.createElement("tbody");
+      for (const entry of data.entries) {
+        const tr = document.createElement("tr");
+        tr.className = "data-row";
+        const tdName = document.createElement("td");
+        tdName.className = "data-row-name";
+        const icon = document.createElement("span");
+        icon.className = "data-row-icon";
+        poserIcone(icon, { name: entry.name.replace(/\/$/, "").split("/").pop() || entry.name, type: entry.dir ? "dir" : "file" }, "x/x");
+        const text = document.createElement("span");
+        text.className = "data-row-name-text";
+        text.textContent = entry.name;
+        text.title = entry.name;
+        tdName.append(icon, text);
+        const tdSize = document.createElement("td");
+        tdSize.className = "explorer-col-size";
+        tdSize.textContent = entry.dir ? "—" : formatSize(entry.size);
+        tr.append(tdName, tdSize);
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      body.appendChild(table);
+    } catch (error) {
+      if (activeTab() !== tab) return;
+      body.replaceChildren();
+      note("plugin.file-explorer.viewer.error", { message: error.message });
+    }
+    return;
+  }
+  if (kind === "text") {
+    if (size != null && size > VIEWER_TEXT_MAX) {
+      note("plugin.file-explorer.viewer.tooBig", { size: formatSize(size) });
+      return;
+    }
+    note("plugin.file-explorer.viewer.loading");
+    try {
+      const res = await fetch(fileUrl, { credentials: "same-origin" });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+      const text = await res.text();
+      if (activeTab() !== tab) return;
+      body.replaceChildren();
+      const pre = document.createElement("pre");
+      pre.className = "viewer-raw";
+      pre.textContent = text;
+      if (!text.length) note("plugin.file-explorer.viewer.emptyFile");
+      else body.appendChild(pre);
+    } catch (error) {
+      if (activeTab() !== tab) return;
+      body.replaceChildren();
+      note("plugin.file-explorer.viewer.error", { message: error.message });
+    }
+    return;
+  }
+  note("plugin.file-explorer.viewer.noPreview");
+}
+
+window.Allkin.registerTabKind("viewer", {
+  panels: ["viewer-view"],
+  byPath: true,
+  icon: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>',
+  label: (tab) => tab.name || tab.path.split("/").pop(),
+  meta: t("plugin.file-explorer.tab.viewer.meta"),
+  tooltip: (tab) => tab.path,
+  scroller: () => document.getElementById("viewer-body"),
+  activate: (tab) => void activateViewer(tab),
 });
 
 window.Allkin.registerTabKind("explorer", {

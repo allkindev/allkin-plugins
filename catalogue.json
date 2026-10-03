@@ -2,9 +2,148 @@
   "schemaVersion": 1,
   "plugins": [
     {
+      "id": "creator",
+      "name": "Creator",
+      "version": "1.0.1",
+      "description": "L'atelier de plugins : décris ce que tu veux, l'agent Creator écrit le plugin ou le service, et l'établi le contrôle, l'installe et le met au point avec toi.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "interface",
+          "reason": "Ajoute l'établi Creator à la page d'Allkin. Avec ta session, il crée les projets, installe tes plugins depuis ton dépôt et pilote leur service."
+        },
+        {
+          "id": "agent",
+          "reason": "Creator confie l'écriture des plugins et des services à son agent, avec qui tu converses."
+        },
+        {
+          "id": "repository",
+          "reason": "Le dossier de travail de l'agent devient un dépôt local : ce que vous y écrivez apparaît dans les pages Plugins et Services et s'installe depuis là."
+        },
+        {
+          "id": "network",
+          "reason": "L'agent lit la documentation en ligne des API pour écrire un service ou un plugin qui s'y connecte."
+        }
+      ],
+      "service": false,
+      "web": false,
+      "ui": true,
+      "agent": {
+        "name": "Creator"
+      },
+      "icon": "icon.svg",
+      "validation": {
+        "status": "pending"
+      },
+      "locales": {
+        "en": {
+          "name": "Creator",
+          "description": "The plugin workshop: describe what you want, the Creator agent writes the plugin or the service, and the workbench checks it, installs it and debugs it with you.",
+          "permissions": {
+            "interface": "Adds the Creator workbench to the Allkin page. With your session, it creates projects, installs your plugins from your repository and drives their service.",
+            "agent": "Creator hands the writing of plugins and services to its agent, which you talk with.",
+            "repository": "The agent's working folder becomes a local repository: what you write there appears in the Plugins and Services pages and installs from there.",
+            "network": "The agent reads the online documentation of APIs to write a service or a plugin that connects to them."
+          }
+        },
+        "es": {
+          "name": "Creator",
+          "description": "El taller de plugins: describe lo que quieres, el agente Creator escribe el plugin o el servicio, y el banco de trabajo lo comprueba, lo instala y lo depura contigo.",
+          "permissions": {
+            "interface": "Añade el banco de trabajo Creator a la página de Allkin. Con tu sesión, crea los proyectos, instala tus plugins desde tu repositorio y controla su servicio.",
+            "agent": "Creator confía la escritura de plugins y servicios a su agente, con el que conversas.",
+            "repository": "La carpeta de trabajo del agente se convierte en un repositorio local: lo que escribís allí aparece en las páginas Plugins y Servicios y se instala desde allí.",
+            "network": "El agente lee la documentación en línea de las API para escribir un servicio o un plugin que se conecte a ellas."
+          }
+        },
+        "de": {
+          "name": "Creator",
+          "description": "Die Plugin-Werkstatt: Beschreibe, was du willst, der Agent Creator schreibt das Plugin oder den Dienst, und die Werkbank prüft, installiert und debuggt es mit dir.",
+          "permissions": {
+            "interface": "Fügt die Creator-Werkbank der Allkin-Seite hinzu. Mit deiner Sitzung legt sie Projekte an, installiert deine Plugins aus deinem Repository und steuert ihren Dienst.",
+            "agent": "Creator überlässt das Schreiben von Plugins und Diensten seinem Agenten, mit dem du dich unterhältst.",
+            "repository": "Der Arbeitsordner des Agenten wird zu einem lokalen Repository: Was ihr dort schreibt, erscheint auf den Seiten Plugins und Dienste und wird von dort installiert.",
+            "network": "Der Agent liest die Online-Dokumentation von APIs, um einen Dienst oder ein Plugin zu schreiben, das sich damit verbindet."
+          }
+        }
+      },
+      "files": [
+        {
+          "path": "README-DE.md",
+          "size": 4516,
+          "sha256": "16e8c476979c720b0c18ed95c6d77da847d0e90ef830dc07d081ee3abd3f253e"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 3957,
+          "sha256": "6aa522183ed6896eb661ceadf524be5dbe8f75cc2c8dcb4a224dc6dd84c90bbe"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 4236,
+          "sha256": "bc316cb410819a3d895b3e8bcc8037cbbd3921fbe34570b3dda44d86e72bf698"
+        },
+        {
+          "path": "README.md",
+          "size": 4241,
+          "sha256": "05e15e1483bfedefcd7b041d7edb810fbe2de2dd2416bc6cc8ba83ab0906edd4"
+        },
+        {
+          "path": "agent.md",
+          "size": 3836,
+          "sha256": "2e6df19da515957e5d8f7d918f874d38a684facd991beb513adfc9565e216049"
+        },
+        {
+          "path": "creator.css",
+          "size": 11179,
+          "sha256": "b25a239ed9fb81ed21af8a7ab8fe489d549c1d70ca51ba1817329067fa71215f"
+        },
+        {
+          "path": "creator.js",
+          "size": 24463,
+          "sha256": "cc7c97eabddcb53dc746aebc72a6cdd747e93a45c84ecd11041e9a7d58876345"
+        },
+        {
+          "path": "icon.svg",
+          "size": 268,
+          "sha256": "41cb8697ad753d1539b31b1f76036b4080029f905a75d8532c6d866b6dffb98b"
+        },
+        {
+          "path": "locales.js",
+          "size": 26357,
+          "sha256": "b4e317966fcd0cdd8ea484676926ad7e032696008840b862efe317e4d5d4e2b1"
+        },
+        {
+          "path": "plugin.json",
+          "size": 4191,
+          "sha256": "14351e2ab9fd595c721bd3499aecdcb51508993f33b31b39e22c2b475031326f"
+        },
+        {
+          "path": "standard/PLUGIN-STANDARD.md",
+          "size": 13651,
+          "sha256": "21580e59022f121488c3e799d3c3500ae73eb4c0c5345c3928cf84ac2945b005"
+        },
+        {
+          "path": "standard/SERVICE-STANDARD.md",
+          "size": 9469,
+          "sha256": "b8ff08ce01c8c6d6e5215b024a869343dae984e0fccf0ad83677c38212d21450"
+        },
+        {
+          "path": "validation.json",
+          "size": 24,
+          "sha256": "fa4f05341a991367c51dd2d84214bcee5d6cb3a111e56f96ccb9a5a3c261ac65"
+        },
+        {
+          "path": "view.html",
+          "size": 6564,
+          "sha256": "a7e2219b1ff256575af893378006e024523bfd19e5df1c0bb3657d562aea288f"
+        }
+      ]
+    },
+    {
       "id": "file-explorer",
       "name": "Explorateur de fichiers",
-      "version": "1.0.6",
+      "version": "1.0.10",
       "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
       "author": "Allkin",
       "permissions": [
@@ -48,33 +187,33 @@
       "files": [
         {
           "path": "README-DE.md",
-          "size": 2661,
-          "sha256": "e510b1c6215bc881bc4374afbabd1a0ac2f3c526d40c20a908e783fbce4cb8dd"
+          "size": 2884,
+          "sha256": "43df5d6da7c02ef3b73205e039a3748cdd364cac0adb1d71a0c88fb68e665984"
         },
         {
           "path": "README-EN.md",
-          "size": 2271,
-          "sha256": "6443983b6360eeb844e261d6c9587be7e14d565b6be73bdad87b1b7a9b32675f"
+          "size": 2469,
+          "sha256": "facb0405fd25fdec69b3bc3332b1697583fbedae93195f7304c758cdd00bf8aa"
         },
         {
           "path": "README-ES.md",
-          "size": 2560,
-          "sha256": "1efdbea08fbe355a4c02c38e615bafda843537b76b45b8f9d17d567a5984122f"
+          "size": 2782,
+          "sha256": "7d091604e7f3214eceff3395bdc0bd5f206cd0b25c4202e167a12558bae4d343"
         },
         {
           "path": "README.md",
-          "size": 2564,
-          "sha256": "c1a7b2e302600489fd4c869bfe915cb972a7143a51352d0fd026960f2f7f2a22"
+          "size": 2781,
+          "sha256": "6e423e81efe803c7d05752a77f7249cc636801355af4da82b3facf4350a5de0d"
         },
         {
           "path": "explorer.css",
-          "size": 20778,
-          "sha256": "be70ddfbf3c696ab6f4ab0fa79880a622f241f697d137ee185044d5d84a63a88"
+          "size": 23157,
+          "sha256": "78ab0c590509b649fcd9ccde9e36de4c143fc69e55208d0248aecaa8f7cd0e85"
         },
         {
           "path": "explorer.js",
-          "size": 77075,
-          "sha256": "8dd5fe322a10bf0396d4904d84dd085fa305692e3f1e27f050d6493f9aa79b34"
+          "size": 83331,
+          "sha256": "134278c9ac0953b71b4c87055a9710b5e805d0a761835235a1f9dcec84b278ef"
         },
         {
           "path": "icon.svg",
@@ -83,13 +222,13 @@
         },
         {
           "path": "locales.js",
-          "size": 38732,
-          "sha256": "64b58d2fd8c9f7a12d13d0106f59e22f54af5e541b0704d8b33d46c788e803b9"
+          "size": 41784,
+          "sha256": "95cd812681c519b97cba77307f420367dfb076d516f46188a3b0e29abfe6404b"
         },
         {
           "path": "plugin.json",
-          "size": 1534,
-          "sha256": "90e99edb3c2d7230087e51dc6f82a2cc51867c112cc613756640085c3737a87f"
+          "size": 1535,
+          "sha256": "5160453e324b084c8faf822c4e02d0a04a13b061bb9c5c99ee380ebd06542b67"
         },
         {
           "path": "validation.json",
@@ -98,8 +237,8 @@
         },
         {
           "path": "view.html",
-          "size": 26413,
-          "sha256": "658030af715277ef6f5558ca18e59db33349329bbba1b8c35dd08afa77d1263b"
+          "size": 27614,
+          "sha256": "3e4e9f3e60b4040ba8937c82a8714a6e219de9ae2d17ef615b901fb02e694852"
         }
       ]
     },
@@ -198,7 +337,7 @@
     {
       "id": "markdown-editor",
       "name": "Éditeur markdown",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "description": "L'éditeur markdown d'Allkin : on écrit dans le document mis en forme, sans jamais voir une balise. Missions, rôle des agents (CLAUDE.md) et fichiers .md.",
       "author": "Allkin",
       "permissions": [
@@ -262,8 +401,8 @@
         },
         {
           "path": "editor.css",
-          "size": 18660,
-          "sha256": "cfed4e99fb89a4ef85c714693943ac1392aa8713c6213ec17e21aed4c2a6468c"
+          "size": 18764,
+          "sha256": "351bbefac29655c62b0b73d630273338fc5e3baa1c56e71fb0060ca8a07e7a98"
         },
         {
           "path": "editor.js",
@@ -288,7 +427,7 @@
         {
           "path": "plugin.json",
           "size": 1753,
-          "sha256": "c49b799cbcdd635c1c8ad5b18c338c06ba1c422adadb544c1ab98d07e78fabaf"
+          "sha256": "5e909d93e8947840d67de776b0f6103799e17891c064cff62ad6f7edf221d009"
         },
         {
           "path": "ui.js",
@@ -305,7 +444,7 @@
     {
       "id": "promptr",
       "name": "Promptr",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "L'atelier de prompts : dessinez un agent en blocs, ou ouvrez un prompt existant pour le voir en plan. Son agent dédié écrit le prompt depuis le plan, et le plan depuis un prompt.",
       "author": "Allkin",
       "permissions": [
@@ -405,12 +544,12 @@
         {
           "path": "plugin.json",
           "size": 3067,
-          "sha256": "a30bc6b8ad4da40e78bb1333bb89abc4492be17dfa7ea2c288b3021875a32ba5"
+          "sha256": "27bd28235c8f82b9713f4d24ebf267ccbdd60683a26be825b50fc1f6a62d3e54"
         },
         {
           "path": "promptr.css",
-          "size": 26819,
-          "sha256": "144bf1da9bb9edd0981e2ef1dfb5b17b1dea55021ba7feea5e2132e9226b8a40"
+          "size": 26851,
+          "sha256": "324bce3f6a95636b2f5004dd81d1e3e8da1acbcf1b50678c3250ce64566bffa0"
         },
         {
           "path": "validation.json",
@@ -426,6 +565,121 @@
           "path": "zip.js",
           "size": 5653,
           "sha256": "a08424ea4f2e930a4a705e17fa38b600fcd437829c6356f0c61397c5861593d4"
+        }
+      ]
+    },
+    {
+      "id": "recordr",
+      "name": "Recordr",
+      "version": "1.0.1",
+      "description": "Écoute le micro, transcrit ce qui se dit au fil de la parole et distingue les interlocuteurs. La reconnaissance est faite par le service audio que tu choisis.",
+      "author": "Allkin",
+      "permissions": [
+        {
+          "id": "network",
+          "reason": "Écoute sur un port local pour servir sa page dans Allkin. L'audio part du navigateur directement chez le service audio choisi, avec une clé temporaire qu'Allkin lui demande."
+        }
+      ],
+      "service": true,
+      "web": true,
+      "ui": false,
+      "icon": "icon.svg",
+      "validation": {
+        "status": "pending"
+      },
+      "locales": {
+        "en": {
+          "name": "Recordr",
+          "description": "Listens to the microphone, transcribes what is said as it is spoken and tells the speakers apart. Recognition is done by the audio service you choose.",
+          "permissions": {
+            "network": "Listens on a local port to serve its page in Allkin. The audio goes from the browser straight to the chosen audio service, with a temporary key Allkin asks it for."
+          }
+        },
+        "es": {
+          "name": "Recordr",
+          "description": "Escucha el micrófono, transcribe lo que se dice a medida que se habla y distingue a los interlocutores. El reconocimiento lo hace el servicio de audio que elijas.",
+          "permissions": {
+            "network": "Escucha en un puerto local para servir su página en Allkin. El audio va del navegador directamente al servicio de audio elegido, con una clave temporal que Allkin le pide."
+          }
+        },
+        "de": {
+          "name": "Recordr",
+          "description": "Hört dem Mikrofon zu, schreibt mit, was gesagt wird, während gesprochen wird, und unterscheidet die Sprecher. Die Erkennung übernimmt der Audiodienst, den du wählst.",
+          "permissions": {
+            "network": "Lauscht auf einem lokalen Port, um seine Seite in Allkin auszuliefern. Der Ton geht vom Browser direkt zum gewählten Audiodienst, mit einem temporären Schlüssel, den Allkin dort anfordert."
+          }
+        }
+      },
+      "files": [
+        {
+          "path": "README-DE.md",
+          "size": 5091,
+          "sha256": "5f2447ada78e0208646cd7ddd4a2c2c5f861a0e75143e2ee261ce933eb1feb63"
+        },
+        {
+          "path": "README-EN.md",
+          "size": 4618,
+          "sha256": "193797d6b512cc696008e54068bb6ffd4984a82fd7057560cdbe462d80e774cf"
+        },
+        {
+          "path": "README-ES.md",
+          "size": 4893,
+          "sha256": "1d3ce3e2b344dcae227e2885bc40ee7e05bfadd0b357795abb63c9146f9a45fe"
+        },
+        {
+          "path": "README.md",
+          "size": 4985,
+          "sha256": "f9d062ff97d2a5af25b3e3ff1dadae626cc509ca80fd2f7539caf2b309f4a4ae"
+        },
+        {
+          "path": "icon.svg",
+          "size": 277,
+          "sha256": "bfcdff8a5fdb47d10c723e5b25dd6a650c634a8eaa0781e230c320384842fa20"
+        },
+        {
+          "path": "plugin.json",
+          "size": 5920,
+          "sha256": "151f21a257d36cd3e1024a71be4e63ac389e013c6c522e53cae3ddec3c5e17d9"
+        },
+        {
+          "path": "server.mjs",
+          "size": 7748,
+          "sha256": "8b1dd43783aa9e8d02aa5849abdf7d673abcfb07cc55c37d2a28b56d477417f4"
+        },
+        {
+          "path": "validation.json",
+          "size": 24,
+          "sha256": "fa4f05341a991367c51dd2d84214bcee5d6cb3a111e56f96ccb9a5a3c261ac65"
+        },
+        {
+          "path": "web/app.js",
+          "size": 36123,
+          "sha256": "bc987df039706e28cadc75ef43cba762edeb01adb83655ea0284435ba782c80f"
+        },
+        {
+          "path": "web/index.html",
+          "size": 5772,
+          "sha256": "c4c1552e5aa4e05819b5cb5d0798976623fcec1e42a73e914ba06a531c18761d"
+        },
+        {
+          "path": "web/locales.js",
+          "size": 15422,
+          "sha256": "fdd79305f8b651cc2cab0fe8be6713eae56fdca573db29546c81c5736e7784a4"
+        },
+        {
+          "path": "web/stream.js",
+          "size": 9724,
+          "sha256": "9ef13f676746cf35629f7cf79e2e66d80ed1396dceffdd5df24dca919fb8dd56"
+        },
+        {
+          "path": "web/style.css",
+          "size": 18283,
+          "sha256": "3b01e68e8f9303fbdf28628635963a083598490629b39fc22b99edcf780a31d1"
+        },
+        {
+          "path": "web/worklet.js",
+          "size": 1722,
+          "sha256": "7adf161c6212b16a02b4d03f988de5b4727bbcf5fce61ee1fa884acb7333ffbb"
         }
       ]
     },

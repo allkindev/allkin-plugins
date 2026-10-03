@@ -35,7 +35,10 @@ no.
 ## Explorador de `~/.allkin`
 
 Desde la página de inicio, un recorrido **de solo lectura** por la carpeta de instalación de
-Allkin: agentes, sesiones, copias de seguridad. Los secretos no se pueden leer ahí.
+Allkin: agentes, sesiones, copias de seguridad. Los secretos no se pueden leer ahí. Un archivo se
+abre en una pestaña **visor**, sobre fondo azul: texto en bruto sin coloreado ni formato, una
+imagen, un PDF, o el contenido de un archivo comprimido (zip, tar) sin extraerlo; los demás tipos
+se descargan.
 
 ## Sin este plugin
 

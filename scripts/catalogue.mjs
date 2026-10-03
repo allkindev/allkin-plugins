@@ -29,7 +29,7 @@ const ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
    les versions nombre par nombre : « 1.0008 » y vaudrait 1.8. */
 const VERSION_PATTERN = /^1\.0\.(?:0|[1-9]\d*)$/;
 const SEGMENT_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9._-]*$/;
-const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface", "agent"]);
+const KNOWN_PERMISSIONS = new Set(["network", "filesystem", "exec", "root", "agents", "interface", "agent", "repository"]);
 const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
 const MAX_FILES = 500;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -80,8 +80,10 @@ function readPlugin(id) {
   if (m.service && (typeof m.service.command !== "string" || !m.service.command)) fail(id, "service.command est obligatoire.");
   if (m.agent) {
     if (typeof m.agent.name !== "string" || !m.agent.name.trim()) fail(id, "agent.name est obligatoire.");
-    if (typeof m.agent.prompt !== "string" || !m.agent.prompt.endsWith(".md")) fail(id, "agent.prompt doit désigner un fichier .md du plugin.");
-    else if (!existsSync(join(dir, m.agent.prompt))) fail(id, `agent.prompt : ${m.agent.prompt} est absent.`);
+    // One Markdown file, or several joined in order (role + reference documents).
+    const prompts = Array.isArray(m.agent.prompt) ? m.agent.prompt : [m.agent.prompt];
+    if (!prompts.length || !prompts.every((f) => typeof f === "string" && f.endsWith(".md"))) fail(id, "agent.prompt doit désigner un ou plusieurs fichiers .md du plugin.");
+    else for (const f of prompts) if (!existsSync(join(dir, f))) fail(id, `agent.prompt : ${f} est absent.`);
     const declared = (Array.isArray(m.permissions) ? m.permissions : []).some((p) => (typeof p === "string" ? p : p?.id) === "agent");
     if (!declared) fail(id, "un plugin qui déclare « agent » doit demander le droit « agent ».");
   }
@@ -150,13 +152,56 @@ const plugins = existsSync(PLUGINS_DIR)
       .filter(Boolean)
   : [];
 
+/* Services (see SERVICE-STANDARD.md): a folder services/<id>/ holding a
+   declarative service.json and its README files. Allkin reads the definition
+   from the catalogue itself — it is data, there is nothing to download — and
+   fetches a README only when its help is opened. */
+const SERVICES_DIR = join(ROOT, "services");
+const SERVICE_READMES = ["README.md", "README-FR.md", "README-ES.md", "README-DE.md"];
+
+function readService(id) {
+  const dir = join(SERVICES_DIR, id);
+  const failService = (message) => errors.push(`services/${id} : ${message}`);
+  if (!ID_PATTERN.test(id)) return failService("nom de dossier : minuscules, chiffres et tirets.");
+  if (!existsSync(join(dir, "service.json"))) return failService("service.json est absent.");
+  if (!existsSync(join(dir, "README.md"))) return failService("README.md est absent — l'aide est obligatoire.");
+  let definition;
+  try {
+    definition = JSON.parse(readFileSync(join(dir, "service.json"), "utf-8"));
+  } catch (err) {
+    return failService(`service.json n'est pas un JSON valide (${err.message}).`);
+  }
+  for (const field of ["label", "authType", "category"]) {
+    if (typeof definition[field] !== "string" || !definition[field]) failService(`${field} est obligatoire.`);
+  }
+  if (!definition.apiBaseUrl && !definition.needsBaseUrl && !definition.baseUrlTemplate) {
+    failService("apiBaseUrl, needsBaseUrl ou baseUrlTemplate est obligatoire.");
+  }
+  return {
+    id,
+    definition,
+    validation: readValidation(dir),
+    readmes: SERVICE_READMES.filter((name) => existsSync(join(dir, name))),
+  };
+}
+
+const services = existsSync(SERVICES_DIR)
+  ? readdirSync(SERVICES_DIR)
+      .filter((name) => statSync(join(SERVICES_DIR, name)).isDirectory())
+      .sort()
+      .map(readService)
+      .filter(Boolean)
+  : [];
+
 for (const w of warnings) console.warn(`attention  ${w}`);
 if (errors.length) {
   for (const e of errors) console.error(`erreur     ${e}`);
   process.exit(1);
 }
 
-const content = JSON.stringify({ schemaVersion: 1, plugins }, null, 2) + "\n";
+// `services` only when the repository holds some: a catalogue without them
+// stays byte for byte what it was.
+const content = JSON.stringify({ schemaVersion: 1, plugins, ...(services.length ? { services } : {}) }, null, 2) + "\n";
 if (process.argv.includes("--check")) {
   const current = existsSync(CATALOGUE_PATH) ? readFileSync(CATALOGUE_PATH, "utf-8") : "";
   if (current !== content) {

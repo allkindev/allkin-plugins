@@ -35,7 +35,9 @@ télécharge sinon.
 ## Explorateur de `~/.allkin`
 
 Depuis l'accueil, un parcours **en lecture seule** du dossier d'installation d'Allkin : agents,
-sessions, sauvegardes. Les secrets n'y sont pas lisibles.
+sessions, sauvegardes. Les secrets n'y sont pas lisibles. Un fichier s'ouvre dans un onglet
+**visualiseur**, sur fond bleu : texte brut sans coloration ni mise en forme, image, PDF, ou le
+contenu d'une archive (zip, tar) sans l'extraire ; les autres types se téléchargent.
 
 ## Sans ce plugin
 

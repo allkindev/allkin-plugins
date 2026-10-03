@@ -1,6 +1,6 @@
 {
   "name": "Explorateur de fichiers",
-  "version": "1.0.6",
+  "version": "1.0.10",
   "description": "L'onglet Fichiers de chaque agent (dépôt, archives, scripts, corbeille) et l'explorateur de ~/.allkin.",
   "author": "Allkin",
   "permissions": [

@@ -38,7 +38,7 @@
 }
 .pr-logo svg { width: 1.2rem; height: 1.2rem; }
 .pr-head-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 10rem; }
-.pr-title { margin: 0; font-size: var(--text-lg); font-weight: 750; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-title { margin: 0; font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pr-subtitle { font-size: var(--text-xs); color: var(--text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Les volets : un segment, au centre de l'en-tête. */
@@ -118,7 +118,7 @@ button.pr-icon-btn.pr-danger:hover { background: color-mix(in srgb, #e5484d 12%,
 
 /* ---- Point de départ -------------------------------------------------------------- */
 .pr-start { max-width: 46rem; margin: 6vh auto 0; text-align: center; }
-.pr-start-title { margin: 0 0 var(--sp-5); font-size: 1.5rem; font-weight: 750; letter-spacing: -0.02em; }
+.pr-start-title { margin: 0 0 var(--sp-5); font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; }
 .pr-start-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--sp-4); }
 button.pr-start-card {
   min-height: 0;
@@ -172,7 +172,7 @@ button.pr-start-card:hover {
   color: var(--text);
 }
 .pr-identity input:focus { outline: none; box-shadow: none; border: none; }
-.pr-identity input.pr-identity-name { height: auto; font-size: 1.6rem; font-weight: 750; letter-spacing: -0.02em; }
+.pr-identity input.pr-identity-name { height: auto; font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; }
 .pr-identity input.pr-identity-desc { height: auto; font-size: var(--text-md); color: var(--text-dim); }
 .pr-identity input::placeholder { color: var(--text-faint); opacity: 0.7; }
 
@@ -253,7 +253,7 @@ button.pr-card-main:hover { background: none; box-shadow: none; transform: none;
 }
 .pr-block-icon svg { width: 1.1rem; height: 1.1rem; }
 .pr-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.pr-card-title { font-size: var(--text-md); font-weight: 650; }
+.pr-card-title { font-size: var(--text-md); font-weight: 600; }
 .pr-card-summary {
   font-size: var(--text-sm);
   line-height: 1.45;
@@ -359,7 +359,7 @@ button.pr-seg-btn.active { background: var(--bg-alt); color: var(--text); box-sh
   border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
   background: var(--bg-alt);
 }
-.pr-prompt-source { font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6; resize: vertical; }
+.pr-prompt-source { font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.6; resize: vertical; }
 .pr-prompt-preview { overflow-y: auto; }
 .pr-prompt-empty,
 .pr-test-empty {
@@ -581,14 +581,14 @@ button.pr-pick {
 button.pr-pick:hover:not(:disabled) { border-color: color-mix(in srgb, var(--text) 22%, transparent); background: color-mix(in srgb, var(--text) 3%, var(--bg-alt)); box-shadow: none; transform: none; }
 button.pr-pick:disabled { opacity: 0.45; cursor: default; }
 .pr-pick-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.pr-pick-text strong { font-size: var(--text-md); font-weight: 650; }
+.pr-pick-text strong { font-size: var(--text-md); font-weight: 600; }
 .pr-pick-text span { font-size: var(--text-xs); color: var(--text-dim); line-height: 1.4; }
 
 /* Ouvrir un prompt. */
 .pr-import { display: flex; flex-direction: column; gap: var(--sp-3); }
 .pr-import-seg { align-self: flex-start; }
 .pr-import-pane.hidden { display: none; }
-.pr-import-text { font-family: var(--font-mono); font-size: 0.82rem !important; min-height: 14rem; }
+.pr-import-text { font-family: var(--font-mono); font-size: var(--text-sm) !important; min-height: 14rem; }
 .pr-import .pr-modal-hint { margin: 0; }
 .pr-drop {
   display: flex;

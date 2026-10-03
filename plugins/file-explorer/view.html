@@ -124,6 +124,23 @@
         </table>
       </div>
     </div>
+    <!-- Viewer: a read-only file of ~/.allkin, shown as it is in a tab of its
+         own — raw text, an image, a PDF, the entries of an archive. Nothing
+         to edit, nothing to format: a window on the disk. -->
+    <div class="viewer-view hidden" id="viewer-view">
+      <div class="viewer-head">
+        <span class="viewer-icon" id="viewer-icon"></span>
+        <div class="viewer-id">
+          <span class="viewer-name" id="viewer-name"></span>
+          <span class="viewer-meta" id="viewer-meta"></span>
+        </div>
+        <span class="explorer-readonly" data-i18n="plugin.file-explorer.explorer.readOnly">read only</span>
+        <a class="secondary data-header-btn viewer-download" id="viewer-download" href="#" download title="Download" data-i18n-title="common.download" aria-label="Download" data-i18n-aria-label="common.download">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        </a>
+      </div>
+      <div class="viewer-body" id="viewer-body"></div>
+    </div>
 </template>
 
 <template data-slot="body">

@@ -3,6 +3,12 @@
 Guide pas à pas. Le format complet du manifeste et l'API des plugins d'interface sont décrits dans
 le [README](README.md) ; ce document dit **comment s'y prendre**, et ce qu'on a appris en chemin.
 
+Les **règles** elles-mêmes — ce qu'un plugin doit et devrait respecter — sont dans le
+[standard](plugins/creator/standard/PLUGIN-STANDARD.md) ; celles d'un service dans
+[SERVICE-STANDARD.md](plugins/creator/standard/SERVICE-STANDARD.md). Le plugin **Creator** les
+vérifie (bouton *Vérifier* de son établi) et son agent écrit un plugin conforme en conversation :
+c'est la voie la plus courte.
+
 Trois sortes de plugins, combinables :
 
 | Sorte | Manifeste | Exemple dans ce dépôt |
@@ -156,6 +162,11 @@ les README de `wetty` et `file-explorer` pour le ton.
 ---
 
 ## 2. Tester en local, sans publier
+
+Le plus simple : ajouter le dossier du dépôt comme **dépôt local** (page Plugins → bouton
+**Dépôts** → le chemin du dossier). Allkin le lit en direct : pas de `catalogue.json` à
+régénérer, pas de serveur à lancer, « Installer » copie le dossier tel quel. La méthode ci-dessous
+reste utile pour tester le catalogue lui-même, tel qu'il sera publié.
 
 1. Servir ce dépôt sur la machine :
 

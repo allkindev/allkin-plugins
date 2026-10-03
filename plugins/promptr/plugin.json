@@ -1,6 +1,6 @@
 {
   "name": "Promptr",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "L'atelier de prompts : dessinez un agent en blocs, ou ouvrez un prompt existant pour le voir en plan. Son agent dédié écrit le prompt depuis le plan, et le plan depuis un prompt.",
   "author": "Allkin",
   "permissions": [

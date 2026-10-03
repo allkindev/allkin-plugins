@@ -35,7 +35,9 @@ sonst herunter.
 ## Explorer von `~/.allkin`
 
 Von der Startseite aus ein **schreibgeschützter** Gang durch den Installationsordner von Allkin:
-Agenten, Sitzungen, Sicherungen. Geheimnisse sind dort nicht lesbar.
+Agenten, Sitzungen, Sicherungen. Geheimnisse sind dort nicht lesbar. Eine Datei öffnet sich in
+einem **Betrachter**-Tab auf blauem Grund: Rohtext ohne Färbung oder Layout, ein Bild, ein PDF
+oder der Inhalt eines Archivs (zip, tar) ohne es zu entpacken; andere Arten werden heruntergeladen.
 
 ## Ohne dieses Plugin
 

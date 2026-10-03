@@ -9,6 +9,20 @@ droits s'accordent un par un sur sa page, et son service ne démarre que si on l
 Pour en écrire un : **[Créer un plugin](CREER-UN-PLUGIN.md)** — exemple complet, test en local,
 publication et pièges connus.
 
+**Le standard** — les règles que suit tout plugin et tout service, vérifiées par Allkin :
+[PLUGIN-STANDARD.md](plugins/creator/standard/PLUGIN-STANDARD.md) et
+[SERVICE-STANDARD.md](plugins/creator/standard/SERVICE-STANDARD.md). Ils sont livrés avec le plugin
+**Creator**, dont l'agent écrit plugins et services en conversation et dont l'établi les contrôle
+contre ce standard.
+
+Ce dépôt peut aussi porter des **services** (`services/<id>/service.json`, voir le standard) :
+`scripts/catalogue.mjs` les inscrit dans `catalogue.json`, et tout Allkin qui lit ce dépôt les
+propose dans sa page Services.
+
+Un Allkin lit ce dépôt, et ceux qu'on lui ajoute : bouton **Dépôts** des pages Plugins et Services
+— une adresse (`https://…`, avec son `catalogue.json`) ou un **dossier local**, lu en direct sans
+catalogue à régénérer.
+
 ---
 
 ## Structure d'un plugin
@@ -43,11 +57,14 @@ Le nom du dossier est l'identifiant du plugin : il ne change jamais.
 }
 ```
 
-- **permissions** — `network`, `filesystem`, `exec`, `root`, `agents`, `interface`, `agent`, ou
+- **permissions** — `network`, `filesystem`, `exec`, `root`, `agents`, `interface`, `agent`, `repository`, ou
   un identifiant propre au plugin (affiché à risque élevé). Le service ne démarre pas tant que chacun n'est pas accordé ;
   un droit ajouté dans une nouvelle version n'est jamais accordé d'office.
 - **settings** — types `text`, `textarea`, `number`, `boolean`, `secret`, `select` (avec
-  `options`). Un `secret` n'est jamais renvoyé au navigateur.
+  `options`), `service`. Un `secret` n'est jamais renvoyé au navigateur. A `service` setting
+  (`"type": "service", "capability": "speech"`) lists the connected services of Allkin able to do
+  that; the plugin receives the identifier of the chosen one, never its key — see
+  [Using a service of Allkin](#using-a-service-of-allkin).
 - **service** — lancé sans shell, dans le dossier du plugin. `node` désigne le Node d'Allkin ;
   une commande en `./` est un fichier du plugin (le rendre exécutable dans le dépôt).
 - **web** — suppose un service. `port` fixe ou `portSetting` (un réglage `number`). La page
@@ -102,11 +119,19 @@ avec le plugin. Il déclare une section `agent` et le droit `agent` :
   "agent": {
     "name": "Promptr",                // son nom, dans la liste des agents
     "description": "…",              // facultatif, 100 caractères au plus
-    "prompt": "agent.md",            // son rôle (CLAUDE.md), un fichier .md du plugin
-    "model": "…", "effort": "…", "thinking": "…"   // facultatifs
-  }
+    "prompt": "agent.md",            // son rôle (CLAUDE.md) : un fichier .md, ou une liste jointe dans l'ordre
+    "model": "…", "effort": "…", "thinking": "…",   // facultatifs
+    "workspace": true,               // facultatif : dossier de travail durable (plugin-data/<id>/workspace)
+    "web": true                      // facultatif : l'agent lit le web (demande le droit network)
+  },
+  "repository": true                 // facultatif : ce dossier de travail est un dépôt local (droit repository)
 }
 ```
+
+`repository` suppose `agent.workspace` : les plugins (`plugins/<id>/`) et services
+(`services/<id>/`) écrits dans le dossier de travail apparaissent dans les galeries de cet Allkin
+et s'installent depuis là. Le dossier survit à la désinstallation du plugin. C'est le mécanisme de
+**Creator**.
 
 - L'agent naît dès que **tous les droits** du plugin sont accordés. Son identifiant est
   `plugin-<id>` ; il porte un badge « Plugin » dans la liste des agents.
@@ -127,6 +152,30 @@ tourne dans une session jetable, invisible et sans notification ; personne n'y v
 ni ne remplit de formulaire, les deux sont refusés d'office. L'attente peut durer plusieurs
 minutes (5 au plus). Le rôle de l'agent doit donc dire exactement quoi rendre, et sous quelle forme
 — des balises (`<prompt>…</prompt>`) se relisent bien mieux qu'un texte libre. Voir `promptr`.
+
+## Using a service of Allkin
+
+A plugin does not ask for the key of an external service: the user connects the service once in
+**Services**, and the plugin names what it needs with a setting of type `service`:
+
+```json
+{ "key": "audioService", "label": "Service audio", "type": "service", "capability": "speech", "required": true }
+```
+
+The plugin's page shows the connected services that have this capability (`speech`: real-time
+transcription, Soniox today; `image`: image generation). Allkin then does the part that needs the
+key. For speech, the plugin's **page** — it runs in Allkin's origin, with the user's session —
+asks for one listening session:
+
+```
+POST /api/plugins/<id>/speech/session   { "model": "", "language": "fr" }
+→ { "protocol": "soniox", "wsUrl": "wss://…", "apiKey": "<temporary>", "model": "…", "language": "fr" }
+```
+
+The key lives two minutes and opens one socket; the audio goes from the browser straight to the
+provider. `protocol` names the messages of that socket: speak the ones you know, refuse the others.
+On failure the answer carries a `code` (`no_service`, `refused`, `unreachable`, `provider`) to word
+in the page's own language. See `plugins/recordr` (`web/stream.js`), the model to copy.
 
 ## Ce que reçoit le service
 
