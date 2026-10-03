@@ -1,6 +1,17 @@
-# allkin-plugins
+# allkin-plugins-stable
 
-Les **plugins** d'[Allkin](https://github.com/allkindev/allkin).
+Les **plugins validés** d'[Allkin](https://github.com/allkindev/allkin).
+
+Allkin lit deux dépôts :
+
+| Dépôt | Contenu |
+|-------|---------|
+| **allkin-plugins-stable** (celui-ci) | ce que le propriétaire d'Allkin a vérifié |
+| [allkin-plugins-experimental](https://github.com/allkindev/allkin-plugins-experimental) | ce qui n'est pas encore validé : utilisable par tous, sans garantie de fonctionnement |
+
+Un plugin naît dans le dépôt expérimental et **y reste tant qu'il n'est pas validé**. Une fois
+vérifié, il passe ici (`git_validate_plugin.sh <id>`). Le dépôt où se trouve un plugin **est** son
+statut : `scripts/catalogue.mjs` refuse un plugin non validé ici, et un plugin validé là-bas.
 
 Depuis Allkin, l'icône **Plugins** en bas de la barre latérale lit ce dépôt et affiche les plugins
 disponibles ; on installe ceux qu'on veut utiliser. Un plugin installé ne fait rien tout seul : ses
@@ -10,16 +21,16 @@ Pour en écrire un : **[Créer un plugin](CREER-UN-PLUGIN.md)** — exemple comp
 publication et pièges connus.
 
 **Le standard** — les règles que suit tout plugin et tout service, vérifiées par Allkin :
-[PLUGIN-STANDARD.md](plugins/creator/standard/PLUGIN-STANDARD.md) et
-[SERVICE-STANDARD.md](plugins/creator/standard/SERVICE-STANDARD.md). Ils sont livrés avec le plugin
+[PLUGIN-STANDARD.md](https://github.com/allkindev/allkin-plugins-experimental/blob/main/plugins/creator/standard/PLUGIN-STANDARD.md) et
+[SERVICE-STANDARD.md](https://github.com/allkindev/allkin-plugins-experimental/blob/main/plugins/creator/standard/SERVICE-STANDARD.md). Ils sont livrés avec le plugin
 **Creator**, dont l'agent écrit plugins et services en conversation et dont l'établi les contrôle
 contre ce standard.
 
-Ce dépôt peut aussi porter des **services** (`services/<id>/service.json`, voir le standard) :
-`scripts/catalogue.mjs` les inscrit dans `catalogue.json`, et tout Allkin qui lit ce dépôt les
-propose dans sa page Services.
+Les deux dépôts peuvent aussi porter des **services** (`services/<id>/service.json`, voir le standard) :
+`scripts/catalogue.mjs` les inscrit dans `catalogue.json`, et tout Allkin les propose dans sa page
+Services — avec la même règle : en attente dans l'expérimental, validé ici.
 
-Un Allkin lit ce dépôt, et ceux qu'on lui ajoute : bouton **Dépôts** des pages Plugins et Services
+Un Allkin lit ces deux dépôts (l'expérimental se désactive), et ceux qu'on lui ajoute : bouton **Dépôts** des pages Plugins et Services
 — une adresse (`https://…`, avec son `catalogue.json`) ou un **dossier local**, lu en direct sans
 catalogue à régénérer.
 
@@ -134,7 +145,7 @@ et s'installent depuis là. Le dossier survit à la désinstallation du plugin. 
 **Creator**.
 
 - L'agent naît dès que **tous les droits** du plugin sont accordés. Son identifiant est
-  `plugin-<id>` ; il porte un badge « Plugin » dans la liste des agents.
+  `plugin-<id>` ; son nom est en rose dans la liste des agents.
 - **Aucun droit** : ni commandes, ni fichiers hors de son dossier, ni web, ni autres agents. Personne
   ne peut lui en donner, et les autres agents ne peuvent pas le solliciter.
 - Son **rôle appartient au plugin** : `prompt` est rétabli à chaque mise à jour, et ne se modifie pas

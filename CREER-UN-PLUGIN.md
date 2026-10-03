@@ -4,8 +4,8 @@ Guide pas à pas. Le format complet du manifeste et l'API des plugins d'interfac
 le [README](README.md) ; ce document dit **comment s'y prendre**, et ce qu'on a appris en chemin.
 
 Les **règles** elles-mêmes — ce qu'un plugin doit et devrait respecter — sont dans le
-[standard](plugins/creator/standard/PLUGIN-STANDARD.md) ; celles d'un service dans
-[SERVICE-STANDARD.md](plugins/creator/standard/SERVICE-STANDARD.md). Le plugin **Creator** les
+[standard](https://github.com/allkindev/allkin-plugins-experimental/blob/main/plugins/creator/standard/PLUGIN-STANDARD.md) ; celles d'un service dans
+[SERVICE-STANDARD.md](https://github.com/allkindev/allkin-plugins-experimental/blob/main/plugins/creator/standard/SERVICE-STANDARD.md). Le plugin **Creator** les
 vérifie (bouton *Vérifier* de son établi) et son agent écrit un plugin conforme en conversation :
 c'est la voie la plus courte.
 
@@ -171,7 +171,7 @@ reste utile pour tester le catalogue lui-même, tel qu'il sera publié.
 1. Servir ce dépôt sur la machine :
 
    ```bash
-   cd allkin-plugins
+   cd allkin-plugins-experimental
    node scripts/catalogue.mjs                          # régénère catalogue.json
    python3 -m http.server 8765 --bind 127.0.0.1
    ```
@@ -199,9 +199,23 @@ correspond plus.
 
 ## 3. Publier
 
+Un nouveau plugin se publie dans le dépôt **expérimental**
+([allkin-plugins-experimental](https://github.com/allkindev/allkin-plugins-experimental)), avec
+`validation.json` à `{ "status": "pending" }`. Il y reste tant que le propriétaire d'Allkin ne l'a
+pas validé ; il passe alors dans le dépôt stable, où `validation.json` dit `validated`. Chaque
+dépôt a son `catalogue.json`, et son `scripts/catalogue.mjs` refuse un plugin qui n'est pas à sa
+place.
+
 ```bash
 node scripts/catalogue.mjs --check   # doit dire « à jour »
 git add -A && git commit && git push
+```
+
+Côté propriétaire, deux scripts font tout :
+
+```bash
+~/git_validate_plugin.sh mon-plugin  # expérimental → stable, validation.json mis à « validated »
+~/git_commit_plugins.sh              # versions N+1, catalogues, commit et push des deux dépôts
 ```
 
 - **Incrémenter `version`** dans `plugin.json` à chaque changement : c'est ce qui fait apparaître
@@ -211,7 +225,7 @@ git add -A && git commit && git push
   numéro des deux côtés pour le même contenu.
 - GitHub met jusqu'à **5 minutes** à servir la nouvelle version des fichiers bruts, et Allkin garde
   le catalogue **une heure** en cache : le bouton ↻ de la page Plugins force la relecture.
-- Le dépôt doit rester **public** : Allkin lit les fichiers sans authentification.
+- Les deux dépôts doivent rester **publics** : Allkin lit les fichiers sans authentification.
 
 ---
 

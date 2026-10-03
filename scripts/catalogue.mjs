@@ -34,8 +34,32 @@ const IGNORED = new Set(["node_modules", ".git", ".DS_Store"]);
 const MAX_FILES = 500;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
+/* Which of the two repositories this is (channel.json at the root):
+     stable        only what the owner of Allkin has validated;
+     experimental  only what is still pending.
+   A plugin moves from the second to the first when it is validated — see
+   git_validate_plugin.sh. The script refuses a plugin sitting in the wrong one:
+   the repository a plugin is in IS its status, the two must never disagree. */
+const CHANNEL = (() => {
+  try {
+    const channel = JSON.parse(readFileSync(join(ROOT, "channel.json"), "utf-8")).channel;
+    return channel === "stable" || channel === "experimental" ? channel : null;
+  } catch {
+    return null;
+  }
+})();
+
 const errors = [];
 const warnings = [];
+
+/** A folder in the wrong repository for its validation status. */
+function checkChannel(where, validation) {
+  if (CHANNEL === "stable" && validation.status !== "validated") {
+    errors.push(`${where} : non validé — sa place est dans le dépôt expérimental.`);
+  } else if (CHANNEL === "experimental" && validation.status === "validated") {
+    errors.push(`${where} : validé — sa place est dans le dépôt stable (git_validate_plugin.sh).`);
+  }
+}
 const fail = (id, message) => errors.push(`plugins/${id} : ${message}`);
 
 function listFiles(dir, base = dir) {
@@ -122,7 +146,7 @@ function readPlugin(id) {
     ...(m.agent ? { agent: { name: m.agent.name } } : {}),
     ...(icon ? { icon } : {}),
     // validation.json of the folder: "validated" with its date, or pending.
-    validation: readValidation(dir),
+    validation: (checkChannel(`plugins/${id}`, readValidation(dir)), readValidation(dir)),
     // Translations of the texts above (name, description, permission reasons):
     // the gallery shows them before the plugin is installed.
     ...(m.locales && typeof m.locales === "object" ? { locales: catalogueLocales(m.locales) } : {}),
@@ -177,6 +201,7 @@ function readService(id) {
   if (!definition.apiBaseUrl && !definition.needsBaseUrl && !definition.baseUrlTemplate) {
     failService("apiBaseUrl, needsBaseUrl ou baseUrlTemplate est obligatoire.");
   }
+  checkChannel(`services/${id}`, readValidation(dir));
   return {
     id,
     definition,
@@ -201,7 +226,11 @@ if (errors.length) {
 
 // `services` only when the repository holds some: a catalogue without them
 // stays byte for byte what it was.
-const content = JSON.stringify({ schemaVersion: 1, plugins, ...(services.length ? { services } : {}) }, null, 2) + "\n";
+if (!CHANNEL) {
+  console.error('erreur     channel.json absent ou illisible : { "channel": "stable" } ou { "channel": "experimental" }.');
+  process.exit(1);
+}
+const content = JSON.stringify({ schemaVersion: 1, channel: CHANNEL, plugins, ...(services.length ? { services } : {}) }, null, 2) + "\n";
 if (process.argv.includes("--check")) {
   const current = existsSync(CATALOGUE_PATH) ? readFileSync(CATALOGUE_PATH, "utf-8") : "";
   if (current !== content) {
